@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0065)https://controlexpedicao.netlify.app/index.html?v=20260604-notif2 -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -281,16 +281,17 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .urb-user{background:#E8F5E9;color:#2E7D32}
 .btn-pin-reset{font-size:12px;padding:5px 10px;min-height:32px}
 </style>
+<link rel="manifest" href="https://controlexpedicao.netlify.app/manifest.json">
 </head>
 <body>
 <!-- =================== TELA DE LOGIN =================== -->
-<div id="login-screen">
-  <img class="login-logo" id="login-logo" src="" alt="Célia Alimentos">
+<div id="login-screen" class="hidden">
+  <img class="login-logo" id="login-logo" src="data:image/png;base64,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" alt="Célia Alimentos">
   <div class="login-title">Controle de Expedição</div>
   <div class="login-card">
     <div class="login-tabs">
-      <button class="login-tab active" id="ltab-entrar" onclick="loginTab('entrar')">Entrar</button>
-      <button class="login-tab" id="ltab-cadastro" onclick="loginTab('cadastro')">Cadastrar</button>
+      <button class="login-tab active" id="ltab-entrar" onclick="loginTab(&#39;entrar&#39;)">Entrar</button>
+      <button class="login-tab" id="ltab-cadastro" onclick="loginTab(&#39;cadastro&#39;)">Cadastrar</button>
     </div>
 
     <!-- ENTRAR -->
@@ -298,14 +299,14 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <h2>👋 Bem-vindo</h2>
       <p>Digite seu nome e senha de 4 dígitos</p>
       <div class="fg"><label>Usuário</label>
-        <input id="l-nome" placeholder="Seu nome" autocomplete="username" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')document.querySelector('.pin-digit').focus()">
+        <input id="l-nome" placeholder="Seu nome" autocomplete="username" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key===&#39;Enter&#39;)document.querySelector(&#39;.pin-digit&#39;).focus()">
       </div>
       <label style="font-size:12px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Senha (4 dígitos)</label>
       <div class="login-pin" id="pin-entrar">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar')" onkeydown="pinBack(event,this,'pin-entrar')">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar')" onkeydown="pinBack(event,this,'pin-entrar')">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar')" onkeydown="pinBack(event,this,'pin-entrar')">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar');if(this===document.querySelectorAll('#pin-entrar .pin-digit')[3])fazerLogin();" onkeydown="pinBack(event,this,'pin-entrar')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-entrar&#39;)" onkeydown="pinBack(event,this,&#39;pin-entrar&#39;)">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-entrar&#39;)" onkeydown="pinBack(event,this,&#39;pin-entrar&#39;)">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-entrar&#39;)" onkeydown="pinBack(event,this,&#39;pin-entrar&#39;)">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-entrar&#39;);if(this===document.querySelectorAll(&#39;#pin-entrar .pin-digit&#39;)[3])fazerLogin();" onkeydown="pinBack(event,this,&#39;pin-entrar&#39;)">
       </div>
       <div class="login-err" id="l-err"></div>
       <button class="btn btn-primary btn-full" onclick="fazerLogin()">Entrar →</button>
@@ -320,10 +321,10 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       </div>
       <label style="font-size:12px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Senha (4 dígitos)</label>
       <div class="login-pin" id="pin-cadastro">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
-        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-cadastro&#39;)" onkeydown="pinBack(event,this,&#39;pin-cadastro&#39;)">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-cadastro&#39;)" onkeydown="pinBack(event,this,&#39;pin-cadastro&#39;)">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-cadastro&#39;)" onkeydown="pinBack(event,this,&#39;pin-cadastro&#39;)">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,&#39;pin-cadastro&#39;)" onkeydown="pinBack(event,this,&#39;pin-cadastro&#39;)">
       </div>
       <div class="login-err" id="c-err"></div>
       <button class="btn btn-primary btn-full" onclick="fazerCadastro()">Cadastrar →</button>
@@ -338,15 +339,15 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <button class="notif-btn" id="notif-btn" onclick="abrirNotif()" title="Notificações" aria-label="Notificações">
-      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
       <span class="notif-badge hidden" id="notif-badge">0</span>
     </button>
     <button class="user-chip" id="user-chip" onclick="toggleUserMenu(event)" title="Minha conta">
-      <span class="user-chip-av" id="user-av">?</span>
-      <span id="user-label">—</span>
+      <span class="user-chip-av" id="user-av">R</span>
+      <span id="user-label">RAFAEL</span>
       <span style="font-size:10px;opacity:.7;margin-left:2px">▾</span>
     </button>
-    <span class="saved" id="sync-ind" onclick="menuSync()" style="cursor:pointer">⚙</span>
+    <span class="saved" id="sync-ind" onclick="menuSync()" style="cursor: pointer; color: rgb(191, 233, 173);">● na nuvem</span>
   </div>
 </div>
 
@@ -354,38 +355,38 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 <div class="user-menu-overlay" id="user-menu-overlay" onclick="fecharUserMenu()"></div>
 <div class="user-dropdown" id="user-dropdown">
   <div class="user-dd-header">
-    <div class="user-dd-name" id="dd-nome">—</div>
-    <div class="user-dd-role" id="dd-role">—</div>
+    <div class="user-dd-name" id="dd-nome">RAFAEL</div>
+    <div class="user-dd-role" id="dd-role">👑 Administrador</div>
   </div>
   <button class="user-dd-item" onclick="abrirAlterarSenha()">🔑 Alterar minha senha</button>
-  <button class="user-dd-item" id="dd-btn-admin" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar usuários</button>
+  <button class="user-dd-item" id="dd-btn-admin" onclick="abrirGerenciarUsuarios()" style="">👥 Gerenciar usuários</button>
   <div class="user-dd-sep"></div>
   <button class="user-dd-item danger" onclick="fazerLogout()">↩ Sair da conta</button>
 </div>
 
 <!-- Drawer: Alterar senha -->
-<div class="drawer-overlay" id="dov-senha" onclick="fecharDrawer('senha')"></div>
+<div class="drawer-overlay" id="dov-senha" onclick="fecharDrawer(&#39;senha&#39;)"></div>
 <div class="drawer" id="drawer-senha">
   <div class="drawer-handle"></div>
   <div class="drawer-header">
     <h2>🔑 Alterar senha</h2>
-    <button class="drawer-close" onclick="fecharDrawer('senha')">✕</button>
+    <button class="drawer-close" onclick="fecharDrawer(&#39;senha&#39;)">✕</button>
   </div>
   <div class="drawer-body">
     <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Digite sua senha atual e a nova senha de 4 dígitos.</p>
     <div class="fg"><label>Senha atual</label></div>
     <div class="login-pin" id="pin-atual" style="justify-content:flex-start;margin-bottom:18px">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-atual&#39;)" onkeydown="pinBack(event,this,&#39;pin-atual&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-atual&#39;)" onkeydown="pinBack(event,this,&#39;pin-atual&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-atual&#39;)" onkeydown="pinBack(event,this,&#39;pin-atual&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-atual&#39;)" onkeydown="pinBack(event,this,&#39;pin-atual&#39;)">
     </div>
     <div class="fg"><label>Nova senha</label></div>
     <div class="login-pin" id="pin-nova" style="justify-content:flex-start;margin-bottom:18px">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-nova&#39;)" onkeydown="pinBack(event,this,&#39;pin-nova&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-nova&#39;)" onkeydown="pinBack(event,this,&#39;pin-nova&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-nova&#39;)" onkeydown="pinBack(event,this,&#39;pin-nova&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-nova&#39;)" onkeydown="pinBack(event,this,&#39;pin-nova&#39;)">
     </div>
     <div class="login-err" id="senha-err"></div>
     <button class="btn btn-primary btn-full" onclick="confirmarAlterarSenha()">Salvar nova senha</button>
@@ -393,12 +394,12 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 </div>
 
 <!-- Drawer: Gerenciar usuários (admin) -->
-<div class="drawer-overlay" id="dov-admin" onclick="fecharDrawer('admin')"></div>
+<div class="drawer-overlay" id="dov-admin" onclick="fecharDrawer(&#39;admin&#39;)"></div>
 <div class="drawer" id="drawer-admin">
   <div class="drawer-handle"></div>
   <div class="drawer-header">
     <h2>👥 Usuários cadastrados</h2>
-    <button class="drawer-close" onclick="fecharDrawer('admin')">✕</button>
+    <button class="drawer-close" onclick="fecharDrawer(&#39;admin&#39;)">✕</button>
   </div>
   <div class="drawer-body">
     <div id="admin-users-list"><div class="empty">Carregando...</div></div>
@@ -406,21 +407,21 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 </div>
 
 <!-- Drawer: Redefinir senha (admin reseta a de outro usuário) -->
-<div class="drawer-overlay" id="dov-reset" onclick="fecharDrawer('reset')"></div>
+<div class="drawer-overlay" id="dov-reset" onclick="fecharDrawer(&#39;reset&#39;)"></div>
 <div class="drawer" id="drawer-reset">
   <div class="drawer-handle"></div>
   <div class="drawer-header">
     <h2>🔑 Redefinir senha</h2>
-    <button class="drawer-close" onclick="fecharDrawer('reset')">✕</button>
+    <button class="drawer-close" onclick="fecharDrawer(&#39;reset&#39;)">✕</button>
   </div>
   <div class="drawer-body">
     <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Definindo nova senha para: <b id="reset-user-nome">—</b></p>
     <div class="fg"><label>Nova senha (4 dígitos)</label></div>
     <div class="login-pin" id="pin-reset" style="justify-content:flex-start;margin-bottom:18px">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
-      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-reset&#39;)" onkeydown="pinBack(event,this,&#39;pin-reset&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-reset&#39;)" onkeydown="pinBack(event,this,&#39;pin-reset&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-reset&#39;)" onkeydown="pinBack(event,this,&#39;pin-reset&#39;)">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,&#39;pin-reset&#39;)" onkeydown="pinBack(event,this,&#39;pin-reset&#39;)">
     </div>
     <div class="login-err" id="reset-err"></div>
     <button class="btn btn-primary btn-full" onclick="confirmarResetSenha()">Confirmar redefinição</button>
@@ -438,51 +439,686 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="notif-list" id="notif-list"><div class="notif-empty">Nenhuma notificação</div></div>
 </div>
 <!-- Drawer: BASE ITENS -->
-<div class="drawer-overlay" id="dov-baseitens" onclick="fecharDrawer('baseitens')"></div>
+<div class="drawer-overlay" id="dov-baseitens" onclick="fecharDrawer(&#39;baseitens&#39;)"></div>
 <div class="drawer" id="drawer-baseitens">
   <div class="drawer-handle"></div>
   <div class="drawer-header">
     <h2>📋 Base de Itens</h2>
     <div style="display:flex;align-items:center;gap:8px">
-      <button class="btn btn-primary btn-sm admin-only" id="bi-btn-cadastrar" onclick="abrirNovoItemBase()">➕ Cadastrar</button>
-      <button class="drawer-close" onclick="fecharDrawer('baseitens')">✕</button>
+      <button class="btn btn-primary btn-sm admin-only" id="bi-btn-cadastrar" onclick="abrirNovoItemBase()" style="display: inline-flex;">➕ Cadastrar</button>
+      <button class="drawer-close" onclick="fecharDrawer(&#39;baseitens&#39;)">✕</button>
     </div>
   </div>
   <div class="drawer-body">
     <div class="bi-search-bar">
       <input type="text" id="bi-busca" placeholder="🔍 Buscar por nome ou código..." oninput="renderBaseItens()" style="margin-bottom:0">
     </div>
-    <div id="bi-list"></div>
+    <div id="bi-list"><div class="bi-group-header" style="background:#2E7D32">BATATA</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2139</span>
+        <span class="bi-nome">BATATA CHIPS CHURRASCO</span>
+        <span class="bi-peso">0.75kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2139)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2137</span>
+        <span class="bi-nome">BATATA CHIPS ORIGINAL</span>
+        <span class="bi-peso">0.75kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2137)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2138</span>
+        <span class="bi-nome">BATATA CHIPS SALSA E CEBOLA</span>
+        <span class="bi-peso">0.75kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2138)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1813</span>
+        <span class="bi-nome">BATATA EXTRA FINA CX 100G</span>
+        <span class="bi-peso">2kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1813)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1811</span>
+        <span class="bi-nome">BATATA TRADI CX 100G</span>
+        <span class="bi-peso">2kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1811)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2081</span>
+        <span class="bi-nome">BATATA TRADI CX 400G</span>
+        <span class="bi-peso">8kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2081)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2082</span>
+        <span class="bi-nome">BATATA TRADI CX 800G</span>
+        <span class="bi-peso">8kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2082)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1930</span>
+        <span class="bi-nome">BATATA TRADI FD 400G</span>
+        <span class="bi-peso">8kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1930)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1931</span>
+        <span class="bi-nome">BATATA TRADI FD 800G</span>
+        <span class="bi-peso">9kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1931)">✏️</button>
+      </div><div class="bi-group-header" style="background:#00695C">BRANCO</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1490</span>
+        <span class="bi-nome">ALFINETE POLIDO 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1490)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">65</span>
+        <span class="bi-nome">ALFINETE POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(65)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">64</span>
+        <span class="bi-nome">ALFINETE POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(64)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1164</span>
+        <span class="bi-nome">ARROZ POLIDO SC 50KG</span>
+        <span class="bi-peso">50kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1164)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1669</span>
+        <span class="bi-nome">BERGAMINI POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1669)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1918</span>
+        <span class="bi-nome">CATARINÃO POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1918)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1049</span>
+        <span class="bi-nome">CELIA POLIDO 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1049)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">49</span>
+        <span class="bi-nome">CELIA POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(49)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">22</span>
+        <span class="bi-nome">CELIA POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(22)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">326</span>
+        <span class="bi-nome">CELIA POLIDO SC 25KG</span>
+        <span class="bi-peso">25kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(326)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1531</span>
+        <span class="bi-nome">CINDERELA POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1531)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1431</span>
+        <span class="bi-nome">CINDERELA POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1431)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1544</span>
+        <span class="bi-nome">COMETA POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1544)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1780</span>
+        <span class="bi-nome">JOAO RODRIGUES POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1780)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1801</span>
+        <span class="bi-nome">JOAO RODRIGUES POLIDO 6x5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1801)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2174</span>
+        <span class="bi-nome">LA GRANJA POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2174)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1895</span>
+        <span class="bi-nome">LA GRANJA POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1895)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1497</span>
+        <span class="bi-nome">MADRINHA POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1497)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1496</span>
+        <span class="bi-nome">MADRINHA POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1496)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1720</span>
+        <span class="bi-nome">MORELLI POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1720)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1932</span>
+        <span class="bi-nome">MORELLI POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1932)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1939</span>
+        <span class="bi-nome">MORELLI POLIDO SC 25KG</span>
+        <span class="bi-peso">25kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1939)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1492</span>
+        <span class="bi-nome">SMART POLIDO 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1492)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1491</span>
+        <span class="bi-nome">SMART POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1491)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1620</span>
+        <span class="bi-nome">SMART POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1620)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2084</span>
+        <span class="bi-nome">TIO LIMA POLIDO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2084)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1821</span>
+        <span class="bi-nome">TIO TIM POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1821)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1912</span>
+        <span class="bi-nome">TRIMAIS POLIDO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1912)">✏️</button>
+      </div><div class="bi-group-header" style="background:#455A64">CÃO</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1234</span>
+        <span class="bi-nome">CAMPO BOM (CÃO) 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1234)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">19</span>
+        <span class="bi-nome">CAO BRASIL 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(19)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1861</span>
+        <span class="bi-nome">VIT-DOG 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1861)">✏️</button>
+      </div><div class="bi-group-header" style="background:#5D4037">FARINHA</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1421</span>
+        <span class="bi-nome">FARINHA AMARELA</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1421)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1419</span>
+        <span class="bi-nome">FARINHA BRANCA</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1419)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1461</span>
+        <span class="bi-nome">FARINHA TORRADA</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1461)">✏️</button>
+      </div><div class="bi-group-header" style="background:#455A64">FECULA</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1657</span>
+        <span class="bi-nome">FECULA 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1657)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1859</span>
+        <span class="bi-nome">FECULA 20X1</span>
+        <span class="bi-peso">20kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1859)">✏️</button>
+      </div><div class="bi-group-header" style="background:#880E4F">GRANEL</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9001</span>
+        <span class="bi-nome">ARROZ CÃO</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9001)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9002</span>
+        <span class="bi-nome">INTEGRAL EM BAG</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9002)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9003</span>
+        <span class="bi-nome">INTEGRAL GRANEL</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9003)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9004</span>
+        <span class="bi-nome">PARBOILIZADO EM BAG</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9004)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9005</span>
+        <span class="bi-nome">PARBOILIZADO REPASSADO</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9005)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9006</span>
+        <span class="bi-nome">PARBOILIZADO GRANEL TP1</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9006)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9007</span>
+        <span class="bi-nome">PARBOILIZADO GRANEL TP2</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9007)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9008</span>
+        <span class="bi-nome">PARBOILIZADO GRANEL ESPECIAL</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9008)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9009</span>
+        <span class="bi-nome">POLIDO EM BAG</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9009)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9010</span>
+        <span class="bi-nome">POLIDO GRANEL TP1</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9010)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9011</span>
+        <span class="bi-nome">POLIDO GRANEL REPASSADO</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9011)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9012</span>
+        <span class="bi-nome">POLIDO GRANEL ESPECIAL</span>
+        <span class="bi-peso">granel · kg</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9012)">✏️</button>
+      </div><div class="bi-group-header" style="background:#512DA8">INTEGRAL</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">999</span>
+        <span class="bi-nome">CELIA INTEGRAL 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(999)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">979</span>
+        <span class="bi-nome">CELIA INTEGRAL 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(979)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1450</span>
+        <span class="bi-nome">CELIA INTEGRAL KG (1KG)</span>
+        <span class="bi-peso"></span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1450)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1246</span>
+        <span class="bi-nome">CELIA INTEGRAL/I 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1246)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1245</span>
+        <span class="bi-nome">CELIA INTEGRAL/I 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1245)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1546</span>
+        <span class="bi-nome">COMETA INTEGRAL 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1546)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2042</span>
+        <span class="bi-nome">TIA DORA INTEGRAL 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2042)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2067</span>
+        <span class="bi-nome">TIA DORA INTEGRAL/I 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2067)">✏️</button>
+      </div><div class="bi-group-header" style="background:#8B5E00">MIX</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">335</span>
+        <span class="bi-nome">CELIA MIX 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(335)">✏️</button>
+      </div><div class="bi-group-header" style="background:#C8102E">PARBO</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">387</span>
+        <span class="bi-nome">ALFINETE PARBO 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(387)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">9</span>
+        <span class="bi-nome">ALFINETE PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(9)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">8</span>
+        <span class="bi-nome">ALFINETE PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(8)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1243</span>
+        <span class="bi-nome">ALFINETE PARBO/I 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1243)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1242</span>
+        <span class="bi-nome">ALFINETE PARBO/I 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1242)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2044</span>
+        <span class="bi-nome">ANTUNES PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2044)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1528</span>
+        <span class="bi-nome">ANTUNES PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1528)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">827</span>
+        <span class="bi-nome">ARROZ PARBO SC 50KG</span>
+        <span class="bi-peso">50kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(827)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2051</span>
+        <span class="bi-nome">ARROZ PARBO/I SC 50KG</span>
+        <span class="bi-peso">50kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2051)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">69</span>
+        <span class="bi-nome">BERGAMINI PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(69)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1019</span>
+        <span class="bi-nome">CELIA PARBO 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1019)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">6</span>
+        <span class="bi-nome">CELIA PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(6)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1385</span>
+        <span class="bi-nome">CELIA PARBO 5X5</span>
+        <span class="bi-peso">25kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1385)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">5</span>
+        <span class="bi-nome">CELIA PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(5)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1997</span>
+        <span class="bi-nome">CELIA PARBO KG (1KG)</span>
+        <span class="bi-peso"></span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1997)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1323</span>
+        <span class="bi-nome">CELIA PARBO KG (5KG)</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1323)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1307</span>
+        <span class="bi-nome">CELIA PARBO PCT (5KG)</span>
+        <span class="bi-peso">5kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1307)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">112</span>
+        <span class="bi-nome">CELIA PARBO SC 25KG</span>
+        <span class="bi-peso">25kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(112)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2097</span>
+        <span class="bi-nome">CELIA PARBO/I 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2097)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1240</span>
+        <span class="bi-nome">CELIA PARBO/I 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1240)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1241</span>
+        <span class="bi-nome">CELIA PARBO/I 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1241)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2050</span>
+        <span class="bi-nome">CELIA PARBO/I KG</span>
+        <span class="bi-peso"></span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2050)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">327</span>
+        <span class="bi-nome">CINDERELA PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(327)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">97</span>
+        <span class="bi-nome">CINDERELA PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(97)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2094</span>
+        <span class="bi-nome">CINDERELA PARBO/I 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2094)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2092</span>
+        <span class="bi-nome">CINDERELA PARBO/I 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2092)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1545</span>
+        <span class="bi-nome">COMETA PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1545)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2043</span>
+        <span class="bi-nome">FAVORITINHO PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2043)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2173</span>
+        <span class="bi-nome">GAVEA PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2173)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1779</span>
+        <span class="bi-nome">JOAO RODRIGUES PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1779)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1077</span>
+        <span class="bi-nome">KISAFRA PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1077)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1076</span>
+        <span class="bi-nome">KISAFRA PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1076)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1894</span>
+        <span class="bi-nome">LA GRANJA PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1894)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1498</span>
+        <span class="bi-nome">MADRINHA PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1498)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1718</span>
+        <span class="bi-nome">MORELLI PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1718)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1717</span>
+        <span class="bi-nome">MORELLI PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1717)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1938</span>
+        <span class="bi-nome">MORELLI PARBO SC 25KG</span>
+        <span class="bi-peso">25kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1938)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2095</span>
+        <span class="bi-nome">MORELLI PARBO/I 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2095)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2096</span>
+        <span class="bi-nome">MORELLI PARBO/I 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2096)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1371</span>
+        <span class="bi-nome">PILÃO PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1371)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1369</span>
+        <span class="bi-nome">PILÃO PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1369)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2134</span>
+        <span class="bi-nome">RAMPINELLI PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2134)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">16</span>
+        <span class="bi-nome">REALENGO PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(16)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1494</span>
+        <span class="bi-nome">SMART PARBO 10X1</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1494)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1493</span>
+        <span class="bi-nome">SMART PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1493)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1621</span>
+        <span class="bi-nome">SMART PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1621)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2098</span>
+        <span class="bi-nome">SMART PARBO/I 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2098)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2100</span>
+        <span class="bi-nome">SMART PARBO/I 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2100)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2041</span>
+        <span class="bi-nome">TIA DORA PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2041)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2117</span>
+        <span class="bi-nome">TIA DORA PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2117)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2059</span>
+        <span class="bi-nome">TIA DORA PARBO/I 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2059)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2118</span>
+        <span class="bi-nome">TIA DORA PARBO/I 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2118)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">2083</span>
+        <span class="bi-nome">TIO LIMA PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(2083)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">92</span>
+        <span class="bi-nome">TIO MANOEL PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(92)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">93</span>
+        <span class="bi-nome">TIO MANOEL PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(93)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1913</span>
+        <span class="bi-nome">TRIMAIS PARBO 6X5</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1913)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1368</span>
+        <span class="bi-nome">VO OLIMPIO PARBO 30X1</span>
+        <span class="bi-peso">30kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1368)">✏️</button>
+      </div><div class="bi-group-header" style="background:#2E7D32">TAPIOCA</div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1426</span>
+        <span class="bi-nome">TAPIOCA 1KG</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1426)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1650</span>
+        <span class="bi-nome">TAPIOCA 1KG (2)</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1650)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1425</span>
+        <span class="bi-nome">TAPIOCA 500G</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1425)">✏️</button>
+      </div><div class="bi-item bi-item-admin">
+        <span class="bi-cod">1649</span>
+        <span class="bi-nome">TAPIOCA 500G (2)</span>
+        <span class="bi-peso">10kg/un</span>
+        <button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(1649)">✏️</button>
+      </div></div>
   </div>
 </div>
 
 <!-- Drawer: Novo/Editar item da BASE ITENS -->
-<div class="drawer-overlay" id="dov-novoitem" onclick="fecharDrawer('novoitem')"></div>
+<div class="drawer-overlay" id="dov-novoitem" onclick="fecharDrawer(&#39;novoitem&#39;)"></div>
 <div class="drawer" id="drawer-novoitem">
   <div class="drawer-handle"></div>
   <div class="drawer-header">
     <h2 id="novoitem-title">➕ Novo item</h2>
-    <button class="drawer-close" onclick="fecharDrawer('novoitem')">✕</button>
+    <button class="drawer-close" onclick="fecharDrawer(&#39;novoitem&#39;)">✕</button>
   </div>
   <div class="drawer-body">
     <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="bi-cod" placeholder="ex: 2200"></div>
     <div class="fg"><label>Nome / descrição</label><input id="bi-nome-input" placeholder="ex: NOVA MARCA PARBO 30X1" oninput="this.value=this.value.toUpperCase()"></div>
     <div class="fg"><label>Peso por unidade (kg) <span style="color:var(--text3);font-weight:400">— vazio = granel/kg</span></label><input type="number" inputmode="decimal" id="bi-peso-input" placeholder="ex: 30"></div>
-    <div class="fg"><label>Grupo</label><input id="bi-grupo-input" list="grupos-list-bi" placeholder="ex: PARBO, BRANCO, INTEGRAL..." oninput="this.value=this.value.toUpperCase()"><datalist id="grupos-list-bi"></datalist></div>
+    <div class="fg"><label>Grupo</label><input id="bi-grupo-input" list="grupos-list-bi" placeholder="ex: PARBO, BRANCO, INTEGRAL..." oninput="this.value=this.value.toUpperCase()"><datalist id="grupos-list-bi"><option value="BATATA"></option><option value="BRANCO"></option><option value="CÃO"></option><option value="FARINHA"></option><option value="FECULA"></option><option value="GRANEL"></option><option value="INTEGRAL"></option><option value="MIX"></option><option value="PARBO"></option><option value="TAPIOCA"></option></datalist></div>
     <div class="login-err" id="bi-item-err"></div>
     <div class="btn-row">
       <button class="btn btn-danger" id="bi-btn-excluir" style="display:none" onclick="excluirItemBase()">🗑 Excluir</button>
-      <button class="btn" style="flex:1" onclick="fecharDrawer('novoitem')">Cancelar</button>
+      <button class="btn" style="flex:1" onclick="fecharDrawer(&#39;novoitem&#39;)">Cancelar</button>
       <button class="btn btn-success" style="flex:2" onclick="salvarItemBase()">💾 Salvar</button>
     </div>
   </div>
 </div>
 
 <div class="tabbar">
-  <button class="tab active" id="tab-exp"  data-tab="exp"  onclick="sw('exp')"><i class="icon">🚚</i>Expedição</button>
-  <button class="tab"        id="tab-est"  data-tab="est"  onclick="sw('est')"><i class="icon">📦</i>Estoque</button>
-  <button class="tab"        id="tab-con"  data-tab="con"  onclick="sw('con')"><i class="icon">✅</i>Conciliação</button>
-  <button class="tab"        id="tab-dash" data-tab="dash" onclick="sw('dash')"><i class="icon">📊</i>Painel</button>
+  <button class="tab active" id="tab-exp" data-tab="exp" onclick="sw(&#39;exp&#39;)"><i class="icon">🚚</i>Expedição</button>
+  <button class="tab" id="tab-est" data-tab="est" onclick="sw(&#39;est&#39;)"><i class="icon">📦</i>Estoque</button>
+  <button class="tab" id="tab-con" data-tab="con" onclick="sw(&#39;con&#39;)"><i class="icon">✅</i>Conciliação</button>
+  <button class="tab" id="tab-dash" data-tab="dash" onclick="sw(&#39;dash&#39;)"><i class="icon">📊</i>Painel</button>
 </div>
 
 <div class="wrap">
@@ -504,7 +1140,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="item-add">
       <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="c-cod" placeholder="ex: 5" oninput="lookupCarga()"></div>
       <div class="fg"><label>Qtd</label><input type="number" inputmode="numeric" id="c-qtd" placeholder="0" oninput="calcPesoPrev()"></div>
-      <div class="fg full"><label>Produto</label><input id="c-prod" readonly placeholder="— digite o código —"></div>
+      <div class="fg full"><label>Produto</label><input id="c-prod" readonly="" placeholder="— digite o código —"></div>
     </div>
     <div class="peso-prev" id="peso-prev"></div>
     <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="addItem()">➕ Adicionar item</button>
@@ -515,7 +1151,16 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     </div>
   </div>
   <div class="ctitle">Cargas lançadas</div>
-  <div id="lista-cargas"></div>
+  <div id="lista-cargas"><div class="carga-card"><div class="carga-head"><span class="carga-num">2777</span><span class="carga-dest">CTNR CLIENTE - AM</span><span class="date-badge">09/06/2026</span></div>
+    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody><tr><td class="prod-cod">49</td><td>CELIA POLIDO 30X1</td><td>945</td></tr></tbody></table>
+    
+    <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(0)">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(0)">🗑 Excluir</button><span class="badge b-gray" style="align-self:center">28350kg</span></div></div><div class="carga-card"><div class="carga-head"><span class="carga-num">2793</span><span class="carga-dest">CTNR CD - CE</span><span class="date-badge">09/06/2026</span></div>
+    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody><tr><td class="prod-cod">5</td><td>CELIA PARBO 6X5</td><td>200</td></tr><tr><td class="prod-cod">6</td><td>CELIA PARBO 30X1</td><td>400</td></tr><tr><td class="prod-cod">22</td><td>CELIA POLIDO 6X5</td><td>150</td></tr><tr><td class="prod-cod">999</td><td>CELIA INTEGRAL 10X1</td><td>100</td></tr></tbody></table>
+    <div style="font-size:12px;color:#C0392B;font-weight:600;margin-top:8px">📝 PRIORIZAR O CELIA PARBO E POLIDO DE 6X5 E INTEGRAL 10X1!</div>
+    <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(1)">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(1)">🗑 Excluir</button><span class="badge b-gray" style="align-self:center">23500kg</span></div></div><div class="carga-card"><div class="carga-head"><span class="carga-num">2798</span><span class="carga-dest">CLIENTE RETIRA - CTNR</span><span class="date-badge">11/06/2026</span></div>
+    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody><tr><td class="prod-cod">49</td><td>CELIA POLIDO 30X1</td><td>945</td></tr></tbody></table>
+    
+    <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(2)">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(2)">🗑 Excluir</button><span class="badge b-gray" style="align-self:center">28350kg</span></div></div></div>
 </div>
 
 <!-- ESTOQUE -->
@@ -530,19 +1175,19 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 
   <!-- Toggle lançamento / visual -->
   <div class="est-toggle-bar">
-    <button class="est-toggle-btn active" id="btn-est-lanc" onclick="toggleEstView('lancamento')">📋 Lançamento</button>
-    <button class="est-toggle-btn" id="btn-est-vis"  onclick="toggleEstView('visual')">📊 Resumo Visual</button>
+    <button class="est-toggle-btn active" id="btn-est-lanc" onclick="toggleEstView(&#39;lancamento&#39;)">📋 Lançamento</button>
+    <button class="est-toggle-btn" id="btn-est-vis" onclick="toggleEstView(&#39;visual&#39;)">📊 Resumo Visual</button>
   </div>
 
   <!-- PAINEL LANÇAMENTO (existente) -->
   <div id="est-lancamento">
-    <button class="btn btn-full admin-only" id="btn-novo-item" onclick="toggleCadastro()" style="margin-bottom:12px">➕ Cadastrar novo item</button>
-    <div class="card admin-only" id="cad-card" style="display:none">
+    <button class="btn btn-full admin-only" id="btn-novo-item" onclick="toggleCadastro()" style="margin-bottom: 12px; display: inline-flex;">➕ Cadastrar novo item</button>
+    <div class="card admin-only" id="cad-card" style="">
       <div class="ctitle" id="cad-title">➕ Novo item</div>
       <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="ni-cod" placeholder="ex: 2200"></div>
       <div class="fg"><label>Nome / descrição</label><input id="ni-nome" placeholder="ex: NOVA MARCA PARBO 30X1"></div>
       <div class="fg"><label>Peso por unidade em kg <span style="color:var(--text3)">(deixe vazio se for a granel / contado em kg)</span></label><input type="number" inputmode="decimal" id="ni-peso" placeholder="ex: 30"></div>
-      <div class="fg"><label>Grupo</label><input id="ni-grupo" list="grupos-list" placeholder="ex: PARBO, BRANCO, INTEGRAL, GRANEL..."><datalist id="grupos-list"></datalist></div>
+      <div class="fg"><label>Grupo</label><input id="ni-grupo" list="grupos-list" placeholder="ex: PARBO, BRANCO, INTEGRAL, GRANEL..."><datalist id="grupos-list"><option value="BATATA"></option><option value="BRANCO"></option><option value="CÃO"></option><option value="FARINHA"></option><option value="FECULA"></option><option value="GRANEL"></option><option value="INTEGRAL"></option><option value="MIX"></option><option value="PARBO"></option><option value="TAPIOCA"></option></datalist></div>
       <div class="btn-row">
         <button class="btn btn-danger" id="btn-excluir-item" style="display:none" onclick="excluirItemAtual()">🗑 Excluir</button>
         <button class="btn" style="flex:1" onclick="fecharCadastro()">Cancelar</button>
@@ -551,7 +1196,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     </div>
     <div class="filters">
       <input type="text" id="e-busca" placeholder="🔍 Buscar produto ou código..." oninput="renderGrupos()">
-      <select id="e-tipo" onchange="renderGrupos()"><option value="">Todos os grupos</option></select>
+      <select id="e-tipo" onchange="renderGrupos()"><option value="">Todos os grupos</option><option value="BATATA">BATATA</option><option value="BRANCO">BRANCO</option><option value="CÃO">CÃO</option><option value="FARINHA">FARINHA</option><option value="FECULA">FECULA</option><option value="GRANEL">GRANEL</option><option value="INTEGRAL">INTEGRAL</option><option value="MIX">MIX</option><option value="PARBO">PARBO</option><option value="TAPIOCA">TAPIOCA</option></select>
       <div class="frow">
         <button class="btn btn-sm" onclick="expandir(true)">Abrir todos</button>
         <button class="btn btn-sm" onclick="expandir(false)">Fechar todos</button>
@@ -562,7 +1207,17 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <div class="metric"><div class="metric-label">Itens com qtd</div><div class="metric-val" id="e-itens">0</div></div>
       <div class="metric"><div class="metric-label">Peso contado</div><div class="metric-val" id="e-peso">0 kg</div></div>
     </div>
-    <div id="grupos-est"></div>
+    <div id="grupos-est"><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;BATATA&#39;)"><div class="grupo-title"><span class="chev " id="gc-BATATA">▶</span><span class="badge b-green">BATATA</span> 9 itens</div></div>
+    <div class="grupo-body " id="gb-BATATA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-2139"><span class="prod-cod">2139</span><span><span class="est-nome">BATATA CHIPS CHURRASCO</span> <button class="lapis" onclick="editarItem(2139)" title="Editar item">✏️</button><br><span class="est-peso">0.75kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2139,this.value)"></div><div class="est-row " id="er-2137"><span class="prod-cod">2137</span><span><span class="est-nome">BATATA CHIPS ORIGINAL</span> <button class="lapis" onclick="editarItem(2137)" title="Editar item">✏️</button><br><span class="est-peso">0.75kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2137,this.value)"></div><div class="est-row " id="er-2138"><span class="prod-cod">2138</span><span><span class="est-nome">BATATA CHIPS SALSA E CEBOLA</span> <button class="lapis" onclick="editarItem(2138)" title="Editar item">✏️</button><br><span class="est-peso">0.75kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2138,this.value)"></div><div class="est-row " id="er-1813"><span class="prod-cod">1813</span><span><span class="est-nome">BATATA EXTRA FINA CX 100G</span> <button class="lapis" onclick="editarItem(1813)" title="Editar item">✏️</button><br><span class="est-peso">2kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1813,this.value)"></div><div class="est-row " id="er-1811"><span class="prod-cod">1811</span><span><span class="est-nome">BATATA TRADI CX 100G</span> <button class="lapis" onclick="editarItem(1811)" title="Editar item">✏️</button><br><span class="est-peso">2kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1811,this.value)"></div><div class="est-row " id="er-2081"><span class="prod-cod">2081</span><span><span class="est-nome">BATATA TRADI CX 400G</span> <button class="lapis" onclick="editarItem(2081)" title="Editar item">✏️</button><br><span class="est-peso">8kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2081,this.value)"></div><div class="est-row " id="er-2082"><span class="prod-cod">2082</span><span><span class="est-nome">BATATA TRADI CX 800G</span> <button class="lapis" onclick="editarItem(2082)" title="Editar item">✏️</button><br><span class="est-peso">8kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2082,this.value)"></div><div class="est-row " id="er-1930"><span class="prod-cod">1930</span><span><span class="est-nome">BATATA TRADI FD 400G</span> <button class="lapis" onclick="editarItem(1930)" title="Editar item">✏️</button><br><span class="est-peso">8kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1930,this.value)"></div><div class="est-row " id="er-1931"><span class="prod-cod">1931</span><span><span class="est-nome">BATATA TRADI FD 800G</span> <button class="lapis" onclick="editarItem(1931)" title="Editar item">✏️</button><br><span class="est-peso">9kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1931,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;BRANCO&#39;)"><div class="grupo-title"><span class="chev " id="gc-BRANCO">▶</span><span class="badge b-teal">BRANCO</span> 28 itens</div></div>
+    <div class="grupo-body " id="gb-BRANCO"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1490"><span class="prod-cod">1490</span><span><span class="est-nome">ALFINETE POLIDO 10X1</span> <button class="lapis" onclick="editarItem(1490)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1490,this.value)"></div><div class="est-row " id="er-65"><span class="prod-cod">65</span><span><span class="est-nome">ALFINETE POLIDO 30X1</span> <button class="lapis" onclick="editarItem(65)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(65,this.value)"></div><div class="est-row " id="er-64"><span class="prod-cod">64</span><span><span class="est-nome">ALFINETE POLIDO 6X5</span> <button class="lapis" onclick="editarItem(64)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(64,this.value)"></div><div class="est-row " id="er-1164"><span class="prod-cod">1164</span><span><span class="est-nome">ARROZ POLIDO SC 50KG</span> <button class="lapis" onclick="editarItem(1164)" title="Editar item">✏️</button><br><span class="est-peso">50kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1164,this.value)"></div><div class="est-row " id="er-1669"><span class="prod-cod">1669</span><span><span class="est-nome">BERGAMINI POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1669)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1669,this.value)"></div><div class="est-row " id="er-1918"><span class="prod-cod">1918</span><span><span class="est-nome">CATARINÃO POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1918)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1918,this.value)"></div><div class="est-row " id="er-1049"><span class="prod-cod">1049</span><span><span class="est-nome">CELIA POLIDO 10X1</span> <button class="lapis" onclick="editarItem(1049)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1049,this.value)"></div><div class="est-row " id="er-49"><span class="prod-cod">49</span><span><span class="est-nome">CELIA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(49)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(49,this.value)"></div><div class="est-row " id="er-22"><span class="prod-cod">22</span><span><span class="est-nome">CELIA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(22)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(22,this.value)"></div><div class="est-row " id="er-326"><span class="prod-cod">326</span><span><span class="est-nome">CELIA POLIDO SC 25KG</span> <button class="lapis" onclick="editarItem(326)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(326,this.value)"></div><div class="est-row " id="er-1531"><span class="prod-cod">1531</span><span><span class="est-nome">CINDERELA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1531)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1531,this.value)"></div><div class="est-row " id="er-1431"><span class="prod-cod">1431</span><span><span class="est-nome">CINDERELA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1431)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1431,this.value)"></div><div class="est-row " id="er-1544"><span class="prod-cod">1544</span><span><span class="est-nome">COMETA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1544)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1544,this.value)"></div><div class="est-row " id="er-1780"><span class="prod-cod">1780</span><span><span class="est-nome">JOAO RODRIGUES POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1780)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1780,this.value)"></div><div class="est-row " id="er-1801"><span class="prod-cod">1801</span><span><span class="est-nome">JOAO RODRIGUES POLIDO 6x5</span> <button class="lapis" onclick="editarItem(1801)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1801,this.value)"></div><div class="est-row " id="er-2174"><span class="prod-cod">2174</span><span><span class="est-nome">LA GRANJA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(2174)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2174,this.value)"></div><div class="est-row " id="er-1895"><span class="prod-cod">1895</span><span><span class="est-nome">LA GRANJA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1895)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1895,this.value)"></div><div class="est-row " id="er-1497"><span class="prod-cod">1497</span><span><span class="est-nome">MADRINHA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1497)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1497,this.value)"></div><div class="est-row " id="er-1496"><span class="prod-cod">1496</span><span><span class="est-nome">MADRINHA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1496)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1496,this.value)"></div><div class="est-row " id="er-1720"><span class="prod-cod">1720</span><span><span class="est-nome">MORELLI POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1720)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1720,this.value)"></div><div class="est-row " id="er-1932"><span class="prod-cod">1932</span><span><span class="est-nome">MORELLI POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1932)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1932,this.value)"></div><div class="est-row " id="er-1939"><span class="prod-cod">1939</span><span><span class="est-nome">MORELLI POLIDO SC 25KG</span> <button class="lapis" onclick="editarItem(1939)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1939,this.value)"></div><div class="est-row " id="er-1492"><span class="prod-cod">1492</span><span><span class="est-nome">SMART POLIDO 10X1</span> <button class="lapis" onclick="editarItem(1492)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1492,this.value)"></div><div class="est-row " id="er-1491"><span class="prod-cod">1491</span><span><span class="est-nome">SMART POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1491)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1491,this.value)"></div><div class="est-row " id="er-1620"><span class="prod-cod">1620</span><span><span class="est-nome">SMART POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1620)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1620,this.value)"></div><div class="est-row " id="er-2084"><span class="prod-cod">2084</span><span><span class="est-nome">TIO LIMA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(2084)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2084,this.value)"></div><div class="est-row " id="er-1821"><span class="prod-cod">1821</span><span><span class="est-nome">TIO TIM POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1821)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1821,this.value)"></div><div class="est-row " id="er-1912"><span class="prod-cod">1912</span><span><span class="est-nome">TRIMAIS POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1912)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1912,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;CÃO&#39;)"><div class="grupo-title"><span class="chev " id="gc-CÃO">▶</span><span class="badge b-gray">CÃO</span> 3 itens</div></div>
+    <div class="grupo-body " id="gb-CÃO"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1234"><span class="prod-cod">1234</span><span><span class="est-nome">CAMPO BOM (CÃO) 6X5</span> <button class="lapis" onclick="editarItem(1234)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1234,this.value)"></div><div class="est-row " id="er-19"><span class="prod-cod">19</span><span><span class="est-nome">CAO BRASIL 6X5</span> <button class="lapis" onclick="editarItem(19)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(19,this.value)"></div><div class="est-row " id="er-1861"><span class="prod-cod">1861</span><span><span class="est-nome">VIT-DOG 6X5</span> <button class="lapis" onclick="editarItem(1861)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1861,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;FARINHA&#39;)"><div class="grupo-title"><span class="chev " id="gc-FARINHA">▶</span><span class="badge b-amber">FARINHA</span> 3 itens</div></div>
+    <div class="grupo-body " id="gb-FARINHA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1421"><span class="prod-cod">1421</span><span><span class="est-nome">FARINHA AMARELA</span> <button class="lapis" onclick="editarItem(1421)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1421,this.value)"></div><div class="est-row " id="er-1419"><span class="prod-cod">1419</span><span><span class="est-nome">FARINHA BRANCA</span> <button class="lapis" onclick="editarItem(1419)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1419,this.value)"></div><div class="est-row " id="er-1461"><span class="prod-cod">1461</span><span><span class="est-nome">FARINHA TORRADA</span> <button class="lapis" onclick="editarItem(1461)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1461,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;FECULA&#39;)"><div class="grupo-title"><span class="chev " id="gc-FECULA">▶</span><span class="badge b-gray">FECULA</span> 2 itens</div></div>
+    <div class="grupo-body " id="gb-FECULA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1657"><span class="prod-cod">1657</span><span><span class="est-nome">FECULA 10X1</span> <button class="lapis" onclick="editarItem(1657)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1657,this.value)"></div><div class="est-row " id="er-1859"><span class="prod-cod">1859</span><span><span class="est-nome">FECULA 20X1</span> <button class="lapis" onclick="editarItem(1859)" title="Editar item">✏️</button><br><span class="est-peso">20kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1859,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;GRANEL&#39;)"><div class="grupo-title"><span class="chev " id="gc-GRANEL">▶</span><span class="badge b-pink">GRANEL</span> 12 itens · kg</div></div>
+    <div class="grupo-body " id="gb-GRANEL"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd kg</span></div><div class="est-row " id="er-9001"><span class="prod-cod">9001</span><span><span class="est-nome">ARROZ CÃO</span> <button class="lapis" onclick="editarItem(9001)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9001,this.value)"></div><div class="est-row " id="er-9002"><span class="prod-cod">9002</span><span><span class="est-nome">INTEGRAL EM BAG</span> <button class="lapis" onclick="editarItem(9002)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9002,this.value)"></div><div class="est-row " id="er-9003"><span class="prod-cod">9003</span><span><span class="est-nome">INTEGRAL GRANEL</span> <button class="lapis" onclick="editarItem(9003)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9003,this.value)"></div><div class="est-row " id="er-9004"><span class="prod-cod">9004</span><span><span class="est-nome">PARBOILIZADO EM BAG</span> <button class="lapis" onclick="editarItem(9004)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9004,this.value)"></div><div class="est-row " id="er-9005"><span class="prod-cod">9005</span><span><span class="est-nome">PARBOILIZADO REPASSADO</span> <button class="lapis" onclick="editarItem(9005)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9005,this.value)"></div><div class="est-row " id="er-9006"><span class="prod-cod">9006</span><span><span class="est-nome">PARBOILIZADO GRANEL TP1</span> <button class="lapis" onclick="editarItem(9006)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9006,this.value)"></div><div class="est-row " id="er-9007"><span class="prod-cod">9007</span><span><span class="est-nome">PARBOILIZADO GRANEL TP2</span> <button class="lapis" onclick="editarItem(9007)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9007,this.value)"></div><div class="est-row " id="er-9008"><span class="prod-cod">9008</span><span><span class="est-nome">PARBOILIZADO GRANEL ESPECIAL</span> <button class="lapis" onclick="editarItem(9008)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9008,this.value)"></div><div class="est-row " id="er-9009"><span class="prod-cod">9009</span><span><span class="est-nome">POLIDO EM BAG</span> <button class="lapis" onclick="editarItem(9009)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9009,this.value)"></div><div class="est-row " id="er-9010"><span class="prod-cod">9010</span><span><span class="est-nome">POLIDO GRANEL TP1</span> <button class="lapis" onclick="editarItem(9010)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9010,this.value)"></div><div class="est-row " id="er-9011"><span class="prod-cod">9011</span><span><span class="est-nome">POLIDO GRANEL REPASSADO</span> <button class="lapis" onclick="editarItem(9011)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9011,this.value)"></div><div class="est-row " id="er-9012"><span class="prod-cod">9012</span><span><span class="est-nome">POLIDO GRANEL ESPECIAL</span> <button class="lapis" onclick="editarItem(9012)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9012,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;INTEGRAL&#39;)"><div class="grupo-title"><span class="chev " id="gc-INTEGRAL">▶</span><span class="badge b-purple">INTEGRAL</span> 4 itens</div></div>
+    <div class="grupo-body " id="gb-INTEGRAL"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-999"><span class="prod-cod">999</span><span><span class="est-nome">CELIA INTEGRAL 10X1</span> <button class="lapis" onclick="editarItem(999)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(999,this.value)"></div><div class="est-row " id="er-979"><span class="prod-cod">979</span><span><span class="est-nome">CELIA INTEGRAL 30X1</span> <button class="lapis" onclick="editarItem(979)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(979,this.value)"></div><div class="est-row " id="er-1546"><span class="prod-cod">1546</span><span><span class="est-nome">COMETA INTEGRAL 30X1</span> <button class="lapis" onclick="editarItem(1546)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1546,this.value)"></div><div class="est-row " id="er-2042"><span class="prod-cod">2042</span><span><span class="est-nome">TIA DORA INTEGRAL 10X1</span> <button class="lapis" onclick="editarItem(2042)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2042,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;MIX&#39;)"><div class="grupo-title"><span class="chev " id="gc-MIX">▶</span><span class="badge b-amber">MIX</span> 1 itens</div></div>
+    <div class="grupo-body " id="gb-MIX"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-335"><span class="prod-cod">335</span><span><span class="est-nome">CELIA MIX 6X5</span> <button class="lapis" onclick="editarItem(335)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(335,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;PARBO&#39;)"><div class="grupo-title"><span class="chev " id="gc-PARBO">▶</span><span class="badge b-blue">PARBO</span> 45 itens</div></div>
+    <div class="grupo-body " id="gb-PARBO"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-387"><span class="prod-cod">387</span><span><span class="est-nome">ALFINETE PARBO 10X1</span> <button class="lapis" onclick="editarItem(387)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(387,this.value)"></div><div class="est-row " id="er-9"><span class="prod-cod">9</span><span><span class="est-nome">ALFINETE PARBO 30X1</span> <button class="lapis" onclick="editarItem(9)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9,this.value)"></div><div class="est-row " id="er-8"><span class="prod-cod">8</span><span><span class="est-nome">ALFINETE PARBO 6X5</span> <button class="lapis" onclick="editarItem(8)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(8,this.value)"></div><div class="est-row " id="er-2044"><span class="prod-cod">2044</span><span><span class="est-nome">ANTUNES PARBO 30X1</span> <button class="lapis" onclick="editarItem(2044)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2044,this.value)"></div><div class="est-row " id="er-1528"><span class="prod-cod">1528</span><span><span class="est-nome">ANTUNES PARBO 6X5</span> <button class="lapis" onclick="editarItem(1528)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1528,this.value)"></div><div class="est-row " id="er-827"><span class="prod-cod">827</span><span><span class="est-nome">ARROZ PARBO SC 50KG</span> <button class="lapis" onclick="editarItem(827)" title="Editar item">✏️</button><br><span class="est-peso">50kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(827,this.value)"></div><div class="est-row " id="er-69"><span class="prod-cod">69</span><span><span class="est-nome">BERGAMINI PARBO 6X5</span> <button class="lapis" onclick="editarItem(69)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(69,this.value)"></div><div class="est-row " id="er-1019"><span class="prod-cod">1019</span><span><span class="est-nome">CELIA PARBO 10X1</span> <button class="lapis" onclick="editarItem(1019)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1019,this.value)"></div><div class="est-row " id="er-6"><span class="prod-cod">6</span><span><span class="est-nome">CELIA PARBO 30X1</span> <button class="lapis" onclick="editarItem(6)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(6,this.value)"></div><div class="est-row " id="er-1385"><span class="prod-cod">1385</span><span><span class="est-nome">CELIA PARBO 5X5</span> <button class="lapis" onclick="editarItem(1385)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1385,this.value)"></div><div class="est-row " id="er-5"><span class="prod-cod">5</span><span><span class="est-nome">CELIA PARBO 6X5</span> <button class="lapis" onclick="editarItem(5)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(5,this.value)"></div><div class="est-row " id="er-112"><span class="prod-cod">112</span><span><span class="est-nome">CELIA PARBO SC 25KG</span> <button class="lapis" onclick="editarItem(112)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(112,this.value)"></div><div class="est-row " id="er-327"><span class="prod-cod">327</span><span><span class="est-nome">CINDERELA PARBO 30X1</span> <button class="lapis" onclick="editarItem(327)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(327,this.value)"></div><div class="est-row " id="er-97"><span class="prod-cod">97</span><span><span class="est-nome">CINDERELA PARBO 6X5</span> <button class="lapis" onclick="editarItem(97)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(97,this.value)"></div><div class="est-row " id="er-1545"><span class="prod-cod">1545</span><span><span class="est-nome">COMETA PARBO 30X1</span> <button class="lapis" onclick="editarItem(1545)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1545,this.value)"></div><div class="est-row " id="er-2043"><span class="prod-cod">2043</span><span><span class="est-nome">FAVORITINHO PARBO 30X1</span> <button class="lapis" onclick="editarItem(2043)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2043,this.value)"></div><div class="est-row " id="er-2173"><span class="prod-cod">2173</span><span><span class="est-nome">GAVEA PARBO 6X5</span> <button class="lapis" onclick="editarItem(2173)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2173,this.value)"></div><div class="est-row " id="er-1779"><span class="prod-cod">1779</span><span><span class="est-nome">JOAO RODRIGUES PARBO 30X1</span> <button class="lapis" onclick="editarItem(1779)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1779,this.value)"></div><div class="est-row " id="er-1077"><span class="prod-cod">1077</span><span><span class="est-nome">KISAFRA PARBO 30X1</span> <button class="lapis" onclick="editarItem(1077)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1077,this.value)"></div><div class="est-row " id="er-1076"><span class="prod-cod">1076</span><span><span class="est-nome">KISAFRA PARBO 6X5</span> <button class="lapis" onclick="editarItem(1076)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1076,this.value)"></div><div class="est-row " id="er-1894"><span class="prod-cod">1894</span><span><span class="est-nome">LA GRANJA PARBO 6X5</span> <button class="lapis" onclick="editarItem(1894)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1894,this.value)"></div><div class="est-row " id="er-1498"><span class="prod-cod">1498</span><span><span class="est-nome">MADRINHA PARBO 6X5</span> <button class="lapis" onclick="editarItem(1498)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1498,this.value)"></div><div class="est-row " id="er-1718"><span class="prod-cod">1718</span><span><span class="est-nome">MORELLI PARBO 30X1</span> <button class="lapis" onclick="editarItem(1718)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1718,this.value)"></div><div class="est-row " id="er-1717"><span class="prod-cod">1717</span><span><span class="est-nome">MORELLI PARBO 6X5</span> <button class="lapis" onclick="editarItem(1717)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1717,this.value)"></div><div class="est-row " id="er-1938"><span class="prod-cod">1938</span><span><span class="est-nome">MORELLI PARBO SC 25KG</span> <button class="lapis" onclick="editarItem(1938)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1938,this.value)"></div><div class="est-row " id="er-2095"><span class="prod-cod">2095</span><span><span class="est-nome">MORELLI PARBO/I 30X1</span> <button class="lapis" onclick="editarItem(2095)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2095,this.value)"></div><div class="est-row " id="er-2096"><span class="prod-cod">2096</span><span><span class="est-nome">MORELLI PARBO/I 6X5</span> <button class="lapis" onclick="editarItem(2096)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2096,this.value)"></div><div class="est-row " id="er-1371"><span class="prod-cod">1371</span><span><span class="est-nome">PILÃO PARBO 30X1</span> <button class="lapis" onclick="editarItem(1371)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1371,this.value)"></div><div class="est-row " id="er-1369"><span class="prod-cod">1369</span><span><span class="est-nome">PILÃO PARBO 6X5</span> <button class="lapis" onclick="editarItem(1369)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1369,this.value)"></div><div class="est-row " id="er-2134"><span class="prod-cod">2134</span><span><span class="est-nome">RAMPINELLI PARBO 6X5</span> <button class="lapis" onclick="editarItem(2134)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2134,this.value)"></div><div class="est-row " id="er-16"><span class="prod-cod">16</span><span><span class="est-nome">REALENGO PARBO 6X5</span> <button class="lapis" onclick="editarItem(16)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(16,this.value)"></div><div class="est-row " id="er-1494"><span class="prod-cod">1494</span><span><span class="est-nome">SMART PARBO 10X1</span> <button class="lapis" onclick="editarItem(1494)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1494,this.value)"></div><div class="est-row " id="er-1493"><span class="prod-cod">1493</span><span><span class="est-nome">SMART PARBO 30X1</span> <button class="lapis" onclick="editarItem(1493)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1493,this.value)"></div><div class="est-row " id="er-1621"><span class="prod-cod">1621</span><span><span class="est-nome">SMART PARBO 6X5</span> <button class="lapis" onclick="editarItem(1621)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1621,this.value)"></div><div class="est-row " id="er-2098"><span class="prod-cod">2098</span><span><span class="est-nome">SMART PARBO/I 30X1</span> <button class="lapis" onclick="editarItem(2098)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2098,this.value)"></div><div class="est-row " id="er-2100"><span class="prod-cod">2100</span><span><span class="est-nome">SMART PARBO/I 6X5</span> <button class="lapis" onclick="editarItem(2100)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2100,this.value)"></div><div class="est-row " id="er-2041"><span class="prod-cod">2041</span><span><span class="est-nome">TIA DORA PARBO 30X1</span> <button class="lapis" onclick="editarItem(2041)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2041,this.value)"></div><div class="est-row " id="er-2117"><span class="prod-cod">2117</span><span><span class="est-nome">TIA DORA PARBO 6X5</span> <button class="lapis" onclick="editarItem(2117)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2117,this.value)"></div><div class="est-row " id="er-2059"><span class="prod-cod">2059</span><span><span class="est-nome">TIA DORA PARBO/I 30X1</span> <button class="lapis" onclick="editarItem(2059)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2059,this.value)"></div><div class="est-row " id="er-2118"><span class="prod-cod">2118</span><span><span class="est-nome">TIA DORA PARBO/I 6X5</span> <button class="lapis" onclick="editarItem(2118)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2118,this.value)"></div><div class="est-row " id="er-2083"><span class="prod-cod">2083</span><span><span class="est-nome">TIO LIMA PARBO 30X1</span> <button class="lapis" onclick="editarItem(2083)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2083,this.value)"></div><div class="est-row " id="er-92"><span class="prod-cod">92</span><span><span class="est-nome">TIO MANOEL PARBO 30X1</span> <button class="lapis" onclick="editarItem(92)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(92,this.value)"></div><div class="est-row " id="er-93"><span class="prod-cod">93</span><span><span class="est-nome">TIO MANOEL PARBO 6X5</span> <button class="lapis" onclick="editarItem(93)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(93,this.value)"></div><div class="est-row " id="er-1913"><span class="prod-cod">1913</span><span><span class="est-nome">TRIMAIS PARBO 6X5</span> <button class="lapis" onclick="editarItem(1913)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1913,this.value)"></div><div class="est-row " id="er-1368"><span class="prod-cod">1368</span><span><span class="est-nome">VO OLIMPIO PARBO 30X1</span> <button class="lapis" onclick="editarItem(1368)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1368,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;TAPIOCA&#39;)"><div class="grupo-title"><span class="chev " id="gc-TAPIOCA">▶</span><span class="badge b-green">TAPIOCA</span> 2 itens</div></div>
+    <div class="grupo-body " id="gb-TAPIOCA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1426"><span class="prod-cod">1426</span><span><span class="est-nome">TAPIOCA 1KG</span> <button class="lapis" onclick="editarItem(1426)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1426,this.value)"></div><div class="est-row " id="er-1425"><span class="prod-cod">1425</span><span><span class="est-nome">TAPIOCA 500G</span> <button class="lapis" onclick="editarItem(1425)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1425,this.value)"></div></div></div></div>
   </div>
 
   <!-- PAINEL VISUAL (novo) -->
@@ -621,7 +1276,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <button class="btn btn-sm" onclick="limparDash()">Limpar período (ver tudo)</button>
   </div>
   <div class="metrics">
-    <div class="metric"><div class="metric-label">A carregar (período)</div><div class="metric-val" id="d-car">0 kg</div></div>
+    <div class="metric"><div class="metric-label">A carregar (período)</div><div class="metric-val" id="d-car">80.200 kg</div></div>
     <div class="metric"><div class="metric-label">Em estoque (atual)</div><div class="metric-val" id="d-est">0 kg</div></div>
   </div>
   <button class="btn btn-full" id="btn-maq" onclick="toggleMaq()" style="margin-bottom:12px">🏭 Ocupação de máquinas</button>
@@ -636,12 +1291,18 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="card">
     <div class="ctitle">📊 Estoque × A carregar (kg) por grupo</div>
     <div class="dash-legend"><span><span class="dash-dot" style="background:var(--green)"></span>Em estoque</span><span><span class="dash-dot" style="background:var(--blue)"></span>A carregar</span></div>
-    <div id="dash-bars"></div>
+    <div id="dash-bars"><div class="dash-grp"><div class="dash-grp-top"><span class="badge b-teal">BRANCO</span></div>
+      <div class="dash-bar"><div class="fill fill-est" style="width:0%"></div></div>
+      <div class="dash-bar"><div class="fill fill-car" style="width:100%">61.200 kg</div></div></div><div class="dash-grp"><div class="dash-grp-top"><span class="badge b-purple">INTEGRAL</span></div>
+      <div class="dash-bar"><div class="fill fill-est" style="width:0%"></div></div>
+      <div class="dash-bar"><div class="fill fill-car" style="width:8%">1.000 kg</div></div></div><div class="dash-grp"><div class="dash-grp-top"><span class="badge b-blue">PARBO</span></div>
+      <div class="dash-bar"><div class="fill fill-est" style="width:0%"></div></div>
+      <div class="dash-bar"><div class="fill fill-car" style="width:29.411764705882355%">18.000 kg</div></div></div></div>
   </div>
   <div class="card">
     <div class="ctitle">🚚 Cargas do período · fardos</div>
-    <div id="dash-resumo"></div>
-    <div class="resumo-tot"><span>Total de fardos no período</span><span class="fardos-badge" style="font-size:16px" id="dash-tot-fardos">0</span></div>
+    <div id="dash-resumo"><div class="resumo-row"><span class="resumo-nome">2777 · CTNR CLIENTE - AM <span class="resumo-data">(09/06/2026)</span></span><span class="fardos-badge">945 fardos</span></div><div class="resumo-row"><span class="resumo-nome">2793 · CTNR CD - CE <span class="resumo-data">(09/06/2026)</span></span><span class="fardos-badge">783,3 fardos</span></div><div class="resumo-row"><span class="resumo-nome">2798 · CLIENTE RETIRA - CTNR <span class="resumo-data">(11/06/2026)</span></span><span class="fardos-badge">945 fardos</span></div></div>
+    <div class="resumo-tot"><span>Total de fardos no período</span><span class="fardos-badge" style="font-size:16px" id="dash-tot-fardos">2673,3 fardos</span></div>
   </div>
 </div>
 
@@ -1920,5 +2581,375 @@ setInterval(()=>pull(true),15000);
 // inicia autenticação (deve ser o último passo)
 initAuth();
 </script>
-</body>
-</html>
+
+<div style="text-align:center;font-size:11px;color:#9A7878;padding:10px 0 18px">
+  Versão 2026.06.09.1152
+</div>
+<script>
+window.APP_VERSION = "2026.06.09.1152";
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("./service-worker.js?v=2026.06.09.1152").then(function(reg) {
+      reg.update();
+      if (reg.waiting) reg.waiting.postMessage({type:"SKIP_WAITING"});
+      reg.addEventListener("updatefound", function() {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener("statechange", function() {
+          if (nw.state === "installed" && navigator.serviceWorker.controller) {
+            nw.postMessage({type:"SKIP_WAITING"});
+            setTimeout(function() { location.reload(); }, 800);
+          }
+        });
+      });
+    }).catch(function(err) {
+      console.log("Service Worker não registrado:", err);
+    });
+  });
+  navigator.serviceWorker.addEventListener("controllerchange", function() {
+    if (!window.__swRefreshing) {
+      window.__swRefreshing = true;
+      location.reload();
+    }
+  });
+}
+</script>
+
+
+
+<span style="z-index: 2147483647;"><template shadowrootmode="open"><style type="text/css">/*
+! tailwindcss v3.3.0 | MIT License | https://tailwindcss.com
+*//*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}::before,
+::after {
+  --tw-content: '';
+}/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+*/html {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  -o-tab-size: 4;
+     tab-size: 4; /* 3 */
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+}/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}/*
+Remove the default font size and weight for headings.
+*/h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/a {
+  color: inherit;
+  text-decoration: inherit;
+}/*
+Add the correct font weight in Edge and Safari.
+*/b,
+strong {
+  font-weight: bolder;
+}/*
+1. Use the user's configured `mono` font family by default.
+2. Correct the odd `em` font sizing in all browsers.
+*/code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
+  font-size: 1em; /* 2 */
+}/*
+Add the correct font size in all browsers.
+*/small {
+  font-size: 80%;
+}/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}sub {
+  bottom: -0.25em;
+}sup {
+  top: -0.5em;
+}/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/button,
+select {
+  text-transform: none;
+}/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}/*
+Use the modern Firefox focus style for all focusable elements.
+*/:-moz-focusring {
+  outline: auto;
+}/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/:-moz-ui-invalid {
+  box-shadow: none;
+}/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/progress {
+  vertical-align: baseline;
+}/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/[type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/::-webkit-search-decoration {
+  -webkit-appearance: none;
+}/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}/*
+Add the correct display in Chrome and Safari.
+*/summary {
+  display: list-item;
+}/*
+Removes the default spacing and border for appropriate elements.
+*/blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}fieldset {
+  margin: 0;
+  padding: 0;
+}legend {
+  padding: 0;
+}ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}/*
+Prevent resizing textareas horizontally by default.
+*/textarea {
+  resize: vertical;
+}/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}input::placeholder,
+textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}/*
+Set the default cursor for buttons.
+*/button,
+[role="button"] {
+  cursor: pointer;
+}/*
+Make sure disabled buttons don't get the pointer cursor.
+*/:disabled {
+  cursor: default;
+}/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/img,
+video {
+  max-width: 100%;
+  height: auto;
+}/* Make elements with the HTML hidden attribute stay hidden by default */[hidden] {
+  display: none;
+}*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}
+</style><style type="text/css">@import url(https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap);</style><style type="text/css">@import url(https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap);</style><style type="text/css">.row[data-v-0a08c546]{display:flex;flex-wrap:wrap;margin-left:-8px;margin-right:-8px}[class*="grid-"][data-v-0a08c546]{padding:0 8px;margin-bottom:16px}.grid-1[data-v-0a08c546]{width:8.3333333333%}.grid-2[data-v-0a08c546]{width:16.6666666667%}.grid-23[data-v-0a08c546]{width:20%}.grid-3[data-v-0a08c546]{width:25%}.grid-4[data-v-0a08c546]{width:33.3333333333%}.grid-5[data-v-0a08c546]{width:41.6666666667%}.grid-6[data-v-0a08c546]{width:50%}.grid-7[data-v-0a08c546]{width:58.3333333333%}.grid-8[data-v-0a08c546]{width:66.6666666667%}.grid-9[data-v-0a08c546]{width:75%}.grid-10[data-v-0a08c546]{width:83.3333333333%}.grid-11[data-v-0a08c546]{width:91.6666666667%}.grid-12[data-v-0a08c546]{width:100%}*[data-v-0a08c546]{font-family:"Roboto", sans-serif;-moz-box-sizing:border-box;box-sizing:border-box;outline:none !important}p[data-v-0a08c546]{margin:0}.-scroll[data-v-0a08c546]::-webkit-scrollbar{width:8px}.-scroll[data-v-0a08c546]::-webkit-scrollbar-track{background:transparent;padding:2px}.-scroll[data-v-0a08c546]::-webkit-scrollbar-thumb{background-color:#ccc;border:3px solid transparent;border-radius:20px}.scroll[data-v-0a08c546]{scrollbar-width:thin;scrollbar-color:#ccc transparent}.-blackfriday .header .header-container[data-v-0a08c546]{background-color:#000}.-blackfriday .header .header-container .brand-icons .icons>.minimize-button[data-v-0a08c546]:before{background-color:#fff}.-blackfriday .header .header-container .brand-icons .brand-back.-inside[data-v-0a08c546]{width:auto}.-blackfriday .header .header-container .brand-icons .logo[data-v-0a08c546]{width:17px;height:23px}.-blackfriday .tab-item-container .product-wrapper .card-best-offer-deals-container .content .header .box-best-offer[data-v-0a08c546]{background-color:#000;color:#fff}.-blackfriday .container-campaing[data-v-0a08c546]{background:linear-gradient(257deg, #000 27.57%, #4d4d4d 103.19%)}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area[data-v-0a08c546]{background-color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area>.tag[data-v-0a08c546]{background-color:#000}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area>.tag>.percentage-off[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.heading[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.price-old[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.price-new[data-v-0a08c546]{color:#ffc500}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.seller-lowest-price[data-v-0a08c546]{color:#d1d1d1}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.cashback-information>.formula>.text[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.link-to-offer[data-v-0a08c546]{background-color:#fff;border:1px solid #d1d1d1}.-blackfriday .card-container-offer>.content>.header>.tag-offer.-blackfriday[data-v-0a08c546]{background:#000 no-repeat 6px center;color:#fff}*[data-v-0a08c546]{font-family:'Montserrat', 'Roboto', sans-serif}.font-bold[data-v-0a08c546]{font-weight:bold}.text-white[data-v-0a08c546]{color:white}.font_14[data-v-0a08c546]{font-size:14px}@keyframes pulse-0a08c546{0%{box-shadow:0 0 0 0px rgba(255,197,0,0.5)}70%{box-shadow:0 0 0 20px rgba(255,197,0,0)}100%{box-shadow:0 0 0 10px rgba(255,197,0,0)}}.animation[data-v-0a08c546]{animation-duration:0.8s;animation-fill-mode:both;animation-delay:0.6s}@keyframes fadeIn-0a08c546{from{opacity:0}to{opacity:1}}.fadeIn[data-v-0a08c546]{animation-name:fadeIn-0a08c546}@keyframes fadeInUp-0a08c546{from{opacity:0;transform:translate3d(0, 100%, 0)}to{opacity:1;transform:translate3d(0, 0, 0)}}.fadeInUp[data-v-0a08c546]{animation-name:fadeInUp-0a08c546}.global-template-container>.content[data-v-0a08c546]{background-color:#fff;border-radius:12px;box-shadow:0px 9px 24px rgba(0,0,0,0.25);display:grid;font-family:'Montserrat', 'Roboto', sans-serif;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;max-height:92vh;position:fixed;right:20px;top:20px;width:436px;z-index:3265656565656;font-size:16px}.global-template-container>.content:not(.-inside):not(.-noFooter)>.body[data-v-0a08c546]{min-height:62vh}.global-template-container>.content[data-v-0a08c546]:not(.-noFooter){grid-template-areas:'header header' 'main main' 'footer footer'}.global-template-container>.content:not(.-noFooter)>.footer[data-v-0a08c546]{grid-area:footer;height:80px;position:relative}.global-template-container>.content.-noFooter[data-v-0a08c546]{grid-template-areas:'header header' 'main main'}.global-template-container>.content>.header[data-v-0a08c546]{grid-area:header;position:relative}.global-template-container>.content>.body[data-v-0a08c546]{grid-area:main;overflow-x:hidden;overflow-y:auto;position:relative;scroll-snap-type:x proximity;min-height:62vh}.global-template-container>.content>.body[data-v-0a08c546]::-webkit-scrollbar{-webkit-appearance:none;width:8px}.global-template-container>.content>.body[data-v-0a08c546]::-webkit-scrollbar-thumb{background-color:rgba(0,0,0,0.15);border-radius:4px;-webkit-box-shadow:0 0 1px rgba(255,255,255,0.25)}.global-template-container>.content>.body>.box-skeleton[data-v-0a08c546]{display:flex;flex-direction:column;height:inherit;padding:20px}.global-template-container>.content>.body>.box-skeleton>.skeleton[data-v-0a08c546]{height:40px;margin-bottom:20px;width:100%}.global-template-container>.content>.body>.box-skeleton>.skeleton.-big[data-v-0a08c546]{height:200px}
+</style><div><!----></div></template></span></body></html>
