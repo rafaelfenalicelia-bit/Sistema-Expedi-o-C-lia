@@ -6,11 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#185FA5">
-<link rel="icon" href="icone.png">
-<link rel="apple-touch-icon" href="icone.png">
-<meta name="apple-mobile-web-app-title" content="Controle de Expedição">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="manifest.json">
 <title>Controle de Expedição</title>
 <style>
 :root{
@@ -213,20 +208,222 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .est-vis-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .est-vis-header h3{font-size:14px;font-weight:700}
 .est-vis-data{font-size:12px;color:var(--text2)}
+
+/* ---- LOGIN ---- */
+#login-screen{position:fixed;inset:0;z-index:300;background:linear-gradient(160deg,#9B0B22 0%,#C8102E 45%,#7A0818 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+#login-screen.hidden{display:none}
+.login-logo{height:80px;width:auto;mix-blend-mode:screen;margin-bottom:8px}
+.login-title{color:#fff;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:32px}
+.login-card{background:#fff;border-radius:16px;padding:24px 20px;width:100%;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.login-card h2{font-size:18px;font-weight:700;margin-bottom:4px;color:var(--text)}
+.login-card p{font-size:13px;color:var(--text2);margin-bottom:20px}
+.login-pin{display:flex;gap:10px;justify-content:center;margin:12px 0 18px}
+.pin-digit{width:52px;height:60px;border:2px solid var(--border2);border-radius:10px;font-size:26px;font-weight:700;text-align:center;color:var(--text);background:var(--surface);font-family:inherit;-webkit-text-security:disc;outline:none;transition:border-color .15s}
+.pin-digit:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.15)}
+.login-err{color:var(--red);font-size:13px;font-weight:600;text-align:center;min-height:20px;margin-bottom:10px}
+.login-switch{text-align:center;margin-top:14px;font-size:13px;color:var(--text2)}
+.login-switch a{color:var(--red);font-weight:600;cursor:pointer;text-decoration:none}
+/* modo cadastro */
+.login-tabs{display:flex;background:var(--surface2);border-radius:8px;overflow:hidden;margin-bottom:18px}
+.login-tab{flex:1;padding:9px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--text2);font-family:inherit}
+.login-tab.active{background:var(--red);color:#fff}
+/* badge usuário logado na appbar */
+.user-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 10px 4px 6px;cursor:pointer;font-size:12px;font-weight:600;color:#fff;border:none;font-family:inherit}
+.user-chip-av{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+/* tab bloqueada para não-admin */
+.tab.locked{opacity:.35;pointer-events:none}
+.tab.hidden-tab{display:none}
+.admin-only{display:none}
+
+/* ---- BASE ITENS drawer ---- */
+.bi-search-bar{position:sticky;top:0;background:var(--surface);padding:10px 0 8px;z-index:2}
+.bi-group-header{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;padding:6px 10px;border-radius:6px;margin:14px 0 6px}
+.bi-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--surface)}
+.bi-cod{font-size:11px;font-weight:700;color:var(--text3);min-width:32px}
+.bi-nome{font-size:13px;font-weight:600;flex:1}
+.bi-peso{font-size:11px;color:var(--text3)}
+.bi-empty{text-align:center;padding:32px 16px;color:var(--text2);font-size:13px}
+/* BASE ITENS admin actions */
+.bi-item-admin{cursor:pointer;transition:background .12s}
+.bi-item-admin:hover{background:var(--redXL);border-color:var(--redL)}
+.bi-add-float{position:sticky;bottom:0;background:var(--surface);padding:12px 0 4px;margin-top:8px}
+.user-menu-overlay{position:fixed;inset:0;z-index:149;display:none}
+.user-menu-overlay.open{display:block}
+.user-dropdown{position:absolute;top:52px;right:12px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:150;min-width:200px;overflow:hidden;display:none;flex-direction:column}
+.user-dropdown.open{display:flex}
+.user-dd-header{padding:12px 14px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.user-dd-name{font-size:14px;font-weight:700}
+.user-dd-role{font-size:11px;color:var(--text3);margin-top:1px}
+.user-dd-item{display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--text);width:100%;text-align:left;transition:background .12s}
+.user-dd-item:hover{background:var(--surface2)}
+.user-dd-item.danger{color:var(--red)}
+.user-dd-sep{height:1px;background:var(--border);margin:2px 0}
+
+/* ---- DRAWER GENÉRICO ---- */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:160;opacity:0;pointer-events:none;transition:opacity .22s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);z-index:161;border-radius:20px 20px 0 0;max-height:90vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 24px rgba(0,0,0,.15)}
+.drawer.open{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 0}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.drawer-header h2{font-size:17px;font-weight:700}
+.drawer-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text2);padding:4px;line-height:1}
+.drawer-body{flex:1;overflow-y:auto;padding:0 16px 24px}
+.drawer-body .fg{margin-bottom:14px}
+
+/* tabela de usuários (admin) */
+.user-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+.user-tbl th{text-align:left;padding:8px 8px;font-size:11px;font-weight:700;color:var(--text2);border-bottom:2px solid var(--border2);background:var(--surface2)}
+.user-tbl td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.user-tbl tr:last-child td{border-bottom:none}
+.user-role-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px}
+.urb-admin{background:#FDE8EC;color:var(--red)}
+.urb-user{background:#E8F5E9;color:#2E7D32}
+.btn-pin-reset{font-size:12px;padding:5px 10px;min-height:32px}
 </style>
 </head>
 <body>
+<!-- =================== TELA DE LOGIN =================== -->
+<div id="login-screen">
+  <img class="login-logo" id="login-logo" src="" alt="Célia Alimentos">
+  <div class="login-title">Controle de Expedição</div>
+  <div class="login-card">
+    <div class="login-tabs">
+      <button class="login-tab active" id="ltab-entrar" onclick="loginTab('entrar')">Entrar</button>
+      <button class="login-tab" id="ltab-cadastro" onclick="loginTab('cadastro')">Cadastrar</button>
+    </div>
+
+    <!-- ENTRAR -->
+    <div id="lpanel-entrar">
+      <h2>👋 Bem-vindo</h2>
+      <p>Digite seu nome e senha de 4 dígitos</p>
+      <div class="fg"><label>Usuário</label>
+        <input id="l-nome" placeholder="Seu nome" autocomplete="username" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')document.querySelector('.pin-digit').focus()">
+      </div>
+      <label style="font-size:12px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Senha (4 dígitos)</label>
+      <div class="login-pin" id="pin-entrar">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar')" onkeydown="pinBack(event,this,'pin-entrar')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar')" onkeydown="pinBack(event,this,'pin-entrar')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar')" onkeydown="pinBack(event,this,'pin-entrar')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-entrar');if(this===document.querySelectorAll('#pin-entrar .pin-digit')[3])fazerLogin();" onkeydown="pinBack(event,this,'pin-entrar')">
+      </div>
+      <div class="login-err" id="l-err"></div>
+      <button class="btn btn-primary btn-full" onclick="fazerLogin()">Entrar →</button>
+    </div>
+
+    <!-- CADASTRAR -->
+    <div id="lpanel-cadastro" style="display:none">
+      <h2>✨ Novo usuário</h2>
+      <p>Crie seu acesso com nome e senha de 4 dígitos</p>
+      <div class="fg"><label>Nome</label>
+        <input id="c-nome" placeholder="Seu nome" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <label style="font-size:12px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Senha (4 dígitos)</label>
+      <div class="login-pin" id="pin-cadastro">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
+        <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" oninput="pinNext(this,'pin-cadastro')" onkeydown="pinBack(event,this,'pin-cadastro')">
+      </div>
+      <div class="login-err" id="c-err"></div>
+      <button class="btn btn-primary btn-full" onclick="fazerCadastro()">Cadastrar →</button>
+    </div>
+  </div>
+</div>
+
 <div class="appbar">
   <div class="appbar-left">
     <img class="appbar-logo" src="data:image/png;base64,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" alt="Célia Alimentos">
     <h1>Controle de Expedição</h1>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
+  <div style="display:flex;align-items:center;gap:8px">
     <button class="notif-btn" id="notif-btn" onclick="abrirNotif()" title="Notificações" aria-label="Notificações">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="notif-badge hidden" id="notif-badge">0</span>
     </button>
-    <span class="saved" id="sync-ind" onclick="menuSync()" style="cursor:pointer">⚙ configurar</span>
+    <button class="user-chip" id="user-chip" onclick="toggleUserMenu(event)" title="Minha conta">
+      <span class="user-chip-av" id="user-av">?</span>
+      <span id="user-label">—</span>
+      <span style="font-size:10px;opacity:.7;margin-left:2px">▾</span>
+    </button>
+    <span class="saved" id="sync-ind" onclick="menuSync()" style="cursor:pointer">⚙</span>
+  </div>
+</div>
+
+<!-- Dropdown usuário -->
+<div class="user-menu-overlay" id="user-menu-overlay" onclick="fecharUserMenu()"></div>
+<div class="user-dropdown" id="user-dropdown">
+  <div class="user-dd-header">
+    <div class="user-dd-name" id="dd-nome">—</div>
+    <div class="user-dd-role" id="dd-role">—</div>
+  </div>
+  <button class="user-dd-item" onclick="abrirAlterarSenha()">🔑 Alterar minha senha</button>
+  <button class="user-dd-item" id="dd-btn-admin" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar usuários</button>
+  <div class="user-dd-sep"></div>
+  <button class="user-dd-item danger" onclick="fazerLogout()">↩ Sair da conta</button>
+</div>
+
+<!-- Drawer: Alterar senha -->
+<div class="drawer-overlay" id="dov-senha" onclick="fecharDrawer('senha')"></div>
+<div class="drawer" id="drawer-senha">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2>🔑 Alterar senha</h2>
+    <button class="drawer-close" onclick="fecharDrawer('senha')">✕</button>
+  </div>
+  <div class="drawer-body">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Digite sua senha atual e a nova senha de 4 dígitos.</p>
+    <div class="fg"><label>Senha atual</label></div>
+    <div class="login-pin" id="pin-atual" style="justify-content:flex-start;margin-bottom:18px">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-atual')" onkeydown="pinBack(event,this,'pin-atual')">
+    </div>
+    <div class="fg"><label>Nova senha</label></div>
+    <div class="login-pin" id="pin-nova" style="justify-content:flex-start;margin-bottom:18px">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-nova')" onkeydown="pinBack(event,this,'pin-nova')">
+    </div>
+    <div class="login-err" id="senha-err"></div>
+    <button class="btn btn-primary btn-full" onclick="confirmarAlterarSenha()">Salvar nova senha</button>
+  </div>
+</div>
+
+<!-- Drawer: Gerenciar usuários (admin) -->
+<div class="drawer-overlay" id="dov-admin" onclick="fecharDrawer('admin')"></div>
+<div class="drawer" id="drawer-admin">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2>👥 Usuários cadastrados</h2>
+    <button class="drawer-close" onclick="fecharDrawer('admin')">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div id="admin-users-list"><div class="empty">Carregando...</div></div>
+  </div>
+</div>
+
+<!-- Drawer: Redefinir senha (admin reseta a de outro usuário) -->
+<div class="drawer-overlay" id="dov-reset" onclick="fecharDrawer('reset')"></div>
+<div class="drawer" id="drawer-reset">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2>🔑 Redefinir senha</h2>
+    <button class="drawer-close" onclick="fecharDrawer('reset')">✕</button>
+  </div>
+  <div class="drawer-body">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Definindo nova senha para: <b id="reset-user-nome">—</b></p>
+    <div class="fg"><label>Nova senha (4 dígitos)</label></div>
+    <div class="login-pin" id="pin-reset" style="justify-content:flex-start;margin-bottom:18px">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
+      <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" oninput="pinNext(this,'pin-reset')" onkeydown="pinBack(event,this,'pin-reset')">
+    </div>
+    <div class="login-err" id="reset-err"></div>
+    <button class="btn btn-primary btn-full" onclick="confirmarResetSenha()">Confirmar redefinição</button>
   </div>
 </div>
 <div class="notif-overlay" id="notif-overlay" onclick="fecharNotif()"></div>
@@ -240,18 +437,62 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   </div>
   <div class="notif-list" id="notif-list"><div class="notif-empty">Nenhuma notificação</div></div>
 </div>
+<!-- Drawer: BASE ITENS -->
+<div class="drawer-overlay" id="dov-baseitens" onclick="fecharDrawer('baseitens')"></div>
+<div class="drawer" id="drawer-baseitens">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2>📋 Base de Itens</h2>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn btn-primary btn-sm admin-only" id="bi-btn-cadastrar" onclick="abrirNovoItemBase()">➕ Cadastrar</button>
+      <button class="drawer-close" onclick="fecharDrawer('baseitens')">✕</button>
+    </div>
+  </div>
+  <div class="drawer-body">
+    <div class="bi-search-bar">
+      <input type="text" id="bi-busca" placeholder="🔍 Buscar por nome ou código..." oninput="renderBaseItens()" style="margin-bottom:0">
+    </div>
+    <div id="bi-list"></div>
+  </div>
+</div>
+
+<!-- Drawer: Novo/Editar item da BASE ITENS -->
+<div class="drawer-overlay" id="dov-novoitem" onclick="fecharDrawer('novoitem')"></div>
+<div class="drawer" id="drawer-novoitem">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2 id="novoitem-title">➕ Novo item</h2>
+    <button class="drawer-close" onclick="fecharDrawer('novoitem')">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="bi-cod" placeholder="ex: 2200"></div>
+    <div class="fg"><label>Nome / descrição</label><input id="bi-nome-input" placeholder="ex: NOVA MARCA PARBO 30X1" oninput="this.value=this.value.toUpperCase()"></div>
+    <div class="fg"><label>Peso por unidade (kg) <span style="color:var(--text3);font-weight:400">— vazio = granel/kg</span></label><input type="number" inputmode="decimal" id="bi-peso-input" placeholder="ex: 30"></div>
+    <div class="fg"><label>Grupo</label><input id="bi-grupo-input" list="grupos-list-bi" placeholder="ex: PARBO, BRANCO, INTEGRAL..." oninput="this.value=this.value.toUpperCase()"><datalist id="grupos-list-bi"></datalist></div>
+    <div class="login-err" id="bi-item-err"></div>
+    <div class="btn-row">
+      <button class="btn btn-danger" id="bi-btn-excluir" style="display:none" onclick="excluirItemBase()">🗑 Excluir</button>
+      <button class="btn" style="flex:1" onclick="fecharDrawer('novoitem')">Cancelar</button>
+      <button class="btn btn-success" style="flex:2" onclick="salvarItemBase()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div class="tabbar">
-  <button class="tab active" data-tab="exp" onclick="sw('exp')"><i class="icon">🚚</i>Expedição</button>
-  <button class="tab" data-tab="est" onclick="sw('est')"><i class="icon">📦</i>Estoque</button>
-  <button class="tab" data-tab="con" onclick="sw('con')"><i class="icon">✅</i>Conciliação</button>
-  <button class="tab" data-tab="dash" onclick="sw('dash')"><i class="icon">📊</i>Painel</button>
+  <button class="tab active" id="tab-exp"  data-tab="exp"  onclick="sw('exp')"><i class="icon">🚚</i>Expedição</button>
+  <button class="tab"        id="tab-est"  data-tab="est"  onclick="sw('est')"><i class="icon">📦</i>Estoque</button>
+  <button class="tab"        id="tab-con"  data-tab="con"  onclick="sw('con')"><i class="icon">✅</i>Conciliação</button>
+  <button class="tab"        id="tab-dash" data-tab="dash" onclick="sw('dash')"><i class="icon">📊</i>Painel</button>
 </div>
 
 <div class="wrap">
 
 <!-- EXPEDIÇÃO -->
 <div class="screen active" id="screen-exp">
-  <div class="ptitle">Lançamento de Cargas</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+    <div class="ptitle">Lançamento de Cargas</div>
+    <button class="btn btn-sm" style="background:var(--redXL);color:var(--red);border-color:var(--redL);font-weight:700" onclick="abrirBaseItens()">📋 BASE ITENS</button>
+  </div>
   <div class="psub">Digite o código e a quantidade — nome e peso entram sozinhos</div>
   <div class="card" id="card-carga">
     <div class="ctitle" id="form-title">➕ Nova carga</div>
@@ -295,8 +536,8 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 
   <!-- PAINEL LANÇAMENTO (existente) -->
   <div id="est-lancamento">
-    <button class="btn btn-full" id="btn-novo-item" onclick="toggleCadastro()" style="margin-bottom:12px">➕ Cadastrar novo item</button>
-    <div class="card" id="cad-card" style="display:none">
+    <button class="btn btn-full admin-only" id="btn-novo-item" onclick="toggleCadastro()" style="margin-bottom:12px">➕ Cadastrar novo item</button>
+    <div class="card admin-only" id="cad-card" style="display:none">
       <div class="ctitle" id="cad-title">➕ Novo item</div>
       <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="ni-cod" placeholder="ex: 2200"></div>
       <div class="fg"><label>Nome / descrição</label><input id="ni-nome" placeholder="ex: NOVA MARCA PARBO 30X1"></div>
@@ -902,7 +1143,8 @@ function renderGrupos(){
     html+=`<div class="grupo"><div class="grupo-head" onclick="toggleG('${tp}')"><div class="grupo-title"><span class="chev ${ab?'open':''}" id="gc-${tp}">▶</span><span class="badge ${TP_BADGE[tp]}">${tp}</span> ${itens.length} itens${granel?' · kg':''}</div>${pre>0?`<span class="badge b-green">${pre} ✓</span>`:''}</div>
     <div class="grupo-body ${ab?'open':''}" id="gb-${tp}"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">${granel?'Qtd kg':'Qtd'}</span></div>`;
     itens.forEach(p=>{ const v=estoqueQtd[p.cod]||''; const h=p.granel?'<span class="est-peso">granel · kg</span>':(p.peso>0?`<span class="est-peso">${p.peso}kg/un</span>`:'');
-      html+=`<div class="est-row ${v?'filled':''}" id="er-${p.cod}"><span class="prod-cod">${p.cod}</span><span><span class="est-nome">${p.nome}</span> <button class="lapis" onclick="editarItem(${p.cod})" title="Editar item">✏️</button><br>${h}</span><input type="number" inputmode="numeric" min="0" placeholder="0" value="${v}" oninput="setQtd(${p.cod},this.value)"></div>`;
+      const lapisBtn = (usuarioAtual&&usuarioAtual.role==='admin') ? `<button class="lapis" onclick="editarItem(${p.cod})" title="Editar item">✏️</button>` : '';
+      html+=`<div class="est-row ${v?'filled':''}" id="er-${p.cod}"><span class="prod-cod">${p.cod}</span><span><span class="est-nome">${p.nome}</span> ${lapisBtn}<br>${h}</span><input type="number" inputmode="numeric" min="0" placeholder="0" value="${v}" oninput="setQtd(${p.cod},this.value)"></div>`;
     });
     html+='</div></div>';
   });
@@ -1035,6 +1277,371 @@ function sw(tab){
   if(tab==='con')renderCon(); if(tab==='dash')renderDash(); if(tab==='est')renderGrupos();
 }
 function hoje(){ return new Date().toISOString().slice(0,10); }
+
+// ============================================================
+// SISTEMA DE USUÁRIOS
+// ============================================================
+const USERS_KEY   = 'celia_users_v1';
+const SESSION_KEY = 'celia_session_v1';
+const ADMIN_NAME  = 'RAFAEL';
+const ADMIN_PIN   = '0315';
+
+function loadUsers(){
+  let u=[];
+  try{ const r=localStorage.getItem(USERS_KEY); if(r) u=JSON.parse(r); }catch(e){}
+  if(!u.find(x=>x.nome===ADMIN_NAME)){
+    u.unshift({nome:ADMIN_NAME, pin:ADMIN_PIN, role:'admin'});
+    saveUsers(u);
+  }
+  return u;
+}
+function saveUsers(u){ try{ localStorage.setItem(USERS_KEY,JSON.stringify(u)); }catch(e){} }
+
+let usuarioAtual = null;
+function loadSession(){ try{ const r=localStorage.getItem(SESSION_KEY); if(r){usuarioAtual=JSON.parse(r);return true;} }catch(e){} return false; }
+function saveSession(u){ usuarioAtual=u; try{ localStorage.setItem(SESSION_KEY,JSON.stringify(u)); }catch(e){} }
+function clearSession(){ usuarioAtual=null; try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
+
+// ---- PIN helpers ----
+function pinNext(el,cid){
+  el.value=el.value.replace(/\D/g,'').slice(0,1);
+  if(el.value){ const ps=[...document.querySelectorAll('#'+cid+' .pin-digit')], idx=ps.indexOf(el); if(idx<ps.length-1) ps[idx+1].focus(); }
+}
+function pinBack(e,el,cid){
+  if(e.key==='Backspace'&&!el.value){ const ps=[...document.querySelectorAll('#'+cid+' .pin-digit')], idx=ps.indexOf(el); if(idx>0){ps[idx-1].focus();ps[idx-1].value='';} }
+}
+function getPin(cid){ return [...document.querySelectorAll('#'+cid+' .pin-digit')].map(i=>i.value).join(''); }
+function clearPin(cid){ document.querySelectorAll('#'+cid+' .pin-digit').forEach(i=>i.value=''); }
+
+// ---- Login / Cadastro ----
+function loginTab(t){
+  document.getElementById('lpanel-entrar').style.display   = t==='entrar'  ?'':'none';
+  document.getElementById('lpanel-cadastro').style.display = t==='cadastro'?'':'none';
+  document.getElementById('ltab-entrar').classList.toggle('active', t==='entrar');
+  document.getElementById('ltab-cadastro').classList.toggle('active',t==='cadastro');
+  document.getElementById('l-err').textContent='';
+  document.getElementById('c-err').textContent='';
+  clearPin('pin-entrar'); clearPin('pin-cadastro');
+  setTimeout(()=>document.getElementById(t==='entrar'?'l-nome':'c-nome').focus(),50);
+}
+function fazerLogin(){
+  const nome=(document.getElementById('l-nome').value||'').trim().toUpperCase();
+  const pin=getPin('pin-entrar');
+  const err=document.getElementById('l-err');
+  if(!nome){err.textContent='Digite seu nome';return;}
+  if(pin.length<4){err.textContent='Digite a senha completa (4 dígitos)';return;}
+  const user=loadUsers().find(u=>u.nome===nome&&u.pin===pin);
+  if(!user){err.textContent='Usuário ou senha incorretos ❌';clearPin('pin-entrar');return;}
+  saveSession({nome:user.nome,role:user.role});
+  abrirApp();
+}
+function fazerCadastro(){
+  const nome=(document.getElementById('c-nome').value||'').trim().toUpperCase();
+  const pin=getPin('pin-cadastro');
+  const err=document.getElementById('c-err');
+  if(!nome){err.textContent='Digite um nome';return;}
+  if(pin.length<4){err.textContent='Digite a senha completa (4 dígitos)';return;}
+  if(nome===ADMIN_NAME){err.textContent='Este nome é reservado';return;}
+  const users=loadUsers();
+  if(users.find(u=>u.nome===nome)){err.textContent='Usuário já existe. Faça login.';return;}
+  users.push({nome,pin,role:'user'}); saveUsers(users);
+  saveSession({nome,role:'user'});
+  toast('Cadastro realizado!');
+  setTimeout(()=>abrirApp(),400);
+}
+
+// ---- Abre o app ----
+function abrirApp(){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('user-av').textContent    = usuarioAtual.nome.charAt(0);
+  document.getElementById('user-label').textContent = usuarioAtual.nome;
+  document.getElementById('dd-nome').textContent    = usuarioAtual.nome;
+  document.getElementById('dd-role').textContent    = usuarioAtual.role==='admin' ? '👑 Administrador' : '👤 Usuário';
+  const isAdmin = usuarioAtual.role==='admin';
+  document.getElementById('dd-btn-admin').style.display = isAdmin ? '' : 'none';
+
+  // Abas admin-only: ocultar completamente para não-admin
+  ['exp','dash'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden-tab', !isAdmin);
+  });
+
+  // Elementos .admin-only: mostrar só para admin
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    const tag = el.tagName.toLowerCase();
+    const isBtn = tag==='button' || el.classList.contains('btn');
+    el.style.display = isAdmin ? (isBtn ? 'inline-flex' : '') : 'none';
+  });
+
+  // Não-admin começa no Estoque
+  if(!isAdmin) sw('est');
+}
+
+// ---- Menu dropdown ----
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const dd=document.getElementById('user-dropdown');
+  const ov=document.getElementById('user-menu-overlay');
+  const isOpen=dd.classList.contains('open');
+  dd.classList.toggle('open',!isOpen);
+  ov.classList.toggle('open',!isOpen);
+}
+function fecharUserMenu(){
+  document.getElementById('user-dropdown').classList.remove('open');
+  document.getElementById('user-menu-overlay').classList.remove('open');
+}
+
+// ---- Drawers genérico ----
+function abrirDrawer(id){
+  fecharUserMenu();
+  document.getElementById('dov-'+id).classList.add('open');
+  document.getElementById('drawer-'+id).classList.add('open');
+}
+function fecharDrawer(id){
+  document.getElementById('dov-'+id).classList.remove('open');
+  document.getElementById('drawer-'+id).classList.remove('open');
+}
+
+// ---- Alterar própria senha ----
+function abrirAlterarSenha(){
+  clearPin('pin-atual'); clearPin('pin-nova');
+  document.getElementById('senha-err').textContent='';
+  abrirDrawer('senha');
+  setTimeout(()=>document.querySelector('#pin-atual .pin-digit').focus(),300);
+}
+function confirmarAlterarSenha(){
+  const pinAtual=getPin('pin-atual'), pinNova=getPin('pin-nova');
+  const err=document.getElementById('senha-err');
+  if(pinAtual.length<4){err.textContent='Digite a senha atual completa';return;}
+  if(pinNova.length<4){err.textContent='Digite a nova senha completa';return;}
+  const users=loadUsers();
+  const idx=users.findIndex(u=>u.nome===usuarioAtual.nome);
+  if(idx<0||users[idx].pin!==pinAtual){err.textContent='Senha atual incorreta ❌';clearPin('pin-atual');return;}
+  users[idx].pin=pinNova; saveUsers(users);
+  fecharDrawer('senha');
+  toast('Senha alterada com sucesso ✓');
+}
+
+// ---- Gerenciar usuários (admin) ----
+function abrirGerenciarUsuarios(){
+  renderAdminUsers();
+  abrirDrawer('admin');
+}
+function renderAdminUsers(){
+  const users=loadUsers();
+  const el=document.getElementById('admin-users-list');
+  if(!users.length){el.innerHTML='<div class="empty">Nenhum usuário</div>';return;}
+  let html=`<table class="user-tbl"><thead><tr><th>Nome</th><th>Perfil</th><th style="text-align:right">Ação</th></tr></thead><tbody>`;
+  users.forEach(u=>{
+    const badge = u.role==='admin'
+      ? '<span class="user-role-badge urb-admin">Admin</span>'
+      : '<span class="user-role-badge urb-user">Usuário</span>';
+    const btn = `<button class="btn btn-edit btn-sm btn-pin-reset" onclick="abrirResetSenha('${esc(u.nome)}')">🔑 Senha</button>`;
+    html+=`<tr><td style="font-weight:600">${esc(u.nome)}</td><td>${badge}</td><td style="text-align:right">${btn}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+}
+
+// ---- Reset de senha pelo admin ----
+let _resetTarget=null;
+function abrirResetSenha(nome){
+  _resetTarget=nome;
+  document.getElementById('reset-user-nome').textContent=nome;
+  document.getElementById('reset-err').textContent='';
+  clearPin('pin-reset');
+  // fecha admin drawer, abre reset drawer
+  fecharDrawer('admin');
+  setTimeout(()=>{
+    abrirDrawer('reset');
+    setTimeout(()=>document.querySelector('#pin-reset .pin-digit').focus(),300);
+  },200);
+}
+function confirmarResetSenha(){
+  const pin=getPin('pin-reset');
+  const err=document.getElementById('reset-err');
+  if(pin.length<4){err.textContent='Digite a nova senha completa (4 dígitos)';return;}
+  const users=loadUsers();
+  const idx=users.findIndex(u=>u.nome===_resetTarget);
+  if(idx<0){err.textContent='Usuário não encontrado';return;}
+  users[idx].pin=pin; saveUsers(users);
+  fecharDrawer('reset');
+  toast('Senha de '+_resetTarget+' redefinida ✓');
+  _resetTarget=null;
+}
+
+// ---- Logout ----
+function fazerLogout(){
+  fecharUserMenu();
+  if(!confirm('Sair da conta de '+usuarioAtual.nome+'?')) return;
+  clearSession();
+  document.getElementById('l-nome').value='';
+  clearPin('pin-entrar'); clearPin('pin-cadastro');
+  document.getElementById('l-err').textContent='';
+  loginTab('entrar');
+  document.getElementById('login-screen').classList.remove('hidden');
+}
+
+function syncLoginLogo(){
+  const src=document.querySelector('.appbar-logo')?.src;
+  if(src) document.getElementById('login-logo').src=src;
+}
+function initAuth(){
+  syncLoginLogo(); loadUsers();
+  if(loadSession()) abrirApp();
+  document.getElementById('l-nome').addEventListener('keydown',e=>{
+    if(e.key==='Enter') document.querySelector('#pin-entrar .pin-digit').focus();
+  });
+}
+
+// ============================================================
+// BASE DE ITENS (portfólio para lançamento de cargas — independente do estoque)
+// ============================================================
+const BASE_ITENS_KEY = 'celia_base_itens_v1';
+let baseItens = []; // [{cod, nome, peso, grupo, granel}]
+let _biEditando = null; // cod do item sendo editado, ou null
+
+const BI_GRUPOS_CORES = {
+  'PARBO':'#C8102E','BRANCO':'#00695C','INTEGRAL':'#512DA8','MIX':'#8B5E00',
+  'FARINHA':'#5D4037','TAPIOCA':'#2E7D32','FECULA':'#455A64','BATATA':'#2E7D32',
+  'GRANEL':'#880E4F','CÃO':'#455A64'
+};
+
+function loadBaseItens(){
+  try{ const r=localStorage.getItem(BASE_ITENS_KEY); if(r){ baseItens=JSON.parse(r); return; } }catch(e){}
+  // Semeia com os PRODUTOS existentes na primeira vez
+  baseItens = (typeof PRODUTOS !== 'undefined' ? PRODUTOS : []).map(p=>({
+    cod: p.cod, nome: p.nome, peso: p.peso||0, grupo: p.tp||'', granel: !!p.granel
+  }));
+  saveBaseItens();
+}
+function saveBaseItens(){
+  try{ localStorage.setItem(BASE_ITENS_KEY,JSON.stringify(baseItens)); }catch(e){}
+}
+
+function abrirBaseItens(){
+  document.getElementById('bi-busca').value='';
+  // preenche datalist de grupos
+  const grupos=[...new Set(baseItens.map(x=>x.grupo).filter(Boolean))].sort();
+  document.getElementById('grupos-list-bi').innerHTML = grupos.map(g=>`<option value="${g}">`).join('');
+  renderBaseItens();
+  abrirDrawer('baseitens');
+}
+
+function renderBaseItens(){
+  const busca=(document.getElementById('bi-busca').value||'').toLowerCase().trim();
+  const isAdmin = usuarioAtual && usuarioAtual.role==='admin';
+  const itens = baseItens.filter(it=>
+    !busca ||
+    it.nome.toLowerCase().includes(busca) ||
+    String(it.cod).includes(busca) ||
+    (it.grupo||'').toLowerCase().includes(busca)
+  );
+
+  // Agrupa por grupo
+  const grupos = {};
+  itens.forEach(it=>{
+    const g = it.grupo||'OUTROS';
+    if(!grupos[g]) grupos[g]=[];
+    grupos[g].push(it);
+  });
+
+  const el = document.getElementById('bi-list');
+  if(!itens.length){
+    el.innerHTML='<div class="bi-empty">Nenhum item encontrado</div>';
+    return;
+  }
+
+  let html='';
+  Object.keys(grupos).sort().forEach(g=>{
+    const cor = BI_GRUPOS_CORES[g]||'#455A64';
+    html+=`<div class="bi-group-header" style="background:${cor}">${g}</div>`;
+    grupos[g].forEach(it=>{
+      const peso = it.granel ? 'granel · kg' : (it.peso>0 ? it.peso+'kg/un' : '');
+      const editBtn = isAdmin
+        ? `<button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(${it.cod})">✏️</button>`
+        : '';
+      html+=`<div class="bi-item${isAdmin?' bi-item-admin':''}">
+        <span class="bi-cod">${it.cod}</span>
+        <span class="bi-nome">${esc(it.nome)}</span>
+        <span class="bi-peso">${peso}</span>
+        ${editBtn}
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+
+function abrirNovoItemBase(){
+  _biEditando=null;
+  document.getElementById('novoitem-title').textContent='➕ Novo item';
+  document.getElementById('bi-cod').value='';
+  document.getElementById('bi-cod').removeAttribute('readonly');
+  document.getElementById('bi-nome-input').value='';
+  document.getElementById('bi-peso-input').value='';
+  document.getElementById('bi-grupo-input').value='';
+  document.getElementById('bi-item-err').textContent='';
+  document.getElementById('bi-btn-excluir').style.display='none';
+  fecharDrawer('baseitens');
+  setTimeout(()=>{ abrirDrawer('novoitem'); document.getElementById('bi-cod').focus(); },200);
+}
+
+function abrirEditarItemBase(cod){
+  const it=baseItens.find(x=>x.cod===cod);
+  if(!it) return;
+  _biEditando=cod;
+  document.getElementById('novoitem-title').textContent='✏️ Editar item';
+  document.getElementById('bi-cod').value=it.cod;
+  document.getElementById('bi-cod').setAttribute('readonly','');
+  document.getElementById('bi-nome-input').value=it.nome;
+  document.getElementById('bi-peso-input').value=it.granel?'':it.peso||'';
+  document.getElementById('bi-grupo-input').value=it.grupo||'';
+  document.getElementById('bi-item-err').textContent='';
+  document.getElementById('bi-btn-excluir').style.display='';
+  fecharDrawer('baseitens');
+  setTimeout(()=>{ abrirDrawer('novoitem'); document.getElementById('bi-nome-input').focus(); },200);
+}
+
+function salvarItemBase(){
+  const nomeRaw = document.getElementById('bi-nome-input').value.trim().toUpperCase();
+  const pesoRaw = document.getElementById('bi-peso-input').value.trim();
+  const grupo   = document.getElementById('bi-grupo-input').value.trim().toUpperCase();
+  const err     = document.getElementById('bi-item-err');
+  if(!nomeRaw){ err.textContent='Informe o nome do item'; return; }
+  if(!grupo)  { err.textContent='Informe o grupo'; return; }
+  const peso   = pesoRaw==='' ? 0 : (parseFloat(pesoRaw.replace(',','.'))||0);
+  const granel = peso===0;
+
+  if(_biEditando!==null){
+    const idx=baseItens.findIndex(x=>x.cod===_biEditando);
+    if(idx>=0){ baseItens[idx]={...baseItens[idx],nome:nomeRaw,peso,grupo,granel}; }
+    saveBaseItens();
+    fecharDrawer('novoitem');
+    setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
+    toast('Item atualizado ✓');
+    return;
+  }
+
+  const codRaw = document.getElementById('bi-cod').value;
+  const cod = parseInt(codRaw);
+  if(!cod && cod!==0){ err.textContent='Informe o código'; return; }
+  if(baseItens.find(x=>x.cod===cod)){ err.textContent='Já existe item com este código'; return; }
+  baseItens.push({cod,nome:nomeRaw,peso,grupo,granel});
+  saveBaseItens();
+  fecharDrawer('novoitem');
+  setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
+  toast('Item adicionado à base ✓');
+}
+
+function excluirItemBase(){
+  if(!_biEditando && _biEditando!==0) return;
+  const it=baseItens.find(x=>x.cod===_biEditando);
+  if(!confirm('Excluir "'+(it?it.nome:_biEditando)+'" da base de itens?\nIsso não afeta o estoque.')) return;
+  baseItens=baseItens.filter(x=>x.cod!==_biEditando);
+  saveBaseItens();
+  fecharDrawer('novoitem');
+  setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
+  toast('Item excluído da base ✓');
+}
 
 // ============================================================
 // SISTEMA DE NOTIFICAÇÕES
@@ -1305,50 +1912,13 @@ document.getElementById('e-contador').addEventListener('input',()=>{ultimaEdicao
 loadLocal();
 cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
 loadNotifs(); atualizarBadge();
+loadBaseItens();
 renderCargas(); filtroDatas(); renderGrupos(); renderDash();
 status(API_URL?'online':'');
 if(API_URL) pull(true);
-// puxa atualizações da nuvem a cada 15s (sem atrapalhar quem digita)
 setInterval(()=>pull(true),15000);
-
-// ===== Atualização automática do app (service worker) =====
-(function(){
-  if(!('serviceWorker' in navigator)) return;
-  const tinhaControle = !!navigator.serviceWorker.controller;
-  function mostrarAtualizando(){
-    let el=document.getElementById('upd-overlay');
-    if(!el){
-      el=document.createElement('div'); el.id='upd-overlay';
-      el.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff;font-family:inherit;font-size:16px;font-weight:600';
-      el.innerHTML='<div style="background:#185FA5;padding:16px 22px;border-radius:12px">🔄 Atualizando o app...</div>';
-      document.body.appendChild(el);
-    }
-  }
-  navigator.serviceWorker.register('sw.js').then(reg=>{
-    // checa atualização ao abrir e a cada 60s
-    reg.update();
-    setInterval(()=>reg.update(), 60000);
-    reg.addEventListener('updatefound',()=>{
-      const novo=reg.installing;
-      if(!novo) return;
-      novo.addEventListener('statechange',()=>{
-        // novo SW instalado e já existe um controlando = é uma ATUALIZAÇÃO
-        if(novo.state==='installed' && navigator.serviceWorker.controller){
-          mostrarAtualizando();
-          novo.postMessage('ATIVAR_AGORA');
-        }
-      });
-    });
-  }).catch(()=>{});
-  // quando o novo SW assume o controle, recarrega a página
-  let recarregou=false;
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    if(!tinhaControle) return;   // primeira instalação não recarrega
-    if(recarregou) return; recarregou=true;
-    setTimeout(()=>location.reload(), 400);
-  });
-})();
-
+// inicia autenticação (deve ser o último passo)
+initAuth();
 </script>
 </body>
 </html>
