@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0065)https://controlexpedicao.netlify.app/index.html?v=20260604-notif2 -->
+<!-- saved from url=(0063)https://rafaelfenalicelia-bit.github.io/Sistema-Expedi-o-C-lia/ -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -317,7 +317,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <h2>✨ Novo usuário</h2>
       <p>Crie seu acesso com nome e senha de 4 dígitos</p>
       <div class="fg"><label>Nome</label>
-        <input id="c-nome" placeholder="Seu nome" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+        <input id="cad-nome" placeholder="Seu nome" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
       </div>
       <label style="font-size:12px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Senha (4 dígitos)</label>
       <div class="login-pin" id="pin-cadastro">
@@ -340,7 +340,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div style="display:flex;align-items:center;gap:8px">
     <button class="notif-btn" id="notif-btn" onclick="abrirNotif()" title="Notificações" aria-label="Notificações">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-      <span class="notif-badge hidden" id="notif-badge">0</span>
+      <span class="notif-badge hidden" id="notif-badge">3</span>
     </button>
     <button class="user-chip" id="user-chip" onclick="toggleUserMenu(event)" title="Minha conta">
       <span class="user-chip-av" id="user-av">R</span>
@@ -436,7 +436,67 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <button class="notif-close" onclick="fecharNotif()">✕</button>
     </div>
   </div>
-  <div class="notif-list" id="notif-list"><div class="notif-empty">Nenhuma notificação</div></div>
+  <div class="notif-list" id="notif-list">
+    <div class="notif-item " onclick="notifClick(&#39;1781034227302_1gm05146rl3&#39;)">
+      <div class="notif-icon ni-del">🗑️</div>
+      <div class="notif-content">
+        <div class="notif-title">Carga excluída: 2798</div>
+        <div class="notif-detalhe"><div class="notif-detalhe-linha">📍 CLIENTE RETIRA - CTNR</div><div class="notif-detalhe-linha">📅 11/06/2026</div></div>
+        
+        <div class="notif-time">agora mesmo</div>
+      </div>
+      
+    </div>
+    <div class="notif-item " onclick="notifClick(&#39;1781034227302_7nx2kx23kv&#39;)">
+      <div class="notif-icon ni-del">🗑️</div>
+      <div class="notif-content">
+        <div class="notif-title">Carga excluída: 2793</div>
+        <div class="notif-detalhe"><div class="notif-detalhe-linha">📍 CTNR CD - CE</div><div class="notif-detalhe-linha">📅 09/06/2026</div></div>
+        
+        <div class="notif-time">agora mesmo</div>
+      </div>
+      
+    </div>
+    <div class="notif-item " onclick="notifClick(&#39;1781034227301_z2y0gj15bw&#39;)">
+      <div class="notif-icon ni-del">🗑️</div>
+      <div class="notif-content">
+        <div class="notif-title">Carga excluída: 2777</div>
+        <div class="notif-detalhe"><div class="notif-detalhe-linha">📍 CTNR CLIENTE - AM</div><div class="notif-detalhe-linha">📅 09/06/2026</div></div>
+        
+        <div class="notif-time">agora mesmo</div>
+      </div>
+      
+    </div>
+    <div class="notif-item " onclick="notifClick(&#39;1781027444549_uw1yjq8kjho&#39;)">
+      <div class="notif-icon ni-new">🚚</div>
+      <div class="notif-content">
+        <div class="notif-title">Nova carga: 2798</div>
+        <div class="notif-detalhe"><div class="notif-detalhe-linha">📍 Destino: <b>CLIENTE RETIRA - CTNR</b></div><div class="notif-detalhe-linha">📅 Data: <b>11/06/2026</b></div><div class="notif-detalhe-linha">📦 CELIA POLIDO 30X1 × 945</div></div>
+        <div class="notif-dica">Toque para ver na Conciliação →</div>
+        <div class="notif-time">1h atrás</div>
+      </div>
+      
+    </div>
+    <div class="notif-item " onclick="notifClick(&#39;1781027444549_zihf8shzha&#39;)">
+      <div class="notif-icon ni-new">🚚</div>
+      <div class="notif-content">
+        <div class="notif-title">Nova carga: 2793</div>
+        <div class="notif-detalhe"><div class="notif-detalhe-linha">📍 Destino: <b>CTNR CD - CE</b></div><div class="notif-detalhe-linha">📅 Data: <b>09/06/2026</b></div><div class="notif-detalhe-linha">📦 CELIA PARBO 6X5 × 200</div><div class="notif-detalhe-linha">📦 CELIA PARBO 30X1 × 400</div><div class="notif-detalhe-linha">📦 CELIA POLIDO 6X5 × 150</div><div class="notif-detalhe-linha">📦 CELIA INTEGRAL 10X1 × 100</div><div class="notif-detalhe-linha">📝 <b>PRIORIZAR O CELIA PARBO E POLIDO DE 6X5 E INTEGRAL 10X1!</b></div></div>
+        <div class="notif-dica">Toque para ver na Conciliação →</div>
+        <div class="notif-time">1h atrás</div>
+      </div>
+      
+    </div>
+    <div class="notif-item " onclick="notifClick(&#39;1781027444548_0zikoov3gyr&#39;)">
+      <div class="notif-icon ni-new">🚚</div>
+      <div class="notif-content">
+        <div class="notif-title">Nova carga: 2777</div>
+        <div class="notif-detalhe"><div class="notif-detalhe-linha">📍 Destino: <b>CTNR CLIENTE - AM</b></div><div class="notif-detalhe-linha">📅 Data: <b>09/06/2026</b></div><div class="notif-detalhe-linha">📦 CELIA POLIDO 30X1 × 945</div></div>
+        <div class="notif-dica">Toque para ver na Conciliação →</div>
+        <div class="notif-time">1h atrás</div>
+      </div>
+      
+    </div></div>
 </div>
 <!-- Drawer: BASE ITENS -->
 <div class="drawer-overlay" id="dov-baseitens" onclick="fecharDrawer(&#39;baseitens&#39;)"></div>
@@ -1140,27 +1200,18 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="item-add">
       <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="c-cod" placeholder="ex: 5" oninput="lookupCarga()"></div>
       <div class="fg"><label>Qtd</label><input type="number" inputmode="numeric" id="c-qtd" placeholder="0" oninput="calcPesoPrev()"></div>
-      <div class="fg full"><label>Produto</label><input id="c-prod" readonly="" placeholder="— digite o código —"></div>
+      <div class="fg full"><label>Produto</label><input id="c-prod" readonly="" placeholder="— digite o código —" class=""></div>
     </div>
     <div class="peso-prev" id="peso-prev"></div>
     <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="addItem()">➕ Adicionar item</button>
-    <div id="itens-prev"></div>
+    <div id="itens-prev"><table class="tbl" style="margin-top:10px"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th><th></th></tr></thead><tbody><tr><td class="prod-cod">5</td><td>CELIA PARBO 6X5</td><td>5</td><td><button class="btn btn-danger btn-sm" onclick="remNovo(0)">🗑</button></td></tr></tbody><tfoot><tr><td colspan="2" style="text-align:right;font-weight:700;border-top:1px solid var(--border2)">Total:</td><td colspan="2" style="font-weight:700;border-top:1px solid var(--border2)">150kg</td></tr></tfoot></table></div>
     <div class="btn-row">
       <button class="btn" id="btn-cancel" onclick="cancelEdit()" style="display:none;flex:1">✕ Cancelar</button>
       <button class="btn btn-success" style="flex:2" onclick="salvarCarga()">💾 <span id="btn-save-txt">Salvar carga</span></button>
     </div>
   </div>
   <div class="ctitle">Cargas lançadas</div>
-  <div id="lista-cargas"><div class="carga-card"><div class="carga-head"><span class="carga-num">2777</span><span class="carga-dest">CTNR CLIENTE - AM</span><span class="date-badge">09/06/2026</span></div>
-    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody><tr><td class="prod-cod">49</td><td>CELIA POLIDO 30X1</td><td>945</td></tr></tbody></table>
-    
-    <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(0)">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(0)">🗑 Excluir</button><span class="badge b-gray" style="align-self:center">28350kg</span></div></div><div class="carga-card"><div class="carga-head"><span class="carga-num">2793</span><span class="carga-dest">CTNR CD - CE</span><span class="date-badge">09/06/2026</span></div>
-    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody><tr><td class="prod-cod">5</td><td>CELIA PARBO 6X5</td><td>200</td></tr><tr><td class="prod-cod">6</td><td>CELIA PARBO 30X1</td><td>400</td></tr><tr><td class="prod-cod">22</td><td>CELIA POLIDO 6X5</td><td>150</td></tr><tr><td class="prod-cod">999</td><td>CELIA INTEGRAL 10X1</td><td>100</td></tr></tbody></table>
-    <div style="font-size:12px;color:#C0392B;font-weight:600;margin-top:8px">📝 PRIORIZAR O CELIA PARBO E POLIDO DE 6X5 E INTEGRAL 10X1!</div>
-    <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(1)">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(1)">🗑 Excluir</button><span class="badge b-gray" style="align-self:center">23500kg</span></div></div><div class="carga-card"><div class="carga-head"><span class="carga-num">2798</span><span class="carga-dest">CLIENTE RETIRA - CTNR</span><span class="date-badge">11/06/2026</span></div>
-    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody><tr><td class="prod-cod">49</td><td>CELIA POLIDO 30X1</td><td>945</td></tr></tbody></table>
-    
-    <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(2)">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(2)">🗑 Excluir</button><span class="badge b-gray" style="align-self:center">28350kg</span></div></div></div>
+  <div id="lista-cargas"><div class="empty">Nenhuma carga lançada</div></div>
 </div>
 
 <!-- ESTOQUE -->
@@ -1204,16 +1255,16 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       </div>
     </div>
     <div class="metrics">
-      <div class="metric"><div class="metric-label">Itens com qtd</div><div class="metric-val" id="e-itens">0</div></div>
-      <div class="metric"><div class="metric-label">Peso contado</div><div class="metric-val" id="e-peso">0 kg</div></div>
+      <div class="metric"><div class="metric-label">Itens com qtd</div><div class="metric-val" id="e-itens">1</div></div>
+      <div class="metric"><div class="metric-label">Peso contado</div><div class="metric-val" id="e-peso">100000 kg</div></div>
     </div>
     <div id="grupos-est"><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;BATATA&#39;)"><div class="grupo-title"><span class="chev " id="gc-BATATA">▶</span><span class="badge b-green">BATATA</span> 9 itens</div></div>
     <div class="grupo-body " id="gb-BATATA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-2139"><span class="prod-cod">2139</span><span><span class="est-nome">BATATA CHIPS CHURRASCO</span> <button class="lapis" onclick="editarItem(2139)" title="Editar item">✏️</button><br><span class="est-peso">0.75kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2139,this.value)"></div><div class="est-row " id="er-2137"><span class="prod-cod">2137</span><span><span class="est-nome">BATATA CHIPS ORIGINAL</span> <button class="lapis" onclick="editarItem(2137)" title="Editar item">✏️</button><br><span class="est-peso">0.75kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2137,this.value)"></div><div class="est-row " id="er-2138"><span class="prod-cod">2138</span><span><span class="est-nome">BATATA CHIPS SALSA E CEBOLA</span> <button class="lapis" onclick="editarItem(2138)" title="Editar item">✏️</button><br><span class="est-peso">0.75kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2138,this.value)"></div><div class="est-row " id="er-1813"><span class="prod-cod">1813</span><span><span class="est-nome">BATATA EXTRA FINA CX 100G</span> <button class="lapis" onclick="editarItem(1813)" title="Editar item">✏️</button><br><span class="est-peso">2kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1813,this.value)"></div><div class="est-row " id="er-1811"><span class="prod-cod">1811</span><span><span class="est-nome">BATATA TRADI CX 100G</span> <button class="lapis" onclick="editarItem(1811)" title="Editar item">✏️</button><br><span class="est-peso">2kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1811,this.value)"></div><div class="est-row " id="er-2081"><span class="prod-cod">2081</span><span><span class="est-nome">BATATA TRADI CX 400G</span> <button class="lapis" onclick="editarItem(2081)" title="Editar item">✏️</button><br><span class="est-peso">8kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2081,this.value)"></div><div class="est-row " id="er-2082"><span class="prod-cod">2082</span><span><span class="est-nome">BATATA TRADI CX 800G</span> <button class="lapis" onclick="editarItem(2082)" title="Editar item">✏️</button><br><span class="est-peso">8kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2082,this.value)"></div><div class="est-row " id="er-1930"><span class="prod-cod">1930</span><span><span class="est-nome">BATATA TRADI FD 400G</span> <button class="lapis" onclick="editarItem(1930)" title="Editar item">✏️</button><br><span class="est-peso">8kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1930,this.value)"></div><div class="est-row " id="er-1931"><span class="prod-cod">1931</span><span><span class="est-nome">BATATA TRADI FD 800G</span> <button class="lapis" onclick="editarItem(1931)" title="Editar item">✏️</button><br><span class="est-peso">9kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1931,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;BRANCO&#39;)"><div class="grupo-title"><span class="chev " id="gc-BRANCO">▶</span><span class="badge b-teal">BRANCO</span> 28 itens</div></div>
     <div class="grupo-body " id="gb-BRANCO"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1490"><span class="prod-cod">1490</span><span><span class="est-nome">ALFINETE POLIDO 10X1</span> <button class="lapis" onclick="editarItem(1490)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1490,this.value)"></div><div class="est-row " id="er-65"><span class="prod-cod">65</span><span><span class="est-nome">ALFINETE POLIDO 30X1</span> <button class="lapis" onclick="editarItem(65)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(65,this.value)"></div><div class="est-row " id="er-64"><span class="prod-cod">64</span><span><span class="est-nome">ALFINETE POLIDO 6X5</span> <button class="lapis" onclick="editarItem(64)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(64,this.value)"></div><div class="est-row " id="er-1164"><span class="prod-cod">1164</span><span><span class="est-nome">ARROZ POLIDO SC 50KG</span> <button class="lapis" onclick="editarItem(1164)" title="Editar item">✏️</button><br><span class="est-peso">50kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1164,this.value)"></div><div class="est-row " id="er-1669"><span class="prod-cod">1669</span><span><span class="est-nome">BERGAMINI POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1669)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1669,this.value)"></div><div class="est-row " id="er-1918"><span class="prod-cod">1918</span><span><span class="est-nome">CATARINÃO POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1918)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1918,this.value)"></div><div class="est-row " id="er-1049"><span class="prod-cod">1049</span><span><span class="est-nome">CELIA POLIDO 10X1</span> <button class="lapis" onclick="editarItem(1049)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1049,this.value)"></div><div class="est-row " id="er-49"><span class="prod-cod">49</span><span><span class="est-nome">CELIA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(49)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(49,this.value)"></div><div class="est-row " id="er-22"><span class="prod-cod">22</span><span><span class="est-nome">CELIA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(22)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(22,this.value)"></div><div class="est-row " id="er-326"><span class="prod-cod">326</span><span><span class="est-nome">CELIA POLIDO SC 25KG</span> <button class="lapis" onclick="editarItem(326)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(326,this.value)"></div><div class="est-row " id="er-1531"><span class="prod-cod">1531</span><span><span class="est-nome">CINDERELA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1531)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1531,this.value)"></div><div class="est-row " id="er-1431"><span class="prod-cod">1431</span><span><span class="est-nome">CINDERELA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1431)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1431,this.value)"></div><div class="est-row " id="er-1544"><span class="prod-cod">1544</span><span><span class="est-nome">COMETA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1544)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1544,this.value)"></div><div class="est-row " id="er-1780"><span class="prod-cod">1780</span><span><span class="est-nome">JOAO RODRIGUES POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1780)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1780,this.value)"></div><div class="est-row " id="er-1801"><span class="prod-cod">1801</span><span><span class="est-nome">JOAO RODRIGUES POLIDO 6x5</span> <button class="lapis" onclick="editarItem(1801)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1801,this.value)"></div><div class="est-row " id="er-2174"><span class="prod-cod">2174</span><span><span class="est-nome">LA GRANJA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(2174)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2174,this.value)"></div><div class="est-row " id="er-1895"><span class="prod-cod">1895</span><span><span class="est-nome">LA GRANJA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1895)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1895,this.value)"></div><div class="est-row " id="er-1497"><span class="prod-cod">1497</span><span><span class="est-nome">MADRINHA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1497)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1497,this.value)"></div><div class="est-row " id="er-1496"><span class="prod-cod">1496</span><span><span class="est-nome">MADRINHA POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1496)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1496,this.value)"></div><div class="est-row " id="er-1720"><span class="prod-cod">1720</span><span><span class="est-nome">MORELLI POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1720)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1720,this.value)"></div><div class="est-row " id="er-1932"><span class="prod-cod">1932</span><span><span class="est-nome">MORELLI POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1932)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1932,this.value)"></div><div class="est-row " id="er-1939"><span class="prod-cod">1939</span><span><span class="est-nome">MORELLI POLIDO SC 25KG</span> <button class="lapis" onclick="editarItem(1939)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1939,this.value)"></div><div class="est-row " id="er-1492"><span class="prod-cod">1492</span><span><span class="est-nome">SMART POLIDO 10X1</span> <button class="lapis" onclick="editarItem(1492)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1492,this.value)"></div><div class="est-row " id="er-1491"><span class="prod-cod">1491</span><span><span class="est-nome">SMART POLIDO 30X1</span> <button class="lapis" onclick="editarItem(1491)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1491,this.value)"></div><div class="est-row " id="er-1620"><span class="prod-cod">1620</span><span><span class="est-nome">SMART POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1620)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1620,this.value)"></div><div class="est-row " id="er-2084"><span class="prod-cod">2084</span><span><span class="est-nome">TIO LIMA POLIDO 30X1</span> <button class="lapis" onclick="editarItem(2084)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2084,this.value)"></div><div class="est-row " id="er-1821"><span class="prod-cod">1821</span><span><span class="est-nome">TIO TIM POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1821)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1821,this.value)"></div><div class="est-row " id="er-1912"><span class="prod-cod">1912</span><span><span class="est-nome">TRIMAIS POLIDO 6X5</span> <button class="lapis" onclick="editarItem(1912)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1912,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;CÃO&#39;)"><div class="grupo-title"><span class="chev " id="gc-CÃO">▶</span><span class="badge b-gray">CÃO</span> 3 itens</div></div>
     <div class="grupo-body " id="gb-CÃO"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1234"><span class="prod-cod">1234</span><span><span class="est-nome">CAMPO BOM (CÃO) 6X5</span> <button class="lapis" onclick="editarItem(1234)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1234,this.value)"></div><div class="est-row " id="er-19"><span class="prod-cod">19</span><span><span class="est-nome">CAO BRASIL 6X5</span> <button class="lapis" onclick="editarItem(19)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(19,this.value)"></div><div class="est-row " id="er-1861"><span class="prod-cod">1861</span><span><span class="est-nome">VIT-DOG 6X5</span> <button class="lapis" onclick="editarItem(1861)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1861,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;FARINHA&#39;)"><div class="grupo-title"><span class="chev " id="gc-FARINHA">▶</span><span class="badge b-amber">FARINHA</span> 3 itens</div></div>
     <div class="grupo-body " id="gb-FARINHA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1421"><span class="prod-cod">1421</span><span><span class="est-nome">FARINHA AMARELA</span> <button class="lapis" onclick="editarItem(1421)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1421,this.value)"></div><div class="est-row " id="er-1419"><span class="prod-cod">1419</span><span><span class="est-nome">FARINHA BRANCA</span> <button class="lapis" onclick="editarItem(1419)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1419,this.value)"></div><div class="est-row " id="er-1461"><span class="prod-cod">1461</span><span><span class="est-nome">FARINHA TORRADA</span> <button class="lapis" onclick="editarItem(1461)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1461,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;FECULA&#39;)"><div class="grupo-title"><span class="chev " id="gc-FECULA">▶</span><span class="badge b-gray">FECULA</span> 2 itens</div></div>
-    <div class="grupo-body " id="gb-FECULA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1657"><span class="prod-cod">1657</span><span><span class="est-nome">FECULA 10X1</span> <button class="lapis" onclick="editarItem(1657)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1657,this.value)"></div><div class="est-row " id="er-1859"><span class="prod-cod">1859</span><span><span class="est-nome">FECULA 20X1</span> <button class="lapis" onclick="editarItem(1859)" title="Editar item">✏️</button><br><span class="est-peso">20kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1859,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;GRANEL&#39;)"><div class="grupo-title"><span class="chev " id="gc-GRANEL">▶</span><span class="badge b-pink">GRANEL</span> 12 itens · kg</div></div>
-    <div class="grupo-body " id="gb-GRANEL"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd kg</span></div><div class="est-row " id="er-9001"><span class="prod-cod">9001</span><span><span class="est-nome">ARROZ CÃO</span> <button class="lapis" onclick="editarItem(9001)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9001,this.value)"></div><div class="est-row " id="er-9002"><span class="prod-cod">9002</span><span><span class="est-nome">INTEGRAL EM BAG</span> <button class="lapis" onclick="editarItem(9002)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9002,this.value)"></div><div class="est-row " id="er-9003"><span class="prod-cod">9003</span><span><span class="est-nome">INTEGRAL GRANEL</span> <button class="lapis" onclick="editarItem(9003)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9003,this.value)"></div><div class="est-row " id="er-9004"><span class="prod-cod">9004</span><span><span class="est-nome">PARBOILIZADO EM BAG</span> <button class="lapis" onclick="editarItem(9004)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9004,this.value)"></div><div class="est-row " id="er-9005"><span class="prod-cod">9005</span><span><span class="est-nome">PARBOILIZADO REPASSADO</span> <button class="lapis" onclick="editarItem(9005)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9005,this.value)"></div><div class="est-row " id="er-9006"><span class="prod-cod">9006</span><span><span class="est-nome">PARBOILIZADO GRANEL TP1</span> <button class="lapis" onclick="editarItem(9006)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9006,this.value)"></div><div class="est-row " id="er-9007"><span class="prod-cod">9007</span><span><span class="est-nome">PARBOILIZADO GRANEL TP2</span> <button class="lapis" onclick="editarItem(9007)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9007,this.value)"></div><div class="est-row " id="er-9008"><span class="prod-cod">9008</span><span><span class="est-nome">PARBOILIZADO GRANEL ESPECIAL</span> <button class="lapis" onclick="editarItem(9008)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9008,this.value)"></div><div class="est-row " id="er-9009"><span class="prod-cod">9009</span><span><span class="est-nome">POLIDO EM BAG</span> <button class="lapis" onclick="editarItem(9009)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9009,this.value)"></div><div class="est-row " id="er-9010"><span class="prod-cod">9010</span><span><span class="est-nome">POLIDO GRANEL TP1</span> <button class="lapis" onclick="editarItem(9010)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9010,this.value)"></div><div class="est-row " id="er-9011"><span class="prod-cod">9011</span><span><span class="est-nome">POLIDO GRANEL REPASSADO</span> <button class="lapis" onclick="editarItem(9011)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9011,this.value)"></div><div class="est-row " id="er-9012"><span class="prod-cod">9012</span><span><span class="est-nome">POLIDO GRANEL ESPECIAL</span> <button class="lapis" onclick="editarItem(9012)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9012,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;INTEGRAL&#39;)"><div class="grupo-title"><span class="chev " id="gc-INTEGRAL">▶</span><span class="badge b-purple">INTEGRAL</span> 4 itens</div></div>
+    <div class="grupo-body " id="gb-FECULA"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-1657"><span class="prod-cod">1657</span><span><span class="est-nome">FECULA 10X1</span> <button class="lapis" onclick="editarItem(1657)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1657,this.value)"></div><div class="est-row " id="er-1859"><span class="prod-cod">1859</span><span><span class="est-nome">FECULA 20X1</span> <button class="lapis" onclick="editarItem(1859)" title="Editar item">✏️</button><br><span class="est-peso">20kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1859,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;GRANEL&#39;)"><div class="grupo-title"><span class="chev " id="gc-GRANEL">▶</span><span class="badge b-pink">GRANEL</span> 12 itens · kg</div><span class="badge b-green">1 ✓</span></div>
+    <div class="grupo-body " id="gb-GRANEL"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd kg</span></div><div class="est-row " id="er-9001"><span class="prod-cod">9001</span><span><span class="est-nome">ARROZ CÃO</span> <button class="lapis" onclick="editarItem(9001)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9001,this.value)"></div><div class="est-row " id="er-9002"><span class="prod-cod">9002</span><span><span class="est-nome">INTEGRAL EM BAG</span> <button class="lapis" onclick="editarItem(9002)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9002,this.value)"></div><div class="est-row " id="er-9003"><span class="prod-cod">9003</span><span><span class="est-nome">INTEGRAL GRANEL</span> <button class="lapis" onclick="editarItem(9003)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9003,this.value)"></div><div class="est-row " id="er-9004"><span class="prod-cod">9004</span><span><span class="est-nome">PARBOILIZADO EM BAG</span> <button class="lapis" onclick="editarItem(9004)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9004,this.value)"></div><div class="est-row " id="er-9005"><span class="prod-cod">9005</span><span><span class="est-nome">PARBOILIZADO REPASSADO</span> <button class="lapis" onclick="editarItem(9005)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9005,this.value)"></div><div class="est-row filled" id="er-9006"><span class="prod-cod">9006</span><span><span class="est-nome">PARBOILIZADO GRANEL TP1</span> <button class="lapis" onclick="editarItem(9006)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="100000" oninput="setQtd(9006,this.value)"></div><div class="est-row " id="er-9007"><span class="prod-cod">9007</span><span><span class="est-nome">PARBOILIZADO GRANEL TP2</span> <button class="lapis" onclick="editarItem(9007)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9007,this.value)"></div><div class="est-row " id="er-9008"><span class="prod-cod">9008</span><span><span class="est-nome">PARBOILIZADO GRANEL ESPECIAL</span> <button class="lapis" onclick="editarItem(9008)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9008,this.value)"></div><div class="est-row " id="er-9009"><span class="prod-cod">9009</span><span><span class="est-nome">POLIDO EM BAG</span> <button class="lapis" onclick="editarItem(9009)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9009,this.value)"></div><div class="est-row " id="er-9010"><span class="prod-cod">9010</span><span><span class="est-nome">POLIDO GRANEL TP1</span> <button class="lapis" onclick="editarItem(9010)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9010,this.value)"></div><div class="est-row " id="er-9011"><span class="prod-cod">9011</span><span><span class="est-nome">POLIDO GRANEL REPASSADO</span> <button class="lapis" onclick="editarItem(9011)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9011,this.value)"></div><div class="est-row " id="er-9012"><span class="prod-cod">9012</span><span><span class="est-nome">POLIDO GRANEL ESPECIAL</span> <button class="lapis" onclick="editarItem(9012)" title="Editar item">✏️</button><br><span class="est-peso">granel · kg</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9012,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;INTEGRAL&#39;)"><div class="grupo-title"><span class="chev " id="gc-INTEGRAL">▶</span><span class="badge b-purple">INTEGRAL</span> 4 itens</div></div>
     <div class="grupo-body " id="gb-INTEGRAL"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-999"><span class="prod-cod">999</span><span><span class="est-nome">CELIA INTEGRAL 10X1</span> <button class="lapis" onclick="editarItem(999)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(999,this.value)"></div><div class="est-row " id="er-979"><span class="prod-cod">979</span><span><span class="est-nome">CELIA INTEGRAL 30X1</span> <button class="lapis" onclick="editarItem(979)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(979,this.value)"></div><div class="est-row " id="er-1546"><span class="prod-cod">1546</span><span><span class="est-nome">COMETA INTEGRAL 30X1</span> <button class="lapis" onclick="editarItem(1546)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1546,this.value)"></div><div class="est-row " id="er-2042"><span class="prod-cod">2042</span><span><span class="est-nome">TIA DORA INTEGRAL 10X1</span> <button class="lapis" onclick="editarItem(2042)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2042,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;MIX&#39;)"><div class="grupo-title"><span class="chev " id="gc-MIX">▶</span><span class="badge b-amber">MIX</span> 1 itens</div></div>
     <div class="grupo-body " id="gb-MIX"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-335"><span class="prod-cod">335</span><span><span class="est-nome">CELIA MIX 6X5</span> <button class="lapis" onclick="editarItem(335)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(335,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;PARBO&#39;)"><div class="grupo-title"><span class="chev " id="gc-PARBO">▶</span><span class="badge b-blue">PARBO</span> 45 itens</div></div>
     <div class="grupo-body " id="gb-PARBO"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">Qtd</span></div><div class="est-row " id="er-387"><span class="prod-cod">387</span><span><span class="est-nome">ALFINETE PARBO 10X1</span> <button class="lapis" onclick="editarItem(387)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(387,this.value)"></div><div class="est-row " id="er-9"><span class="prod-cod">9</span><span><span class="est-nome">ALFINETE PARBO 30X1</span> <button class="lapis" onclick="editarItem(9)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(9,this.value)"></div><div class="est-row " id="er-8"><span class="prod-cod">8</span><span><span class="est-nome">ALFINETE PARBO 6X5</span> <button class="lapis" onclick="editarItem(8)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(8,this.value)"></div><div class="est-row " id="er-2044"><span class="prod-cod">2044</span><span><span class="est-nome">ANTUNES PARBO 30X1</span> <button class="lapis" onclick="editarItem(2044)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2044,this.value)"></div><div class="est-row " id="er-1528"><span class="prod-cod">1528</span><span><span class="est-nome">ANTUNES PARBO 6X5</span> <button class="lapis" onclick="editarItem(1528)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1528,this.value)"></div><div class="est-row " id="er-827"><span class="prod-cod">827</span><span><span class="est-nome">ARROZ PARBO SC 50KG</span> <button class="lapis" onclick="editarItem(827)" title="Editar item">✏️</button><br><span class="est-peso">50kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(827,this.value)"></div><div class="est-row " id="er-69"><span class="prod-cod">69</span><span><span class="est-nome">BERGAMINI PARBO 6X5</span> <button class="lapis" onclick="editarItem(69)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(69,this.value)"></div><div class="est-row " id="er-1019"><span class="prod-cod">1019</span><span><span class="est-nome">CELIA PARBO 10X1</span> <button class="lapis" onclick="editarItem(1019)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1019,this.value)"></div><div class="est-row " id="er-6"><span class="prod-cod">6</span><span><span class="est-nome">CELIA PARBO 30X1</span> <button class="lapis" onclick="editarItem(6)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(6,this.value)"></div><div class="est-row " id="er-1385"><span class="prod-cod">1385</span><span><span class="est-nome">CELIA PARBO 5X5</span> <button class="lapis" onclick="editarItem(1385)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1385,this.value)"></div><div class="est-row " id="er-5"><span class="prod-cod">5</span><span><span class="est-nome">CELIA PARBO 6X5</span> <button class="lapis" onclick="editarItem(5)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(5,this.value)"></div><div class="est-row " id="er-112"><span class="prod-cod">112</span><span><span class="est-nome">CELIA PARBO SC 25KG</span> <button class="lapis" onclick="editarItem(112)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(112,this.value)"></div><div class="est-row " id="er-327"><span class="prod-cod">327</span><span><span class="est-nome">CINDERELA PARBO 30X1</span> <button class="lapis" onclick="editarItem(327)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(327,this.value)"></div><div class="est-row " id="er-97"><span class="prod-cod">97</span><span><span class="est-nome">CINDERELA PARBO 6X5</span> <button class="lapis" onclick="editarItem(97)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(97,this.value)"></div><div class="est-row " id="er-1545"><span class="prod-cod">1545</span><span><span class="est-nome">COMETA PARBO 30X1</span> <button class="lapis" onclick="editarItem(1545)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1545,this.value)"></div><div class="est-row " id="er-2043"><span class="prod-cod">2043</span><span><span class="est-nome">FAVORITINHO PARBO 30X1</span> <button class="lapis" onclick="editarItem(2043)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2043,this.value)"></div><div class="est-row " id="er-2173"><span class="prod-cod">2173</span><span><span class="est-nome">GAVEA PARBO 6X5</span> <button class="lapis" onclick="editarItem(2173)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2173,this.value)"></div><div class="est-row " id="er-1779"><span class="prod-cod">1779</span><span><span class="est-nome">JOAO RODRIGUES PARBO 30X1</span> <button class="lapis" onclick="editarItem(1779)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1779,this.value)"></div><div class="est-row " id="er-1077"><span class="prod-cod">1077</span><span><span class="est-nome">KISAFRA PARBO 30X1</span> <button class="lapis" onclick="editarItem(1077)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1077,this.value)"></div><div class="est-row " id="er-1076"><span class="prod-cod">1076</span><span><span class="est-nome">KISAFRA PARBO 6X5</span> <button class="lapis" onclick="editarItem(1076)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1076,this.value)"></div><div class="est-row " id="er-1894"><span class="prod-cod">1894</span><span><span class="est-nome">LA GRANJA PARBO 6X5</span> <button class="lapis" onclick="editarItem(1894)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1894,this.value)"></div><div class="est-row " id="er-1498"><span class="prod-cod">1498</span><span><span class="est-nome">MADRINHA PARBO 6X5</span> <button class="lapis" onclick="editarItem(1498)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1498,this.value)"></div><div class="est-row " id="er-1718"><span class="prod-cod">1718</span><span><span class="est-nome">MORELLI PARBO 30X1</span> <button class="lapis" onclick="editarItem(1718)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1718,this.value)"></div><div class="est-row " id="er-1717"><span class="prod-cod">1717</span><span><span class="est-nome">MORELLI PARBO 6X5</span> <button class="lapis" onclick="editarItem(1717)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1717,this.value)"></div><div class="est-row " id="er-1938"><span class="prod-cod">1938</span><span><span class="est-nome">MORELLI PARBO SC 25KG</span> <button class="lapis" onclick="editarItem(1938)" title="Editar item">✏️</button><br><span class="est-peso">25kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1938,this.value)"></div><div class="est-row " id="er-2095"><span class="prod-cod">2095</span><span><span class="est-nome">MORELLI PARBO/I 30X1</span> <button class="lapis" onclick="editarItem(2095)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2095,this.value)"></div><div class="est-row " id="er-2096"><span class="prod-cod">2096</span><span><span class="est-nome">MORELLI PARBO/I 6X5</span> <button class="lapis" onclick="editarItem(2096)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2096,this.value)"></div><div class="est-row " id="er-1371"><span class="prod-cod">1371</span><span><span class="est-nome">PILÃO PARBO 30X1</span> <button class="lapis" onclick="editarItem(1371)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1371,this.value)"></div><div class="est-row " id="er-1369"><span class="prod-cod">1369</span><span><span class="est-nome">PILÃO PARBO 6X5</span> <button class="lapis" onclick="editarItem(1369)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1369,this.value)"></div><div class="est-row " id="er-2134"><span class="prod-cod">2134</span><span><span class="est-nome">RAMPINELLI PARBO 6X5</span> <button class="lapis" onclick="editarItem(2134)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2134,this.value)"></div><div class="est-row " id="er-16"><span class="prod-cod">16</span><span><span class="est-nome">REALENGO PARBO 6X5</span> <button class="lapis" onclick="editarItem(16)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(16,this.value)"></div><div class="est-row " id="er-1494"><span class="prod-cod">1494</span><span><span class="est-nome">SMART PARBO 10X1</span> <button class="lapis" onclick="editarItem(1494)" title="Editar item">✏️</button><br><span class="est-peso">10kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1494,this.value)"></div><div class="est-row " id="er-1493"><span class="prod-cod">1493</span><span><span class="est-nome">SMART PARBO 30X1</span> <button class="lapis" onclick="editarItem(1493)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1493,this.value)"></div><div class="est-row " id="er-1621"><span class="prod-cod">1621</span><span><span class="est-nome">SMART PARBO 6X5</span> <button class="lapis" onclick="editarItem(1621)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1621,this.value)"></div><div class="est-row " id="er-2098"><span class="prod-cod">2098</span><span><span class="est-nome">SMART PARBO/I 30X1</span> <button class="lapis" onclick="editarItem(2098)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2098,this.value)"></div><div class="est-row " id="er-2100"><span class="prod-cod">2100</span><span><span class="est-nome">SMART PARBO/I 6X5</span> <button class="lapis" onclick="editarItem(2100)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2100,this.value)"></div><div class="est-row " id="er-2041"><span class="prod-cod">2041</span><span><span class="est-nome">TIA DORA PARBO 30X1</span> <button class="lapis" onclick="editarItem(2041)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2041,this.value)"></div><div class="est-row " id="er-2117"><span class="prod-cod">2117</span><span><span class="est-nome">TIA DORA PARBO 6X5</span> <button class="lapis" onclick="editarItem(2117)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2117,this.value)"></div><div class="est-row " id="er-2059"><span class="prod-cod">2059</span><span><span class="est-nome">TIA DORA PARBO/I 30X1</span> <button class="lapis" onclick="editarItem(2059)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2059,this.value)"></div><div class="est-row " id="er-2118"><span class="prod-cod">2118</span><span><span class="est-nome">TIA DORA PARBO/I 6X5</span> <button class="lapis" onclick="editarItem(2118)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2118,this.value)"></div><div class="est-row " id="er-2083"><span class="prod-cod">2083</span><span><span class="est-nome">TIO LIMA PARBO 30X1</span> <button class="lapis" onclick="editarItem(2083)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(2083,this.value)"></div><div class="est-row " id="er-92"><span class="prod-cod">92</span><span><span class="est-nome">TIO MANOEL PARBO 30X1</span> <button class="lapis" onclick="editarItem(92)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(92,this.value)"></div><div class="est-row " id="er-93"><span class="prod-cod">93</span><span><span class="est-nome">TIO MANOEL PARBO 6X5</span> <button class="lapis" onclick="editarItem(93)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(93,this.value)"></div><div class="est-row " id="er-1913"><span class="prod-cod">1913</span><span><span class="est-nome">TRIMAIS PARBO 6X5</span> <button class="lapis" onclick="editarItem(1913)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1913,this.value)"></div><div class="est-row " id="er-1368"><span class="prod-cod">1368</span><span><span class="est-nome">VO OLIMPIO PARBO 30X1</span> <button class="lapis" onclick="editarItem(1368)" title="Editar item">✏️</button><br><span class="est-peso">30kg/un</span></span><input type="number" inputmode="numeric" min="0" placeholder="0" value="" oninput="setQtd(1368,this.value)"></div></div></div><div class="grupo"><div class="grupo-head" onclick="toggleG(&#39;TAPIOCA&#39;)"><div class="grupo-title"><span class="chev " id="gc-TAPIOCA">▶</span><span class="badge b-green">TAPIOCA</span> 2 itens</div></div>
@@ -1276,8 +1327,8 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <button class="btn btn-sm" onclick="limparDash()">Limpar período (ver tudo)</button>
   </div>
   <div class="metrics">
-    <div class="metric"><div class="metric-label">A carregar (período)</div><div class="metric-val" id="d-car">80.200 kg</div></div>
-    <div class="metric"><div class="metric-label">Em estoque (atual)</div><div class="metric-val" id="d-est">0 kg</div></div>
+    <div class="metric"><div class="metric-label">A carregar (período)</div><div class="metric-val" id="d-car">0 kg</div></div>
+    <div class="metric"><div class="metric-label">Em estoque (atual)</div><div class="metric-val" id="d-est">100.000 kg</div></div>
   </div>
   <button class="btn btn-full" id="btn-maq" onclick="toggleMaq()" style="margin-bottom:12px">🏭 Ocupação de máquinas</button>
   <div class="card" id="maq-card" style="display:none">
@@ -1291,23 +1342,19 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="card">
     <div class="ctitle">📊 Estoque × A carregar (kg) por grupo</div>
     <div class="dash-legend"><span><span class="dash-dot" style="background:var(--green)"></span>Em estoque</span><span><span class="dash-dot" style="background:var(--blue)"></span>A carregar</span></div>
-    <div id="dash-bars"><div class="dash-grp"><div class="dash-grp-top"><span class="badge b-teal">BRANCO</span></div>
-      <div class="dash-bar"><div class="fill fill-est" style="width:0%"></div></div>
-      <div class="dash-bar"><div class="fill fill-car" style="width:100%">61.200 kg</div></div></div><div class="dash-grp"><div class="dash-grp-top"><span class="badge b-purple">INTEGRAL</span></div>
-      <div class="dash-bar"><div class="fill fill-est" style="width:0%"></div></div>
-      <div class="dash-bar"><div class="fill fill-car" style="width:8%">1.000 kg</div></div></div><div class="dash-grp"><div class="dash-grp-top"><span class="badge b-blue">PARBO</span></div>
-      <div class="dash-bar"><div class="fill fill-est" style="width:0%"></div></div>
-      <div class="dash-bar"><div class="fill fill-car" style="width:29.411764705882355%">18.000 kg</div></div></div></div>
+    <div id="dash-bars"><div class="dash-grp"><div class="dash-grp-top"><span class="badge b-pink">GRANEL</span></div>
+      <div class="dash-bar"><div class="fill fill-est" style="width:100%">100.000 kg</div></div>
+      <div class="dash-bar"><div class="fill fill-car" style="width:0%"></div></div></div></div>
   </div>
   <div class="card">
     <div class="ctitle">🚚 Cargas do período · fardos</div>
-    <div id="dash-resumo"><div class="resumo-row"><span class="resumo-nome">2777 · CTNR CLIENTE - AM <span class="resumo-data">(09/06/2026)</span></span><span class="fardos-badge">945 fardos</span></div><div class="resumo-row"><span class="resumo-nome">2793 · CTNR CD - CE <span class="resumo-data">(09/06/2026)</span></span><span class="fardos-badge">783,3 fardos</span></div><div class="resumo-row"><span class="resumo-nome">2798 · CLIENTE RETIRA - CTNR <span class="resumo-data">(11/06/2026)</span></span><span class="fardos-badge">945 fardos</span></div></div>
-    <div class="resumo-tot"><span>Total de fardos no período</span><span class="fardos-badge" style="font-size:16px" id="dash-tot-fardos">2673,3 fardos</span></div>
+    <div id="dash-resumo"><div class="empty">Nenhuma carga no período</div></div>
+    <div class="resumo-tot"><span>Total de fardos no período</span><span class="fardos-badge" style="font-size:16px" id="dash-tot-fardos">0 fardos</span></div>
   </div>
 </div>
 
 </div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast">Preencha número e destino</div>
 
 <script>
 const BASE_PRODUTOS = [
@@ -1983,7 +2030,7 @@ function loginTab(t){
   document.getElementById('l-err').textContent='';
   document.getElementById('c-err').textContent='';
   clearPin('pin-entrar'); clearPin('pin-cadastro');
-  setTimeout(()=>document.getElementById(t==='entrar'?'l-nome':'c-nome').focus(),50);
+  setTimeout(()=>document.getElementById(t==='entrar'?'l-nome':'cad-nome').focus(),50);
 }
 function fazerLogin(){
   const nome=(document.getElementById('l-nome').value||'').trim().toUpperCase();
@@ -1997,7 +2044,7 @@ function fazerLogin(){
   abrirApp();
 }
 function fazerCadastro(){
-  const nome=(document.getElementById('c-nome').value||'').trim().toUpperCase();
+  const nome=(document.getElementById('cad-nome').value||'').trim().toUpperCase();
   const pin=getPin('pin-cadastro');
   const err=document.getElementById('c-err');
   if(!nome){err.textContent='Digite um nome';return;}
@@ -2952,4 +2999,339 @@ video {
   --tw-backdrop-sepia:  ;
 }
 </style><style type="text/css">@import url(https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap);</style><style type="text/css">@import url(https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap);</style><style type="text/css">.row[data-v-0a08c546]{display:flex;flex-wrap:wrap;margin-left:-8px;margin-right:-8px}[class*="grid-"][data-v-0a08c546]{padding:0 8px;margin-bottom:16px}.grid-1[data-v-0a08c546]{width:8.3333333333%}.grid-2[data-v-0a08c546]{width:16.6666666667%}.grid-23[data-v-0a08c546]{width:20%}.grid-3[data-v-0a08c546]{width:25%}.grid-4[data-v-0a08c546]{width:33.3333333333%}.grid-5[data-v-0a08c546]{width:41.6666666667%}.grid-6[data-v-0a08c546]{width:50%}.grid-7[data-v-0a08c546]{width:58.3333333333%}.grid-8[data-v-0a08c546]{width:66.6666666667%}.grid-9[data-v-0a08c546]{width:75%}.grid-10[data-v-0a08c546]{width:83.3333333333%}.grid-11[data-v-0a08c546]{width:91.6666666667%}.grid-12[data-v-0a08c546]{width:100%}*[data-v-0a08c546]{font-family:"Roboto", sans-serif;-moz-box-sizing:border-box;box-sizing:border-box;outline:none !important}p[data-v-0a08c546]{margin:0}.-scroll[data-v-0a08c546]::-webkit-scrollbar{width:8px}.-scroll[data-v-0a08c546]::-webkit-scrollbar-track{background:transparent;padding:2px}.-scroll[data-v-0a08c546]::-webkit-scrollbar-thumb{background-color:#ccc;border:3px solid transparent;border-radius:20px}.scroll[data-v-0a08c546]{scrollbar-width:thin;scrollbar-color:#ccc transparent}.-blackfriday .header .header-container[data-v-0a08c546]{background-color:#000}.-blackfriday .header .header-container .brand-icons .icons>.minimize-button[data-v-0a08c546]:before{background-color:#fff}.-blackfriday .header .header-container .brand-icons .brand-back.-inside[data-v-0a08c546]{width:auto}.-blackfriday .header .header-container .brand-icons .logo[data-v-0a08c546]{width:17px;height:23px}.-blackfriday .tab-item-container .product-wrapper .card-best-offer-deals-container .content .header .box-best-offer[data-v-0a08c546]{background-color:#000;color:#fff}.-blackfriday .container-campaing[data-v-0a08c546]{background:linear-gradient(257deg, #000 27.57%, #4d4d4d 103.19%)}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area[data-v-0a08c546]{background-color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area>.tag[data-v-0a08c546]{background-color:#000}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area>.tag>.percentage-off[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.heading[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.price-old[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.price-new[data-v-0a08c546]{color:#ffc500}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.seller-lowest-price[data-v-0a08c546]{color:#d1d1d1}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.cashback-information>.formula>.text[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.link-to-offer[data-v-0a08c546]{background-color:#fff;border:1px solid #d1d1d1}.-blackfriday .card-container-offer>.content>.header>.tag-offer.-blackfriday[data-v-0a08c546]{background:#000 no-repeat 6px center;color:#fff}*[data-v-0a08c546]{font-family:'Montserrat', 'Roboto', sans-serif}.font-bold[data-v-0a08c546]{font-weight:bold}.text-white[data-v-0a08c546]{color:white}.font_14[data-v-0a08c546]{font-size:14px}@keyframes pulse-0a08c546{0%{box-shadow:0 0 0 0px rgba(255,197,0,0.5)}70%{box-shadow:0 0 0 20px rgba(255,197,0,0)}100%{box-shadow:0 0 0 10px rgba(255,197,0,0)}}.animation[data-v-0a08c546]{animation-duration:0.8s;animation-fill-mode:both;animation-delay:0.6s}@keyframes fadeIn-0a08c546{from{opacity:0}to{opacity:1}}.fadeIn[data-v-0a08c546]{animation-name:fadeIn-0a08c546}@keyframes fadeInUp-0a08c546{from{opacity:0;transform:translate3d(0, 100%, 0)}to{opacity:1;transform:translate3d(0, 0, 0)}}.fadeInUp[data-v-0a08c546]{animation-name:fadeInUp-0a08c546}.global-template-container>.content[data-v-0a08c546]{background-color:#fff;border-radius:12px;box-shadow:0px 9px 24px rgba(0,0,0,0.25);display:grid;font-family:'Montserrat', 'Roboto', sans-serif;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;max-height:92vh;position:fixed;right:20px;top:20px;width:436px;z-index:3265656565656;font-size:16px}.global-template-container>.content:not(.-inside):not(.-noFooter)>.body[data-v-0a08c546]{min-height:62vh}.global-template-container>.content[data-v-0a08c546]:not(.-noFooter){grid-template-areas:'header header' 'main main' 'footer footer'}.global-template-container>.content:not(.-noFooter)>.footer[data-v-0a08c546]{grid-area:footer;height:80px;position:relative}.global-template-container>.content.-noFooter[data-v-0a08c546]{grid-template-areas:'header header' 'main main'}.global-template-container>.content>.header[data-v-0a08c546]{grid-area:header;position:relative}.global-template-container>.content>.body[data-v-0a08c546]{grid-area:main;overflow-x:hidden;overflow-y:auto;position:relative;scroll-snap-type:x proximity;min-height:62vh}.global-template-container>.content>.body[data-v-0a08c546]::-webkit-scrollbar{-webkit-appearance:none;width:8px}.global-template-container>.content>.body[data-v-0a08c546]::-webkit-scrollbar-thumb{background-color:rgba(0,0,0,0.15);border-radius:4px;-webkit-box-shadow:0 0 1px rgba(255,255,255,0.25)}.global-template-container>.content>.body>.box-skeleton[data-v-0a08c546]{display:flex;flex-direction:column;height:inherit;padding:20px}.global-template-container>.content>.body>.box-skeleton>.skeleton[data-v-0a08c546]{height:40px;margin-bottom:20px;width:100%}.global-template-container>.content>.body>.box-skeleton>.skeleton.-big[data-v-0a08c546]{height:200px}
-</style><div><!----></div></template></span></body></html>
+</style><div><!----></div></template></span><aside style="z-index: 2147483647;"><template shadowrootmode="open"><style type="text/css">/*
+! tailwindcss v3.3.0 | MIT License | https://tailwindcss.com
+*//*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}::before,
+::after {
+  --tw-content: '';
+}/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+*/html {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  -o-tab-size: 4;
+     tab-size: 4; /* 3 */
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+}/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}/*
+Remove the default font size and weight for headings.
+*/h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/a {
+  color: inherit;
+  text-decoration: inherit;
+}/*
+Add the correct font weight in Edge and Safari.
+*/b,
+strong {
+  font-weight: bolder;
+}/*
+1. Use the user's configured `mono` font family by default.
+2. Correct the odd `em` font sizing in all browsers.
+*/code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
+  font-size: 1em; /* 2 */
+}/*
+Add the correct font size in all browsers.
+*/small {
+  font-size: 80%;
+}/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}sub {
+  bottom: -0.25em;
+}sup {
+  top: -0.5em;
+}/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/button,
+select {
+  text-transform: none;
+}/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}/*
+Use the modern Firefox focus style for all focusable elements.
+*/:-moz-focusring {
+  outline: auto;
+}/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/:-moz-ui-invalid {
+  box-shadow: none;
+}/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/progress {
+  vertical-align: baseline;
+}/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/[type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/::-webkit-search-decoration {
+  -webkit-appearance: none;
+}/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}/*
+Add the correct display in Chrome and Safari.
+*/summary {
+  display: list-item;
+}/*
+Removes the default spacing and border for appropriate elements.
+*/blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}fieldset {
+  margin: 0;
+  padding: 0;
+}legend {
+  padding: 0;
+}ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}/*
+Prevent resizing textareas horizontally by default.
+*/textarea {
+  resize: vertical;
+}/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}input::placeholder,
+textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}/*
+Set the default cursor for buttons.
+*/button,
+[role="button"] {
+  cursor: pointer;
+}/*
+Make sure disabled buttons don't get the pointer cursor.
+*/:disabled {
+  cursor: default;
+}/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/img,
+video {
+  max-width: 100%;
+  height: auto;
+}/* Make elements with the HTML hidden attribute stay hidden by default */[hidden] {
+  display: none;
+}*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}
+</style><style type="text/css">@import url(https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap);</style><style type="text/css">@import url(https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap);</style><style type="text/css">.row[data-v-0a08c546]{display:flex;flex-wrap:wrap;margin-left:-8px;margin-right:-8px}[class*="grid-"][data-v-0a08c546]{padding:0 8px;margin-bottom:16px}.grid-1[data-v-0a08c546]{width:8.3333333333%}.grid-2[data-v-0a08c546]{width:16.6666666667%}.grid-23[data-v-0a08c546]{width:20%}.grid-3[data-v-0a08c546]{width:25%}.grid-4[data-v-0a08c546]{width:33.3333333333%}.grid-5[data-v-0a08c546]{width:41.6666666667%}.grid-6[data-v-0a08c546]{width:50%}.grid-7[data-v-0a08c546]{width:58.3333333333%}.grid-8[data-v-0a08c546]{width:66.6666666667%}.grid-9[data-v-0a08c546]{width:75%}.grid-10[data-v-0a08c546]{width:83.3333333333%}.grid-11[data-v-0a08c546]{width:91.6666666667%}.grid-12[data-v-0a08c546]{width:100%}*[data-v-0a08c546]{font-family:"Roboto", sans-serif;-moz-box-sizing:border-box;box-sizing:border-box;outline:none !important}p[data-v-0a08c546]{margin:0}.-scroll[data-v-0a08c546]::-webkit-scrollbar{width:8px}.-scroll[data-v-0a08c546]::-webkit-scrollbar-track{background:transparent;padding:2px}.-scroll[data-v-0a08c546]::-webkit-scrollbar-thumb{background-color:#ccc;border:3px solid transparent;border-radius:20px}.scroll[data-v-0a08c546]{scrollbar-width:thin;scrollbar-color:#ccc transparent}.-blackfriday .header .header-container[data-v-0a08c546]{background-color:#000}.-blackfriday .header .header-container .brand-icons .icons>.minimize-button[data-v-0a08c546]:before{background-color:#fff}.-blackfriday .header .header-container .brand-icons .brand-back.-inside[data-v-0a08c546]{width:auto}.-blackfriday .header .header-container .brand-icons .logo[data-v-0a08c546]{width:17px;height:23px}.-blackfriday .tab-item-container .product-wrapper .card-best-offer-deals-container .content .header .box-best-offer[data-v-0a08c546]{background-color:#000;color:#fff}.-blackfriday .container-campaing[data-v-0a08c546]{background:linear-gradient(257deg, #000 27.57%, #4d4d4d 103.19%)}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area[data-v-0a08c546]{background-color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area>.tag[data-v-0a08c546]{background-color:#000}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.image-area>.tag>.percentage-off[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.heading[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.price-old[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.price-new[data-v-0a08c546]{color:#ffc500}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.sales-condition>.seller-lowest-price[data-v-0a08c546]{color:#d1d1d1}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.content>.cashback-information>.formula>.text[data-v-0a08c546]{color:#fff}.-blackfriday .container-campaing>.carousel>.rail-sale>.product>.link-to-offer[data-v-0a08c546]{background-color:#fff;border:1px solid #d1d1d1}.-blackfriday .card-container-offer>.content>.header>.tag-offer.-blackfriday[data-v-0a08c546]{background:#000 no-repeat 6px center;color:#fff}*[data-v-0a08c546]{font-family:'Montserrat', 'Roboto', sans-serif}.font-bold[data-v-0a08c546]{font-weight:bold}.text-white[data-v-0a08c546]{color:white}.font_14[data-v-0a08c546]{font-size:14px}@keyframes pulse-0a08c546{0%{box-shadow:0 0 0 0px rgba(255,197,0,0.5)}70%{box-shadow:0 0 0 20px rgba(255,197,0,0)}100%{box-shadow:0 0 0 10px rgba(255,197,0,0)}}.animation[data-v-0a08c546]{animation-duration:0.8s;animation-fill-mode:both;animation-delay:0.6s}@keyframes fadeIn-0a08c546{from{opacity:0}to{opacity:1}}.fadeIn[data-v-0a08c546]{animation-name:fadeIn-0a08c546}@keyframes fadeInUp-0a08c546{from{opacity:0;transform:translate3d(0, 100%, 0)}to{opacity:1;transform:translate3d(0, 0, 0)}}.fadeInUp[data-v-0a08c546]{animation-name:fadeInUp-0a08c546}.global-template-container>.content[data-v-0a08c546]{background-color:#fff;border-radius:12px;box-shadow:0px 9px 24px rgba(0,0,0,0.25);display:grid;font-family:'Montserrat', 'Roboto', sans-serif;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;max-height:92vh;position:fixed;right:20px;top:20px;width:436px;z-index:3265656565656;font-size:16px}.global-template-container>.content:not(.-inside):not(.-noFooter)>.body[data-v-0a08c546]{min-height:62vh}.global-template-container>.content[data-v-0a08c546]:not(.-noFooter){grid-template-areas:'header header' 'main main' 'footer footer'}.global-template-container>.content:not(.-noFooter)>.footer[data-v-0a08c546]{grid-area:footer;height:80px;position:relative}.global-template-container>.content.-noFooter[data-v-0a08c546]{grid-template-areas:'header header' 'main main'}.global-template-container>.content>.header[data-v-0a08c546]{grid-area:header;position:relative}.global-template-container>.content>.body[data-v-0a08c546]{grid-area:main;overflow-x:hidden;overflow-y:auto;position:relative;scroll-snap-type:x proximity;min-height:62vh}.global-template-container>.content>.body[data-v-0a08c546]::-webkit-scrollbar{-webkit-appearance:none;width:8px}.global-template-container>.content>.body[data-v-0a08c546]::-webkit-scrollbar-thumb{background-color:rgba(0,0,0,0.15);border-radius:4px;-webkit-box-shadow:0 0 1px rgba(255,255,255,0.25)}.global-template-container>.content>.body>.box-skeleton[data-v-0a08c546]{display:flex;flex-direction:column;height:inherit;padding:20px}.global-template-container>.content>.body>.box-skeleton>.skeleton[data-v-0a08c546]{height:40px;margin-bottom:20px;width:100%}.global-template-container>.content>.body>.box-skeleton>.skeleton.-big[data-v-0a08c546]{height:200px}
+</style><div><!----></div></template></aside></body></html>
