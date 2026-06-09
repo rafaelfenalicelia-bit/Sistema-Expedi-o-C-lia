@@ -1310,6 +1310,45 @@ status(API_URL?'online':'');
 if(API_URL) pull(true);
 // puxa atualizações da nuvem a cada 15s (sem atrapalhar quem digita)
 setInterval(()=>pull(true),15000);
+
+// ===== Atualização automática do app (service worker) =====
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  const tinhaControle = !!navigator.serviceWorker.controller;
+  function mostrarAtualizando(){
+    let el=document.getElementById('upd-overlay');
+    if(!el){
+      el=document.createElement('div'); el.id='upd-overlay';
+      el.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff;font-family:inherit;font-size:16px;font-weight:600';
+      el.innerHTML='<div style="background:#185FA5;padding:16px 22px;border-radius:12px">🔄 Atualizando o app...</div>';
+      document.body.appendChild(el);
+    }
+  }
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    // checa atualização ao abrir e a cada 60s
+    reg.update();
+    setInterval(()=>reg.update(), 60000);
+    reg.addEventListener('updatefound',()=>{
+      const novo=reg.installing;
+      if(!novo) return;
+      novo.addEventListener('statechange',()=>{
+        // novo SW instalado e já existe um controlando = é uma ATUALIZAÇÃO
+        if(novo.state==='installed' && navigator.serviceWorker.controller){
+          mostrarAtualizando();
+          novo.postMessage('ATIVAR_AGORA');
+        }
+      });
+    });
+  }).catch(()=>{});
+  // quando o novo SW assume o controle, recarrega a página
+  let recarregou=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(!tinhaControle) return;   // primeira instalação não recarrega
+    if(recarregou) return; recarregou=true;
+    setTimeout(()=>location.reload(), 400);
+  });
+})();
+
 </script>
 </body>
 </html>
