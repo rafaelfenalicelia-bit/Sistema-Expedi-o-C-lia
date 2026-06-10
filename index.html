@@ -105,6 +105,8 @@ input[readonly]{background:var(--surface2);color:var(--text2)}
 textarea{width:100%;min-height:60px;padding:10px 11px;border:1px solid var(--border2);border-radius:var(--rmd);font-size:16px;font-family:inherit;background:var(--surface);color:var(--text);resize:vertical}
 textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(200,16,46,.15)}
 .legenda{font-size:11px;color:var(--text2);margin:8px 2px;display:flex;gap:14px;flex-wrap:wrap}
+.con-fardos{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:10px 14px;margin:4px 0 10px;font-size:14px;color:var(--text2);text-align:center}
+.con-fardos b{font-size:17px;color:var(--text)}
 .legenda b{font-weight:700}
 .prog-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--rlg)}
 .prog-tbl{border-collapse:collapse;width:100%;min-width:640px;font-size:12px;background:var(--surface)}
@@ -486,9 +488,9 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 </div>
 
 <div class="tabbar">
-  <button class="tab active" id="tab-exp"  data-tab="exp"  onclick="sw('exp')"><i class="icon">🚚</i>Expedição</button>
+  <button class="tab active" id="tab-exp"  data-tab="exp"  onclick="sw('exp')"><i class="icon">🚚</i>Cargas</button>
   <button class="tab"        id="tab-est"  data-tab="est"  onclick="sw('est')"><i class="icon">📦</i>Estoque</button>
-  <button class="tab"        id="tab-con"  data-tab="con"  onclick="sw('con')"><i class="icon">✅</i>Conciliação</button>
+  <button class="tab"        id="tab-con"  data-tab="con"  onclick="sw('con')"><i class="icon">📅</i>Agenda</button>
   <button class="tab"        id="tab-dash" data-tab="dash" onclick="sw('dash')"><i class="icon">📊</i>Painel</button>
 </div>
 
@@ -593,7 +595,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 
 <!-- CONCILIAÇÃO -->
 <div class="screen" id="screen-con">
-  <div class="ptitle">Conciliação do Dia</div>
+  <div class="ptitle">Agenda de Carregamentos</div>
   <div class="psub">Programado vs. disponível no estoque</div>
   <div class="filters">
     <div class="frow">
@@ -607,6 +609,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="metric"><div class="metric-label">OK</div><div class="metric-val ok" id="m-ok">0</div></div>
     <div class="metric"><div class="metric-label">Falta</div><div class="metric-val falta" id="m-falta">0</div></div>
   </div>
+  <div class="con-fardos">🧱 Total de fardos no período: <b id="con-fardos-tot">0</b></div>
   <div class="legenda">Qtd em <b class="ok">verde</b> = estoque cobre &nbsp;·&nbsp; <b class="falta">vermelho</b> = falta no estoque</div>
   <div class="prog-wrap">
     <table class="prog-tbl">
@@ -1226,6 +1229,10 @@ function renderCon(){
     });
   });
   document.getElementById('con-body').innerHTML=rows||'<tr><td colspan="6"><div class="empty">Nenhuma carga no período selecionado</div></td></tr>';
+  // total de fardos do período = soma do peso de todas as cargas ÷ 30
+  let pesoTot=0;
+  cf.forEach(c=>c.itens.forEach(it=>{ pesoTot+=(it.peso||0); }));
+  document.getElementById('con-fardos-tot').textContent=fmtFardos(pesoTot/30)+' fardos';
 }
 function fmtKg(n){ return Math.round(n).toLocaleString('pt-BR')+' kg'; }
 function fmtFardos(n){ const r=Math.round(n*10)/10; return (Number.isInteger(r)?r:r.toFixed(1)).toString().replace('.',','); }
@@ -1827,7 +1834,7 @@ function renderNotifList(){
   el.innerHTML = notificacoes.map(n=>{
     const detalheHtml = (n.detalhe||[]).map(l=>`<div class="notif-detalhe-linha">${l}</div>`).join('');
     const podeFiltrar = n.tipo !== 'excluida' && n.cargaData;
-    const dica = podeFiltrar ? '<div class="notif-dica">Toque para ver na Conciliação →</div>' : '';
+    const dica = podeFiltrar ? '<div class="notif-dica">Toque para ver na Agenda →</div>' : '';
     return `
     <div class="notif-item ${n.lida?'':'unread'}" onclick="notifClick('${n.id}')">
       <div class="notif-icon ${classes[n.tipo]||'ni-edit'}">${icones[n.tipo]||'🔔'}</div>
@@ -1976,7 +1983,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v5';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v8';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
