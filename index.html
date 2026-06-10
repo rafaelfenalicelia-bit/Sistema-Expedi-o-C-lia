@@ -881,7 +881,7 @@ function entrarEdicao(idx){
   editandoIdx=idx; const c=cargas[idx];
   document.getElementById('c-num').value=c.num; document.getElementById('c-dest').value=c.nome; document.getElementById('c-data').value=c.data;
   document.getElementById('c-obs').value=c.obs||'';
-  novosItens=c.itens.map(x=>({...x})); renderNovos();
+  novosItens=consolidarItens(c.itens.map(x=>({...x}))); renderNovos();
   document.getElementById('form-title').textContent='✏️ Editar carga '+c.num;
   document.getElementById('btn-save-txt').textContent='Salvar alterações';
   document.getElementById('btn-cancel').style.display=''; document.getElementById('card-carga').classList.add('editing');
@@ -896,19 +896,39 @@ function cancelEdit(){
   document.getElementById('btn-save-txt').textContent='Salvar carga';
   document.getElementById('btn-cancel').style.display='none'; document.getElementById('card-carga').classList.remove('editing');
 }
+// Agrupa itens com mesmo código, somando as quantidades
+function consolidarItens(itens){
+  const mapa = {};
+  itens.forEach(it => {
+    if(mapa[it.cod]){
+      mapa[it.cod].qtd  += it.qtd;
+      mapa[it.cod].peso += it.peso;
+    } else {
+      mapa[it.cod] = {...it};
+    }
+  });
+  return Object.values(mapa);
+}
+
 function salvarCarga(){
   const num=document.getElementById('c-num').value.trim(), nome=document.getElementById('c-dest').value.trim(), data=document.getElementById('c-data').value, obs=document.getElementById('c-obs').value.trim();
   if(!num||!nome){ toast('Preencha número e destino'); return; }
   if(!data){ toast('Informe a data'); return; }
   if(!novosItens.length){ toast('Adicione ao menos um item'); return; }
+  // ✅ Consolida itens duplicados somando as quantidades
+  const itensFinal = consolidarItens(novosItens);
+  if(itensFinal.length < novosItens.length){
+    const diff = novosItens.length - itensFinal.length;
+    toast(`${diff} item(ns) duplicado(s) somado(s) ✓`);
+  }
   if(editandoIdx!==null){
     const antes={...cargas[editandoIdx],itens:[...cargas[editandoIdx].itens]};
-    const nova={id:cargas[editandoIdx].id||novoId(),num,nome,data,obs,itens:[...novosItens]};
-    cargas[editandoIdx]=nova; toast('Carga atualizada');
+    const nova={id:cargas[editandoIdx].id||novoId(),num,nome,data,obs,itens:itensFinal};
+    cargas[editandoIdx]=nova; if(!itensFinal.length < novosItens.length) toast('Carga atualizada');
     notifSalvarLocal('editada',nova,antes);
   } else {
-    const nova={id:novoId(),num,nome,data,obs,itens:[...novosItens]};
-    cargas.push(nova); toast('Carga salva');
+    const nova={id:novoId(),num,nome,data,obs,itens:itensFinal};
+    cargas.push(nova); if(itensFinal.length === novosItens.length) toast('Carga salva');
     notifSalvarLocal('nova',nova,null);
   }
   // ✅ Atualiza snapshot AGORA e bloqueia o pull por alguns segundos
