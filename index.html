@@ -742,7 +742,7 @@ function pull(silencioso){
   if(!API_URL) return;
   // não atrapalha quem está digitando
   if(document.activeElement && document.activeElement.tagName==='INPUT') return;
-  if(Date.now()-ultimaEdicao < 6000) return;
+  if(Date.now()-ultimaEdicao < 20000) return;
   fetch(API_URL+'?action=load&t='+Date.now())
     .then(r=>r.json()).then(d=>{
       const servCargas = Array.isArray(d.cargas)?d.cargas:[];
@@ -752,7 +752,7 @@ function pull(silencioso){
       // 🛡 PROTEÇÃO: nuvem voltou vazia mas este aparelho tem dados -> restaura a nuvem (não apaga)
       if(nuvemVazia && localTem){
         enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
-        cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
+        cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         status('online'); if(!silencioso) toast('Nuvem estava vazia — dados restaurados deste aparelho ✓');
         return;
       }
@@ -767,7 +767,7 @@ function pull(silencioso){
         } else if(d.meta.produtos){ mergeProdutosDaNuvem(d.meta.produtos); }
       }
       detectarMudancas(cargasAntes, cargas);
-      cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
+      cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
       saveLocal();
       renderCargas(); filtroDatas(); renderGrupos();
       if(document.getElementById('est-visual').classList.contains('active')) renderEstVisual();
@@ -821,14 +821,14 @@ function sincronizarInicial(){
           if(servBase){ baseItens=d.meta.baseItens; saveBaseItens(); rebuildRegistro(); }
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
         }
-        cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
+        cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         saveLocal();
         renderCargas(); filtroDatas(); renderGrupos(); renderDash();
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
         enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
-        cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
+        cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
         status('online'); toast('Conectado');
@@ -933,8 +933,8 @@ function salvarCarga(){
   }
   // ✅ Atualiza snapshot AGORA e bloqueia o pull por alguns segundos
   // para o envio à nuvem concluir antes de qualquer nova leitura.
-  ultimaEdicao = Date.now();
-  cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
+  ultimaEdicao = Date.now();   // bloqueia pull por 20s para o servidor receber antes
+  cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
   cancelEdit(); renderCargas(); filtroDatas(); saveAll();
 }
 function renderCargas(){
@@ -960,7 +960,7 @@ function remCarga(i){
     c.num,'');
   // ✅ Atualiza snapshot para que o pull não redetecte como mudança
   ultimaEdicao = Date.now();
-  cargasSnapshot = cargas.map(x=>({...x,itens:[...x.itens]}));
+  cargasSnapshot = cargas.map(x=>({...x,itens:normalizarItens(x.itens)}));
   renderCargas(); filtroDatas(); saveAll();
 }
 function filtroDatas(){ /* não há mais seletor único; o filtro agora é por intervalo */ }
@@ -1897,6 +1897,20 @@ function novoId(){ return 'c'+Date.now().toString(36)+Math.random().toString(36)
 // chave estável: usa id quando existe; senão, número+destino+data (evita colisão de números repetidos)
 function keyOf(c){ return c.id ? ('id:'+c.id) : ('k:'+(c.num||'')+'|'+(c.nome||'')+'|'+(c.data||'')); }
 
+// Normaliza itens de uma carga para comparação: consolida duplicatas e ordena por cod
+function normalizarItens(itens){
+  const m = {};
+  (itens||[]).forEach(it=>{ if(m[it.cod]) m[it.cod].qtd+=it.qtd; else m[it.cod]={...it}; });
+  return Object.values(m).sort((a,b)=>a.cod-b.cod);
+}
+// Gera string canônica de uma carga para comparação
+function cargaStr(c){
+  return JSON.stringify({
+    nome:c.nome, data:c.data, obs:(c.obs||'').trim(),
+    itens: normalizarItens(c.itens).map(i=>({cod:i.cod,qtd:i.qtd}))
+  });
+}
+
 function detectarMudancas(cargasAntes, cargasDepois){
   if(!cargasAntes) return;
   const mapaAntes={}, mapaDepois={};
@@ -1923,9 +1937,8 @@ function detectarMudancas(cargasAntes, cargasDepois){
         c.num, '');
       return;
     }
-    const aStr = JSON.stringify({nome:c.nome,data:c.data,obs:c.obs||'',itens:c.itens});
-    const dStr = JSON.stringify({nome:dep.nome,data:dep.data,obs:dep.obs||'',itens:dep.itens});
-    if(aStr !== dStr){
+    // Usa comparação normalizada — ignora ordem e duplicatas
+    if(cargaStr(c) !== cargaStr(dep)){
       addNotif('editada',
         'Carga editada: '+dep.num,
         resumoMudancas(c, dep),
@@ -1952,7 +1965,7 @@ GRUPOS.forEach(t=>{ if(!(t in abertos)) abertos[t]=false; });
 atualizarListasGrupos();
 document.getElementById('e-contador').addEventListener('input',()=>{ultimaEdicao=Date.now();});
 loadLocal();
-cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
+cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
 loadNotifs(); atualizarBadge();
 loadBaseItens();
 renderCargas(); filtroDatas(); renderGrupos(); renderDash();
