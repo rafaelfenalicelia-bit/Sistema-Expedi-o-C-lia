@@ -670,14 +670,14 @@ let prodDeleted = [];      // cods excluídos
 let editandoItemCod = null;
 let cargas=[], estoqueQtd={}, novosItens=[], editandoIdx=null, abertos={};
 function rebuildRegistro(){
-  const arr=[];
-  const add=p=>{ if(prodDeleted.indexOf(p.cod)>=0) return; const ov=prodOverrides[p.cod]; arr.push(ov?Object.assign({},p,ov,{cod:p.cod}):Object.assign({},p)); };
-  BASE_PRODUTOS.forEach(add);
-  customProdutos.forEach(add);
-  PRODUTOS=arr;
+  // Fonte única: a Base de Itens (baseItens). Converte grupo->tp para o resto do app.
+  const fonte = (typeof baseItens!=='undefined' && baseItens.length)
+    ? baseItens.map(it=>({cod:it.cod, nome:it.nome, peso:it.peso||0, tp:it.grupo||'', granel:!!it.granel}))
+    : BASE_PRODUTOS.map(p=>({...p}));
+  PRODUTOS = fonte;
   for(const k in PMAP) delete PMAP[k];
-  arr.forEach(p=>PMAP[p.cod]=p);
-  const gs=[...new Set(arr.map(p=>p.tp))].sort();
+  fonte.forEach(p=>PMAP[p.cod]=p);
+  const gs=[...new Set(fonte.map(p=>p.tp).filter(Boolean))].sort();
   GRUPOS.length=0; gs.forEach(g=>GRUPOS.push(g));
   gs.forEach(g=>{ if(!(g in abertos)) abertos[g]=false; });
   if(typeof atualizarListasGrupos==='function') atualizarListasGrupos();
@@ -728,7 +728,7 @@ function pushEstoque(){
 }
 function pushMeta(){
   if(!API_URL) return;
-  enviar({action:'meta',meta:{contador:val('e-contador'),dataContagem:val('e-data'),produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+  enviar({action:'meta',meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
 }
 function enviar(payload){
   status('enviando');
@@ -751,7 +751,7 @@ function pull(silencioso){
       const localTem = (cargas&&cargas.length>0) || (estoqueQtd&&Object.keys(estoqueQtd).length>0);
       // 🛡 PROTEÇÃO: nuvem voltou vazia mas este aparelho tem dados -> restaura a nuvem (não apaga)
       if(nuvemVazia && localTem){
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
         status('online'); if(!silencioso) toast('Nuvem estava vazia — dados restaurados deste aparelho ✓');
         return;
@@ -761,7 +761,10 @@ function pull(silencioso){
       if(d.meta){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
         if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
-        if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
+        if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
+          baseItens = d.meta.baseItens; saveBaseItens(); rebuildRegistro();
+          if(typeof renderBaseItens==='function' && document.getElementById('bi-list')) renderBaseItens();
+        } else if(d.meta.produtos){ mergeProdutosDaNuvem(d.meta.produtos); }
       }
       detectarMudancas(cargasAntes, cargas);
       cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
@@ -805,7 +808,8 @@ function sincronizarInicial(){
       const servEst = (d.estoqueQtd && typeof d.estoqueQtd==='object') ? d.estoqueQtd : {};
       const prod = d.meta && d.meta.produtos;
       const servProd = prod && ((prod.custom&&prod.custom.length) || (prod.overrides&&Object.keys(prod.overrides).length) || (prod.deleted&&prod.deleted.length) || (Array.isArray(prod)&&prod.length));
-      const nuvemTemDados = servCargas.length>0 || Object.keys(servEst).length>0 || servProd;
+      const servBase = d.meta && Array.isArray(d.meta.baseItens) && d.meta.baseItens.length;
+      const nuvemTemDados = servCargas.length>0 || Object.keys(servEst).length>0 || servProd || servBase;
       const localTemDados = (cargas&&cargas.length>0) || (estoqueQtd&&Object.keys(estoqueQtd).length>0);
 
       if(nuvemTemDados){
@@ -814,7 +818,8 @@ function sincronizarInicial(){
         if(d.meta){
           if(d.meta.contador!==undefined) document.getElementById('e-contador').value=d.meta.contador;
           if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
-          if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
+          if(servBase){ baseItens=d.meta.baseItens; saveBaseItens(); rebuildRegistro(); }
+          else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
         }
         cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
         saveLocal();
@@ -822,7 +827,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:[...c.itens]}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1514,12 +1519,13 @@ const BI_GRUPOS_CORES = {
 };
 
 function loadBaseItens(){
-  try{ const r=localStorage.getItem(BASE_ITENS_KEY); if(r){ baseItens=JSON.parse(r); return; } }catch(e){}
-  // Semeia com os PRODUTOS existentes na primeira vez
-  baseItens = (typeof PRODUTOS !== 'undefined' ? PRODUTOS : []).map(p=>({
+  try{ const r=localStorage.getItem(BASE_ITENS_KEY); if(r){ baseItens=JSON.parse(r)||[]; rebuildRegistro(); return; } }catch(e){}
+  // Semeia com a lista de fábrica na primeira vez
+  baseItens = BASE_PRODUTOS.map(p=>({
     cod: p.cod, nome: p.nome, peso: p.peso||0, grupo: p.tp||'', granel: !!p.granel
   }));
   saveBaseItens();
+  rebuildRegistro();
 }
 function saveBaseItens(){
   try{ localStorage.setItem(BASE_ITENS_KEY,JSON.stringify(baseItens)); }catch(e){}
@@ -1621,7 +1627,7 @@ function salvarItemBase(){
   if(_biEditando!==null){
     const idx=baseItens.findIndex(x=>x.cod===_biEditando);
     if(idx>=0){ baseItens[idx]={...baseItens[idx],nome:nomeRaw,peso,grupo,granel}; }
-    saveBaseItens();
+    saveBaseItens(); aplicarBaseItens();
     fecharDrawer('novoitem');
     setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
     toast('Item atualizado ✓');
@@ -1633,10 +1639,19 @@ function salvarItemBase(){
   if(!cod && cod!==0){ err.textContent='Informe o código'; return; }
   if(baseItens.find(x=>x.cod===cod)){ err.textContent='Já existe item com este código'; return; }
   baseItens.push({cod,nome:nomeRaw,peso,grupo,granel});
-  saveBaseItens();
+  saveBaseItens(); aplicarBaseItens();
   fecharDrawer('novoitem');
   setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
   toast('Item adicionado à base ✓');
+}
+
+// aplica mudanças da Base de Itens em todo o app + nuvem
+function aplicarBaseItens(){
+  rebuildRegistro();
+  renderGrupos();
+  if(typeof renderDash==='function') renderDash();
+  ultimaEdicao = Date.now();
+  if(API_URL) pushMeta();
 }
 
 function excluirItemBase(){
@@ -1644,7 +1659,7 @@ function excluirItemBase(){
   const it=baseItens.find(x=>x.cod===_biEditando);
   if(!confirm('Excluir "'+(it?it.nome:_biEditando)+'" da base de itens?\nIsso não afeta o estoque.')) return;
   baseItens=baseItens.filter(x=>x.cod!==_biEditando);
-  saveBaseItens();
+  saveBaseItens(); aplicarBaseItens();
   fecharDrawer('novoitem');
   setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
   toast('Item excluído da base ✓');
@@ -1928,7 +1943,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v4';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v5';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
