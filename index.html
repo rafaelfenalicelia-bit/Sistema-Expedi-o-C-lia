@@ -1241,20 +1241,34 @@ function limparDash(){ document.getElementById('d-ini').value=''; document.getEl
 function renderDash(){
   const ini=val('d-ini'), fim=val('d-fim');
   const cf=cargas.filter(c=>{ const d=c.data||''; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
+  // grupo efetivo: junta o granel de parbo/polido (e integral/cão) com o acabado
+  function grupoEfetivo(nome, tp){
+    if(tp==='GRANEL'){
+      const n=(nome||'').toUpperCase();
+      if(/PARBO/.test(n)) return 'PARBO';
+      if(/POLIDO/.test(n)) return 'BRANCO';
+      if(/INTEGRAL/.test(n)) return 'INTEGRAL';
+      if(/C[ÃA]O/.test(n)) return 'CÃO';
+    }
+    return tp;
+  }
   // kg a carregar por grupo (período) e kg em estoque por grupo (atual)
   const carGrp={}, estGrp={};
-  cf.forEach(c=>c.itens.forEach(it=>{ carGrp[it.tp]=(carGrp[it.tp]||0)+(it.peso||0); }));
-  Object.keys(estoqueQtd).forEach(cod=>{ const p=PMAP[cod]; if(!p)return; const kg=p.granel?estoqueQtd[cod]:(p.peso>0?p.peso*estoqueQtd[cod]:0); estGrp[p.tp]=(estGrp[p.tp]||0)+kg; });
-  const grupos=[...new Set([...Object.keys(carGrp),...Object.keys(estGrp)])].sort();
+  cf.forEach(c=>c.itens.forEach(it=>{ const g=grupoEfetivo(it.nome,it.tp); carGrp[g]=(carGrp[g]||0)+(it.peso||0); }));
+  Object.keys(estoqueQtd).forEach(cod=>{ const p=PMAP[cod]; if(!p)return; const kg=p.granel?estoqueQtd[cod]:(p.peso>0?p.peso*estoqueQtd[cod]:0); const g=grupoEfetivo(p.nome,p.tp); estGrp[g]=(estGrp[g]||0)+kg; });
+  // mostra só os grupos que têm algo PROGRAMADO no período
+  const grupos=Object.keys(carGrp).filter(g=>carGrp[g]>0).sort();
   const max=Math.max(1,...grupos.map(g=>Math.max(estGrp[g]||0,carGrp[g]||0)));
-  let totalCar=0, totalEst=0, bars='';
+  let totalCar=Object.values(carGrp).reduce((s,v)=>s+v,0);
+  let totalEst=Object.values(estGrp).reduce((s,v)=>s+v,0);
+  let bars='';
   grupos.forEach(g=>{
-    const e=estGrp[g]||0, ca=carGrp[g]||0; totalEst+=e; totalCar+=ca;
+    const e=estGrp[g]||0, ca=carGrp[g]||0;
     bars+=`<div class="dash-grp"><div class="dash-grp-top"><span class="badge ${TP_BADGE[g]||'b-gray'}">${g}</span></div>
       <div class="dash-bar"><div class="fill fill-est" style="width:${e>0?Math.max(8,e/max*100):0}%">${e>0?fmtKg(e):''}</div></div>
       <div class="dash-bar"><div class="fill fill-car" style="width:${ca>0?Math.max(8,ca/max*100):0}%">${ca>0?fmtKg(ca):''}</div></div></div>`;
   });
-  document.getElementById('dash-bars').innerHTML=bars||'<div class="empty">Sem dados no período</div>';
+  document.getElementById('dash-bars').innerHTML=bars||'<div class="empty">Nada programado no período</div>';
   document.getElementById('d-car').textContent=fmtKg(totalCar);
   document.getElementById('d-est').textContent=fmtKg(totalEst);
   // resumo de cargas + fardos (peso total / 30)
@@ -1984,7 +1998,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v9';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v10';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
