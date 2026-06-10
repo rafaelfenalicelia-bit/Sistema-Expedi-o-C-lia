@@ -943,7 +943,8 @@ function salvarCarga(){
 function renderCargas(){
   const el=document.getElementById('lista-cargas');
   if(!cargas.length){ el.innerHTML='<div class="empty">Nenhuma carga lançada</div>'; return; }
-  const ord=cargas.map((c,i)=>({c,i})).sort((a,b)=>(a.c.data||'').localeCompare(b.c.data||''));
+  // mais recém lançadas primeiro (última adicionada no topo)
+  const ord=cargas.map((c,i)=>({c,i})).sort((a,b)=>b.i-a.i);
   el.innerHTML=ord.map(({c,i})=>{
     const tot=c.itens.reduce((s,x)=>s+x.peso,0);
     return `<div class="carga-card"><div class="carga-head"><span class="carga-num">${c.num}</span><span class="carga-dest">${c.nome}</span><span class="date-badge">${fmtData(c.data)}</span></div>
@@ -1983,7 +1984,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v8';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v9';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
