@@ -504,7 +504,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="card" id="card-carga">
     <div class="ctitle" id="form-title">➕ Nova carga</div>
     <div class="fg"><label>Número da carga</label><input id="c-num" placeholder="ex: C-001"></div>
-    <div class="fg"><label>Nome / destino</label><input id="c-nome" placeholder="ex: Supermercado Central"></div>
+    <div class="fg"><label>Nome / destino</label><input id="c-dest" placeholder="ex: Supermercado Central"></div>
     <div class="fg"><label>📅 Data de carregamento</label><input type="date" id="c-data"></div>
     <div class="fg"><label>📝 Observações da carga (opcional)</label><textarea id="c-obs" placeholder="ex: SACARIA 50KG · MANDAR STRECH · ARROZ CLARO..."></textarea></div>
     <div class="ctitle" style="margin-top:6px">Adicionar item por código</div>
@@ -874,7 +874,7 @@ function renderNovos(){
 function remNovo(i){ novosItens.splice(i,1); renderNovos(); }
 function entrarEdicao(idx){
   editandoIdx=idx; const c=cargas[idx];
-  document.getElementById('c-num').value=c.num; document.getElementById('c-nome').value=c.nome; document.getElementById('c-data').value=c.data;
+  document.getElementById('c-num').value=c.num; document.getElementById('c-dest').value=c.nome; document.getElementById('c-data').value=c.data;
   document.getElementById('c-obs').value=c.obs||'';
   novosItens=c.itens.map(x=>({...x})); renderNovos();
   document.getElementById('form-title').textContent='✏️ Editar carga '+c.num;
@@ -884,7 +884,7 @@ function entrarEdicao(idx){
 }
 function cancelEdit(){
   editandoIdx=null; novosItens=[];
-  document.getElementById('c-num').value=''; document.getElementById('c-nome').value='';
+  document.getElementById('c-num').value=''; document.getElementById('c-dest').value='';
   document.getElementById('c-obs').value='';
   document.getElementById('c-data').value=hoje(); renderNovos();
   document.getElementById('form-title').textContent='➕ Nova carga';
@@ -892,7 +892,7 @@ function cancelEdit(){
   document.getElementById('btn-cancel').style.display='none'; document.getElementById('card-carga').classList.remove('editing');
 }
 function salvarCarga(){
-  const num=document.getElementById('c-num').value.trim(), nome=document.getElementById('c-nome').value.trim(), data=document.getElementById('c-data').value, obs=document.getElementById('c-obs').value.trim();
+  const num=document.getElementById('c-num').value.trim(), nome=document.getElementById('c-dest').value.trim(), data=document.getElementById('c-data').value, obs=document.getElementById('c-obs').value.trim();
   if(!num||!nome){ toast('Preencha número e destino'); return; }
   if(!data){ toast('Informe a data'); return; }
   if(!novosItens.length){ toast('Adicione ao menos um item'); return; }
@@ -1928,7 +1928,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v3';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v4';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
