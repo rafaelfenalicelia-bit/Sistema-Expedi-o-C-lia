@@ -59,6 +59,10 @@ input[readonly]{background:var(--surface2);color:var(--text2)}
 .btn-sm{padding:7px 10px;font-size:13px;min-height:36px}
 .btn-row{display:flex;gap:8px;margin-top:10px}
 .item-add{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+.emp-sel{display:flex;gap:8px;margin:2px 0 12px}
+.emp-btn{flex:1;padding:9px 6px;border:1.5px solid var(--border2);background:var(--surface);border-radius:var(--rmd);font-weight:700;font-size:13px;color:var(--text2);cursor:pointer;font-family:inherit;min-height:42px}
+.emp-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.emp-row td{background:var(--surface2);font-weight:800;font-size:11px;color:var(--blue);letter-spacing:.04em;padding:6px 8px}
 .item-add .fg{margin-bottom:0}
 .item-add .full{grid-column:1/-1}
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
@@ -511,6 +515,12 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="psub">Digite o código e a quantidade — nome e peso entram sozinhos</div>
   <div class="card" id="card-carga">
     <div class="ctitle" id="form-title">➕ Nova carga</div>
+    <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:4px">EMPRESA DOS ITENS</div>
+    <div class="emp-sel" id="emp-sel">
+      <button type="button" class="emp-btn active" data-emp="MATRIZ" onclick="setEmpresa('MATRIZ')">MATRIZ</button>
+      <button type="button" class="emp-btn" data-emp="MINAS" onclick="setEmpresa('MINAS')">MINAS</button>
+      <button type="button" class="emp-btn" data-emp="RS" onclick="setEmpresa('RS')">RS</button>
+    </div>
     <div class="fg"><label>Número da carga</label><input id="c-num" placeholder="ex: C-001"></div>
     <div class="fg"><label>Nome / destino</label><input id="c-dest" placeholder="ex: Supermercado Central"></div>
     <div class="fg"><label>📅 Data de carregamento</label><input type="date" id="c-data"></div>
@@ -875,7 +885,7 @@ function addItem(){
   const p=getProd(cod); if(!p){ toast('Código não encontrado'); return; }
   if(!q||q<=0){ toast('Informe a quantidade'); return; }
   const peso=p.granel?q:(p.peso>0?p.peso*q:0);
-  novosItens.push({cod:p.cod,nome:p.nome,tp:p.tp,qtd:q,peso,granel:!!p.granel});
+  novosItens.push({cod:p.cod,nome:p.nome,tp:p.tp,qtd:q,peso,granel:!!p.granel,empresa:empresaSel});
   document.getElementById('c-cod').value=''; document.getElementById('c-prod').value=''; document.getElementById('c-prod').className='';
   document.getElementById('c-qtd').value=''; document.getElementById('peso-prev').textContent=''; document.getElementById('c-cod').focus();
   renderNovos();
@@ -884,8 +894,21 @@ function renderNovos(){
   const el=document.getElementById('itens-prev');
   if(!novosItens.length){ el.innerHTML=''; return; }
   const tot=novosItens.reduce((s,i)=>s+i.peso,0);
-  el.innerHTML='<table class="tbl" style="margin-top:10px"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th><th></th></tr></thead><tbody>'+
-    novosItens.map((it,i)=>`<tr><td class="prod-cod">${it.cod}</td><td>${it.nome}</td><td>${it.granel?it.qtd+'kg':it.qtd}</td><td><div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-edit btn-sm" onclick="editarQtdNovo(${i})" title="Editar quantidade">✏️</button><button class="btn btn-danger btn-sm" onclick="remNovo(${i})" title="Remover item">🗑</button></div></td></tr>`).join('')+
+  // agrupa por empresa preservando o índice original (p/ editar/excluir)
+  const byEmp={};
+  novosItens.forEach((it,idx)=>{ const e=it.empresa||'MATRIZ'; (byEmp[e]=byEmp[e]||[]).push({it,idx}); });
+  const emps = empresasDe(novosItens);
+  const mostrarEmp = emps.length>1;
+  const ordemEmps = EMPRESAS.concat(Object.keys(byEmp).filter(e=>!EMPRESAS.includes(e)));
+  const linha=({it,idx})=>`<tr><td class="prod-cod">${it.cod}</td><td>${it.nome}</td><td>${it.granel?it.qtd+'kg':it.qtd}</td><td><div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-edit btn-sm" onclick="editarQtdNovo(${idx})" title="Editar quantidade">✏️</button><button class="btn btn-danger btn-sm" onclick="remNovo(${idx})" title="Remover item">🗑</button></div></td></tr>`;
+  let body='';
+  ordemEmps.forEach(emp=>{
+    const arr=byEmp[emp]; if(!arr||!arr.length) return;
+    arr.sort((a,b)=>{const ra=ORD_GRUPO[a.it.tp]!=null?ORD_GRUPO[a.it.tp]:50;const rb=ORD_GRUPO[b.it.tp]!=null?ORD_GRUPO[b.it.tp]:50;if(ra!==rb)return ra-rb;return (a.it.nome||'').localeCompare(b.it.nome||'');});
+    if(mostrarEmp) body+=`<tr class="emp-row"><td colspan="4">🏢 ${emp}</td></tr>`;
+    body+=arr.map(linha).join('');
+  });
+  el.innerHTML='<table class="tbl" style="margin-top:10px"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th><th></th></tr></thead><tbody>'+body+
     `</tbody><tfoot><tr><td colspan="2" style="text-align:right;font-weight:700;border-top:1px solid var(--border2)">Total:</td><td colspan="2" style="font-weight:700;border-top:1px solid var(--border2)">${tot.toFixed(0)}kg</td></tr></tfoot></table>`;
 }
 function remNovo(i){ novosItens.splice(i,1); renderNovos(); }
@@ -912,7 +935,7 @@ function entrarEdicao(idx){
   sw('exp'); window.scrollTo({top:0,behavior:'smooth'});
 }
 function cancelEdit(){
-  editandoIdx=null; novosItens=[];
+  editandoIdx=null; novosItens=[]; setEmpresa('MATRIZ');
   document.getElementById('c-num').value=''; document.getElementById('c-dest').value='';
   document.getElementById('c-obs').value='';
   document.getElementById('c-data').value=hoje(); renderNovos();
@@ -920,15 +943,23 @@ function cancelEdit(){
   document.getElementById('btn-save-txt').textContent='Salvar carga';
   document.getElementById('btn-cancel').style.display='none'; document.getElementById('card-carga').classList.remove('editing');
 }
-// Agrupa itens com mesmo código, somando as quantidades
+// Agrupa itens com mesmo código (e mesma empresa), somando as quantidades
+const EMPRESAS = ['MATRIZ','MINAS','RS'];
+let empresaSel = 'MATRIZ';
+function setEmpresa(e){
+  empresaSel=e;
+  document.querySelectorAll('#emp-sel .emp-btn').forEach(b=>b.classList.toggle('active', b.dataset.emp===e));
+}
 function consolidarItens(itens){
   const mapa = {};
   itens.forEach(it => {
-    if(mapa[it.cod]){
-      mapa[it.cod].qtd  += it.qtd;
-      mapa[it.cod].peso += it.peso;
+    const emp = it.empresa||'MATRIZ';
+    const key = emp+'|'+it.cod;
+    if(mapa[key]){
+      mapa[key].qtd  += it.qtd;
+      mapa[key].peso += it.peso;
     } else {
-      mapa[it.cod] = {...it};
+      mapa[key] = {...it, empresa:emp};
     }
   });
   return Object.values(mapa);
@@ -943,6 +974,20 @@ function ordenarItens(itens){
     return (a.nome||'').localeCompare(b.nome||'');
   });
 }
+function rankEmp(e){ const i=EMPRESAS.indexOf(e||'MATRIZ'); return i<0?99:i; }
+// ordena por empresa e, dentro dela, arroz primeiro
+function ordenarItensEmp(itens){
+  return itens.slice().sort((a,b)=>{
+    const ea=rankEmp(a.empresa), eb=rankEmp(b.empresa);
+    if(ea!==eb) return ea-eb;
+    const ra=ORD_GRUPO[a.tp]!=null?ORD_GRUPO[a.tp]:50;
+    const rb=ORD_GRUPO[b.tp]!=null?ORD_GRUPO[b.tp]:50;
+    if(ra!==rb) return ra-rb;
+    return (a.nome||'').localeCompare(b.nome||'');
+  });
+}
+// quantas empresas distintas há numa lista de itens
+function empresasDe(itens){ return [...new Set(itens.map(it=>it.empresa||'MATRIZ'))]; }
 
 function salvarCarga(){
   const num=document.getElementById('c-num').value.trim(), nome=document.getElementById('c-dest').value.trim(), data=document.getElementById('c-data').value, obs=document.getElementById('c-obs').value.trim();
@@ -974,10 +1019,23 @@ function renderCargas(){
   // mais recém lançadas primeiro (última adicionada no topo)
   const ord=cargas.map((c,i)=>({c,i})).sort((a,b)=>b.i-a.i);
   el.innerHTML=ord.map(({c,i})=>{
-    const disp=ordenarItens(consolidarItens(c.itens));
-    const tot=disp.reduce((s,x)=>s+x.peso,0);
+    const cons=consolidarItens(c.itens);
+    const tot=cons.reduce((s,x)=>s+x.peso,0);
+    const emps=empresasDe(cons);
+    const mostrarEmp=emps.length>1;
+    const byEmp={}; cons.forEach(it=>{const e=it.empresa||'MATRIZ';(byEmp[e]=byEmp[e]||[]).push(it);});
+    const ordemEmps=EMPRESAS.concat(Object.keys(byEmp).filter(e=>!EMPRESAS.includes(e)));
+    let corpo='';
+    if(mostrarEmp){
+      ordemEmps.forEach(emp=>{ const arr=byEmp[emp]; if(!arr||!arr.length) return;
+        corpo+=`<tr class="emp-row"><td colspan="3">🏢 ${emp}</td></tr>`;
+        corpo+=ordenarItens(arr).map(x=>`<tr><td class="prod-cod">${x.cod}</td><td>${x.nome}</td><td>${x.granel?x.qtd+'kg':x.qtd}</td></tr>`).join('');
+      });
+    } else {
+      corpo=ordenarItens(cons).map(x=>`<tr><td class="prod-cod">${x.cod}</td><td>${x.nome}</td><td>${x.granel?x.qtd+'kg':x.qtd}</td></tr>`).join('');
+    }
     return `<div class="carga-card"><div class="carga-head"><span class="carga-num">${c.num}</span><span class="carga-dest">${c.nome}</span><span class="date-badge">${fmtData(c.data)}</span></div>
-    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody>${disp.map(x=>`<tr><td class="prod-cod">${x.cod}</td><td>${x.nome}</td><td>${x.granel?x.qtd+'kg':x.qtd}</td></tr>`).join('')}</tbody></table>
+    <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody>${corpo}</tbody></table>
     ${c.obs?`<div style="font-size:12px;color:#C0392B;font-weight:600;margin-top:8px">📝 ${esc(c.obs)}</div>`:''}
     <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(${i})">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(${i})">🗑 Excluir</button>${tot>0?`<span class="badge b-gray" style="align-self:center">${tot.toFixed(0)}kg</span>`:''}</div></div>`;
   }).join('');
@@ -1237,7 +1295,9 @@ function renderCon(){
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   let rows='', gi=0;
   ord.forEach(c=>{
-    const itensDisp=ordenarItens(consolidarItens(c.itens));
+    const cons=consolidarItens(c.itens);
+    const itensDisp=ordenarItensEmp(cons);
+    const multiEmp=empresasDe(cons).length>1;
     const n=itensDisp.length||1;
     const alt=gi%2===1?' pg-alt':'';
     gi++;
@@ -1247,13 +1307,14 @@ function renderCon(){
     }
     itensDisp.forEach((it,i)=>{
       const disp=estoqueQtd[it.cod]||0, cobre=disp>=(progTot[it.cod]||0);
+      const tagEmp = multiEmp ? `<span style="display:inline-block;font-size:9px;font-weight:800;color:var(--blue);background:#E6F1FB;padding:1px 5px;border-radius:6px;margin-right:6px">${it.empresa||'MATRIZ'}</span>` : '';
       rows+=`<tr class="${i===0?'pg-start':''}${alt}">`;
       if(i===0){
         rows+=`<td rowspan="${n}" class="pg-merge">${fmtData(c.data)}</td>`;
         rows+=`<td rowspan="${n}" class="pg-merge">${diaSemana(c.data)}</td>`;
         rows+=`<td rowspan="${n}" class="pg-dest">${esc(c.nome)}</td>`;
       }
-      rows+=`<td class="pg-desc">${esc(it.nome)}</td>`;
+      rows+=`<td class="pg-desc">${tagEmp}${esc(it.nome)}</td>`;
       rows+=`<td class="pg-qtd ${cobre?'pg-ok':'pg-falta'}">${it.qtd}${it.granel?' kg':''}</td>`;
       if(i===0){ rows+=`<td rowspan="${n}" class="pg-obs">${esc(c.obs||'')}</td>`; }
       rows+='</tr>';
@@ -2028,7 +2089,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v13';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v14';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
