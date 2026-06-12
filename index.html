@@ -905,7 +905,7 @@ function renderNovos(){
   ordemEmps.forEach(emp=>{
     const arr=byEmp[emp]; if(!arr||!arr.length) return;
     arr.sort((a,b)=>{const ra=ORD_GRUPO[a.it.tp]!=null?ORD_GRUPO[a.it.tp]:50;const rb=ORD_GRUPO[b.it.tp]!=null?ORD_GRUPO[b.it.tp]:50;if(ra!==rb)return ra-rb;return (a.it.nome||'').localeCompare(b.it.nome||'');});
-    if(mostrarEmp) body+=`<tr class="emp-row"><td colspan="4">🏢 ${emp}</td></tr>`;
+    if(mostrarEmp){ const pesoEmp=arr.reduce((s,x)=>s+(x.it.peso||0),0); body+=`<tr class="emp-row"><td colspan="2">🏢 ${emp}</td><td style="text-align:right">${pesoEmp.toFixed(0)}kg</td><td></td></tr>`; }
     body+=arr.map(linha).join('');
   });
   el.innerHTML='<table class="tbl" style="margin-top:10px"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th><th></th></tr></thead><tbody>'+body+
@@ -1028,7 +1028,8 @@ function renderCargas(){
     let corpo='';
     if(mostrarEmp){
       ordemEmps.forEach(emp=>{ const arr=byEmp[emp]; if(!arr||!arr.length) return;
-        corpo+=`<tr class="emp-row"><td colspan="3">🏢 ${emp}</td></tr>`;
+        const pesoEmp=arr.reduce((s,x)=>s+(x.peso||0),0);
+        corpo+=`<tr class="emp-row"><td colspan="2">🏢 ${emp}</td><td style="text-align:right">${pesoEmp.toFixed(0)}kg</td></tr>`;
         corpo+=ordenarItens(arr).map(x=>`<tr><td class="prod-cod">${x.cod}</td><td>${x.nome}</td><td>${x.granel?x.qtd+'kg':x.qtd}</td></tr>`).join('');
       });
     } else {
@@ -2089,7 +2090,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v14';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v15';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
