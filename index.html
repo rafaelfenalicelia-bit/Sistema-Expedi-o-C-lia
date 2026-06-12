@@ -885,10 +885,22 @@ function renderNovos(){
   if(!novosItens.length){ el.innerHTML=''; return; }
   const tot=novosItens.reduce((s,i)=>s+i.peso,0);
   el.innerHTML='<table class="tbl" style="margin-top:10px"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th><th></th></tr></thead><tbody>'+
-    novosItens.map((it,i)=>`<tr><td class="prod-cod">${it.cod}</td><td>${it.nome}</td><td>${it.granel?it.qtd+'kg':it.qtd}</td><td><button class="btn btn-danger btn-sm" onclick="remNovo(${i})">🗑</button></td></tr>`).join('')+
+    novosItens.map((it,i)=>`<tr><td class="prod-cod">${it.cod}</td><td>${it.nome}</td><td>${it.granel?it.qtd+'kg':it.qtd}</td><td><div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-edit btn-sm" onclick="editarQtdNovo(${i})" title="Editar quantidade">✏️</button><button class="btn btn-danger btn-sm" onclick="remNovo(${i})" title="Remover item">🗑</button></div></td></tr>`).join('')+
     `</tbody><tfoot><tr><td colspan="2" style="text-align:right;font-weight:700;border-top:1px solid var(--border2)">Total:</td><td colspan="2" style="font-weight:700;border-top:1px solid var(--border2)">${tot.toFixed(0)}kg</td></tr></tfoot></table>`;
 }
 function remNovo(i){ novosItens.splice(i,1); renderNovos(); }
+function editarQtdNovo(i){
+  const it=novosItens[i]; if(!it) return;
+  const r=prompt('Nova quantidade'+(it.granel?' (kg)':'')+' para '+it.nome+':', it.qtd);
+  if(r===null) return;
+  const q=parseFloat((''+r).replace(',','.'));
+  if(!q||q<=0){ toast('Quantidade inválida'); return; }
+  const p=getProd(it.cod);
+  const pesoUnit = p ? (p.peso||0) : (it.qtd ? it.peso/it.qtd : 0);
+  it.qtd=q;
+  it.peso = it.granel ? q : (pesoUnit>0 ? pesoUnit*q : 0);
+  renderNovos();
+}
 function entrarEdicao(idx){
   editandoIdx=idx; const c=cargas[idx];
   document.getElementById('c-num').value=c.num; document.getElementById('c-dest').value=c.nome; document.getElementById('c-data').value=c.data;
@@ -2007,7 +2019,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v11';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v12';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
