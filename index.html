@@ -713,6 +713,7 @@ const URLKEY='controle_expedicao_api';
 let API_URL=localStorage.getItem(URLKEY)||'';
 let ultimaEdicao=0;          // marca quando o usuário mexeu por último
 let pushCargasTimer, pushEstTimer;
+let pushPendente=false;      // true enquanto o envio das cargas não foi confirmado pela nuvem
 
 // ---- guarda local (cache offline) ----
 function saveLocal(){
@@ -744,8 +745,17 @@ function saveAll(){ saveLocal(); pushCargas(); pushEstoque(); pushMeta(); }
 
 function pushCargas(){
   saveLocal(); if(!API_URL) return;
+  pushPendente=true;                       // trava a leitura até a nuvem confirmar
   clearTimeout(pushCargasTimer);
-  pushCargasTimer=setTimeout(()=>enviar({action:'cargas',cargas}),300);
+  pushCargasTimer=setTimeout(enviarCargas,300);
+}
+function enviarCargas(){
+  if(!API_URL){ pushPendente=false; return; }
+  status('enviando');
+  fetch(API_URL,{method:'POST',body:JSON.stringify({action:'cargas',cargas})})
+    .then(r=>r.json())
+    .then(()=>{ pushPendente=false; status('online'); })
+    .catch(()=>{ status('offline'); clearTimeout(pushCargasTimer); pushCargasTimer=setTimeout(enviarCargas,5000); }); // mantém pendente e re-tenta
 }
 function pushEstoque(){
   saveLocal(); if(!API_URL) return;
@@ -766,6 +776,8 @@ function enviar(payload){
 // ---- puxar da nuvem ----
 function pull(silencioso){
   if(!API_URL) return;
+  // não sobrescreve enquanto o envio da carga não foi confirmado pela nuvem
+  if(pushPendente) return;
   // não atrapalha quem está digitando
   if(document.activeElement && document.activeElement.tagName==='INPUT') return;
   if(Date.now()-ultimaEdicao < 20000) return;
@@ -894,8 +906,8 @@ function addItem(){
   document.getElementById('c-qtd').value=''; document.getElementById('peso-prev').textContent=''; document.getElementById('c-cod').focus();
   renderNovos();
 }
-function renderNovos(){
-  const el=document.getElementById('itens-prev');
+
+function renderNovos(){  const el=document.getElementById('itens-prev');
   if(!novosItens.length){ el.innerHTML=''; return; }
   const tot=novosItens.reduce((s,i)=>s+i.peso,0);
   // agrupa por empresa preservando o índice original (p/ editar/excluir)
@@ -2095,7 +2107,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v16';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v22';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
