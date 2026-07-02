@@ -494,11 +494,9 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
         <div style="font-size:14px;font-weight:600">Incluir no Estoque</div>
         <div style="font-size:12px;color:var(--text2)">Aparece na aba de contagem de estoque</div>
       </div>
-      <label style="position:relative;width:46px;height:26px;flex-shrink:0">
-        <input type="checkbox" id="bi-no-estoque" style="opacity:0;width:0;height:0;position:absolute">
-        <span onclick="document.getElementById('bi-no-estoque').click()" style="position:absolute;inset:0;background:var(--border2);border-radius:999px;cursor:pointer;transition:background .2s" id="bi-toggle-track"></span>
-        <span onclick="document.getElementById('bi-no-estoque').click()" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)" id="bi-toggle-thumb"></span>
-      </label>
+      <div id="bi-toggle" onclick="toggleEstoqueClick()" style="width:46px;height:26px;border-radius:999px;background:var(--border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
+        <div id="bi-toggle-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
+      </div>
     </div>
     <div class="login-err" id="bi-item-err"></div>
     <div class="btn-row">
@@ -1760,13 +1758,19 @@ function renderBaseItens(){
   el.innerHTML=html;
 }
 
+let _biNoEstoque = false;
+
+function toggleEstoqueClick(){
+  setToggleEstoque(!_biNoEstoque);
+}
+
 function setToggleEstoque(val){
-  const chk=document.getElementById('bi-no-estoque');
-  const track=document.getElementById('bi-toggle-track');
-  const thumb=document.getElementById('bi-toggle-thumb');
-  chk.checked=!!val;
-  track.style.background = val ? 'var(--red)' : 'var(--border2)';
-  thumb.style.transform  = val ? 'translateX(20px)' : 'translateX(0)';
+  _biNoEstoque = !!val;
+  const toggle = document.getElementById('bi-toggle');
+  const thumb  = document.getElementById('bi-toggle-thumb');
+  if(!toggle || !thumb) return;
+  toggle.style.background = _biNoEstoque ? 'var(--red)' : 'var(--border2)';
+  thumb.style.transform   = _biNoEstoque ? 'translateX(20px)' : 'translateX(0)';
 }
 document.addEventListener('change', e=>{ if(e.target.id==='bi-no-estoque') setToggleEstoque(e.target.checked); });
 
@@ -1806,7 +1810,7 @@ function salvarItemBase(){
   const nomeRaw  = document.getElementById('bi-nome-input').value.trim().toUpperCase();
   const pesoRaw  = document.getElementById('bi-peso-input').value.trim();
   const grupo    = document.getElementById('bi-grupo-input').value.trim().toUpperCase();
-  const noEstoque= document.getElementById('bi-no-estoque').checked;
+  const noEstoque= _biNoEstoque;
   const err      = document.getElementById('bi-item-err');
   if(!nomeRaw){ err.textContent='Informe o nome do item'; return; }
   if(!grupo)  { err.textContent='Informe o grupo'; return; }
@@ -2145,7 +2149,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v23';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v24';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
