@@ -776,18 +776,19 @@ function pushEstoque(){
 }
 function pushMeta(){
   if(!API_URL) return;
+  pushPendente = true; // bloqueia pull até confirmação
   enviar({action:'meta',meta:{
     contador:val('e-contador'),
     dataContagem:val('e-data'),
     baseItens:baseItens,
     baseItensTs: getBaseItensTs(),
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
-  }});
+  }}, ()=>{ pushPendente=false; });
 }
-function enviar(payload){
+function enviar(payload, onSuccess){
   status('enviando');
   fetch(API_URL,{method:'POST',body:JSON.stringify(payload)})
-    .then(r=>r.json()).then(()=>status('online'))
+    .then(r=>r.json()).then(()=>{ status('online'); if(onSuccess) onSuccess(); })
     .catch(()=>status('offline'));
 }
 
@@ -1717,14 +1718,17 @@ function getBaseItensTs(){
   return parseInt(localStorage.getItem(BASE_ITENS_KEY+'_ts')||'0');
 }
 
-// Aceita baseItens da nuvem SOMENTE se for mais recente que a versão local
+// Aceita baseItens da nuvem SOMENTE se for genuinamente mais recente que a versão local
 function mergeBaseItensDaNuvem(remota, tsRemota){
   if(!Array.isArray(remota) || !remota.length) return;
   const tsLocal = getBaseItensTs();
-  // Se editou localmente nos últimos 60s OU versão local é mais nova → ignora nuvem
+  // Editou localmente nos últimos 60s → local ganha sempre
   if(Date.now()-ultimaEdicaoBase < 60000) return;
-  if(tsLocal && tsRemota && tsLocal >= tsRemota) return;
-  // Nuvem é mais recente: aceita
+  // Nuvem não tem timestamp → não sabemos qual é mais novo → local ganha (mais seguro)
+  if(!tsRemota) return;
+  // Temos ambos os timestamps → local mais novo ou igual → local ganha
+  if(tsLocal >= tsRemota) return;
+  // Nuvem genuinamente mais recente (outro dispositivo editou depois) → aceita
   baseItens = remota;
   saveBaseItens();
   rebuildRegistro();
@@ -2178,7 +2182,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v26';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v27';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
