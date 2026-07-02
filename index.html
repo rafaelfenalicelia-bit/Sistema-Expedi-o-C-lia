@@ -1759,32 +1759,39 @@ function loadBaseItens(){
     cod: p.cod, nome: p.nome, peso: p.peso||0, grupo: p.tp||'', granel: !!p.granel, noEstoque: true
   }));
   saveBaseItens();
+  setBaseItensTs(0);   // aparelho novo: qualquer versão da nuvem (com timestamp) prevalece
   rebuildRegistro();
 }
 function saveBaseItens(){
-  try{
-    localStorage.setItem(BASE_ITENS_KEY, JSON.stringify(baseItens));
-    localStorage.setItem(BASE_ITENS_KEY+'_ts', String(Date.now()));
-  }catch(e){}
+  try{ localStorage.setItem(BASE_ITENS_KEY, JSON.stringify(baseItens)); }catch(e){}
+}
+function setBaseItensTs(ts){
+  try{ localStorage.setItem(BASE_ITENS_KEY+'_ts', String(ts||0)); }catch(e){}
 }
 function getBaseItensTs(){
   return parseInt(localStorage.getItem(BASE_ITENS_KEY+'_ts')||'0');
 }
 
-// Aceita baseItens da nuvem SOMENTE se for genuinamente mais recente que a versão local
+// Recebe a Base da nuvem. Regra: só o admin edita a Base, então os usuários
+// comuns SEMPRE seguem a nuvem. O admin mantém a própria edição por 60s.
 function mergeBaseItensDaNuvem(remota, tsRemota){
   if(!Array.isArray(remota) || !remota.length) return;
+  const souAdmin = !!(usuarioAtual && usuarioAtual.role==='admin');
   const tsLocal = getBaseItensTs();
-  // Editou localmente nos últimos 60s → local ganha sempre
-  if(Date.now()-ultimaEdicaoBase < 60000) return;
-  // Nuvem não tem timestamp → não sabemos qual é mais novo → local ganha (mais seguro)
-  if(!tsRemota) return;
-  // Temos ambos os timestamps → local mais novo ou igual → local ganha
-  if(tsLocal >= tsRemota) return;
-  // Nuvem genuinamente mais recente (outro dispositivo editou depois) → aceita
+  if(souAdmin){
+    // admin acabou de editar → sua versão prevalece por 60s
+    if(Date.now()-ultimaEdicaoBase < 60000) return;
+    // senão, adota a nuvem só se for genuinamente mais recente
+    if(!tsRemota || tsLocal>=tsRemota) return;
+  } else {
+    // usuário comum segue a nuvem, mas não re-renderiza se já está nessa versão
+    if(tsRemota && tsRemota===tsLocal) return;
+  }
   baseItens = remota;
+  setBaseItensTs(tsRemota||0);
   saveBaseItens();
   rebuildRegistro();
+  renderGrupos();
   if(typeof renderBaseItens==='function' && document.getElementById('bi-list')) renderBaseItens();
 }
 
@@ -1925,12 +1932,13 @@ function salvarItemBase(){
 // aplica mudanças da Base de Itens em todo o app + nuvem
 function aplicarBaseItens(){
   ultimaEdicaoBase = Date.now();
-  saveBaseItens();        // grava com timestamp ANTES de enviar para nuvem
+  setBaseItensTs(Date.now());  // esta edição é a nova versão (timestamp novo)
+  saveBaseItens();
   rebuildRegistro();
   renderGrupos();
   if(typeof renderDash==='function') renderDash();
   ultimaEdicao = Date.now();
-  if(API_URL) pushMeta(); // envia versão com timestamp para a nuvem
+  if(API_URL) pushMeta(); // envia a nova versão (com timestamp) para a nuvem
 }
 
 function excluirItemBase(){
@@ -2235,7 +2243,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v28';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v29';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
