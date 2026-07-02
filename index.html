@@ -488,6 +488,18 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="fg"><label>Nome / descrição</label><input id="bi-nome-input" placeholder="ex: NOVA MARCA PARBO 30X1" oninput="this.value=this.value.toUpperCase()"></div>
     <div class="fg"><label>Peso por unidade (kg) <span style="color:var(--text3);font-weight:400">— vazio = granel/kg</span></label><input type="number" inputmode="decimal" id="bi-peso-input" placeholder="ex: 30"></div>
     <div class="fg"><label>Grupo</label><input id="bi-grupo-input" list="grupos-list-bi" placeholder="ex: PARBO, BRANCO, INTEGRAL..." oninput="this.value=this.value.toUpperCase()"><datalist id="grupos-list-bi"></datalist></div>
+    <!-- Toggle estoque -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:14px">
+      <div>
+        <div style="font-size:14px;font-weight:600">Incluir no Estoque</div>
+        <div style="font-size:12px;color:var(--text2)">Aparece na aba de contagem de estoque</div>
+      </div>
+      <label style="position:relative;width:46px;height:26px;flex-shrink:0">
+        <input type="checkbox" id="bi-no-estoque" style="opacity:0;width:0;height:0;position:absolute">
+        <span onclick="document.getElementById('bi-no-estoque').click()" style="position:absolute;inset:0;background:var(--border2);border-radius:999px;cursor:pointer;transition:background .2s" id="bi-toggle-track"></span>
+        <span onclick="document.getElementById('bi-no-estoque').click()" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)" id="bi-toggle-thumb"></span>
+      </label>
+    </div>
     <div class="login-err" id="bi-item-err"></div>
     <div class="btn-row">
       <button class="btn btn-danger" id="bi-btn-excluir" style="display:none" onclick="excluirItemBase()">🗑 Excluir</button>
@@ -698,12 +710,13 @@ let cargas=[], estoqueQtd={}, novosItens=[], editandoIdx=null, abertos={};
 function rebuildRegistro(){
   // Fonte única: a Base de Itens (baseItens). Converte grupo->tp para o resto do app.
   const fonte = (typeof baseItens!=='undefined' && baseItens.length)
-    ? baseItens.map(it=>({cod:it.cod, nome:it.nome, peso:it.peso||0, tp:it.grupo||'', granel:!!it.granel}))
-    : BASE_PRODUTOS.map(p=>({...p}));
+    ? baseItens.map(it=>({cod:it.cod, nome:it.nome, peso:it.peso||0, tp:it.grupo||'', granel:!!it.granel, noEstoque:!!it.noEstoque}))
+    : BASE_PRODUTOS.map(p=>({...p, noEstoque:true}));
   PRODUTOS = fonte;
   for(const k in PMAP) delete PMAP[k];
   fonte.forEach(p=>PMAP[p.cod]=p);
-  const gs=[...new Set(fonte.map(p=>p.tp).filter(Boolean))].sort();
+  // GRUPOS para estoque: apenas itens marcados como noEstoque
+  const gs=[...new Set(fonte.filter(p=>p.noEstoque).map(p=>p.tp).filter(Boolean))].sort();
   GRUPOS.length=0; gs.forEach(g=>GRUPOS.push(g));
   gs.forEach(g=>{ if(!(g in abertos)) abertos[g]=false; });
   if(typeof atualizarListasGrupos==='function') atualizarListasGrupos();
@@ -1236,7 +1249,7 @@ function renderEstVisual(){
   // agrupa por grupo-label
   const blocos = {}; // label -> {cls, itens:[{nome,fat,kg}]}
   VIS_GRUPOS.forEach(g=>{
-    const prods = PRODUTOS.filter(p=>p.tp===g.tp && estoqueQtd[p.cod]);
+    const prods = PRODUTOS.filter(p=>p.tp===g.tp && p.noEstoque && estoqueQtd[p.cod]);
     if(!prods.length) return;
     if(!blocos[g.label]) blocos[g.label]={cls:g.cls, itens:[]};
     prods.forEach(p=>{
@@ -1280,7 +1293,8 @@ function renderGrupos(){
   const busca=(document.getElementById('e-busca').value||'').toLowerCase(), tf=document.getElementById('e-tipo').value;
   let html='';
   GRUPOS.filter(tp=>!tf||tp===tf).forEach(tp=>{
-    const itens=PRODUTOS.filter(p=>p.tp===tp&&(!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)));
+    // ✅ Apenas itens marcados para o estoque
+    const itens=PRODUTOS.filter(p=>p.tp===tp && p.noEstoque && (!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)));
     if(!itens.length) return;
     const granel=tp==='GRANEL', pre=itens.filter(p=>estoqueQtd[p.cod]).length, ab=abertos[tp]||!!busca;
     html+=`<div class="grupo"><div class="grupo-head" onclick="toggleG('${tp}')"><div class="grupo-title"><span class="chev ${ab?'open':''}" id="gc-${tp}">▶</span><span class="badge ${TP_BADGE[tp]}">${tp}</span> ${itens.length} itens${granel?' · kg':''}</div>${pre>0?`<span class="badge b-green">${pre} ✓</span>`:''}</div>
@@ -1670,10 +1684,20 @@ const BI_GRUPOS_CORES = {
 };
 
 function loadBaseItens(){
-  try{ const r=localStorage.getItem(BASE_ITENS_KEY); if(r){ baseItens=JSON.parse(r)||[]; rebuildRegistro(); return; } }catch(e){}
-  // Semeia com a lista de fábrica na primeira vez
+  try{
+    const r=localStorage.getItem(BASE_ITENS_KEY);
+    if(r){
+      baseItens=JSON.parse(r)||[];
+      // ✅ Migração: itens antigos sem campo noEstoque recebem true (comportamento anterior)
+      let migrou=false;
+      baseItens.forEach(it=>{ if(it.noEstoque===undefined){ it.noEstoque=true; migrou=true; } });
+      if(migrou) saveBaseItens();
+      rebuildRegistro(); return;
+    }
+  }catch(e){}
+  // Semeia com a lista de fábrica na primeira vez — todos entram no estoque por padrão
   baseItens = BASE_PRODUTOS.map(p=>({
-    cod: p.cod, nome: p.nome, peso: p.peso||0, grupo: p.tp||'', granel: !!p.granel
+    cod: p.cod, nome: p.nome, peso: p.peso||0, grupo: p.tp||'', granel: !!p.granel, noEstoque: true
   }));
   saveBaseItens();
   rebuildRegistro();
@@ -1721,12 +1745,13 @@ function renderBaseItens(){
     html+=`<div class="bi-group-header" style="background:${cor}">${g}</div>`;
     grupos[g].forEach(it=>{
       const peso = it.granel ? 'granel · kg' : (it.peso>0 ? it.peso+'kg/un' : '');
+      const estBadge = it.noEstoque ? '<span style="font-size:10px;background:#E8F5E9;color:#2E7D32;font-weight:700;padding:1px 6px;border-radius:999px;white-space:nowrap">📦 Estoque</span>' : '';
       const editBtn = isAdmin
         ? `<button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(${it.cod})">✏️</button>`
         : '';
       html+=`<div class="bi-item${isAdmin?' bi-item-admin':''}">
         <span class="bi-cod">${it.cod}</span>
-        <span class="bi-nome">${esc(it.nome)}</span>
+        <span class="bi-nome">${esc(it.nome)} ${estBadge}</span>
         <span class="bi-peso">${peso}</span>
         ${editBtn}
       </div>`;
@@ -1734,6 +1759,16 @@ function renderBaseItens(){
   });
   el.innerHTML=html;
 }
+
+function setToggleEstoque(val){
+  const chk=document.getElementById('bi-no-estoque');
+  const track=document.getElementById('bi-toggle-track');
+  const thumb=document.getElementById('bi-toggle-thumb');
+  chk.checked=!!val;
+  track.style.background = val ? 'var(--red)' : 'var(--border2)';
+  thumb.style.transform  = val ? 'translateX(20px)' : 'translateX(0)';
+}
+document.addEventListener('change', e=>{ if(e.target.id==='bi-no-estoque') setToggleEstoque(e.target.checked); });
 
 function abrirNovoItemBase(){
   _biEditando=null;
@@ -1745,6 +1780,7 @@ function abrirNovoItemBase(){
   document.getElementById('bi-grupo-input').value='';
   document.getElementById('bi-item-err').textContent='';
   document.getElementById('bi-btn-excluir').style.display='none';
+  setToggleEstoque(false); // novo item NÃO entra no estoque por padrão
   fecharDrawer('baseitens');
   setTimeout(()=>{ abrirDrawer('novoitem'); document.getElementById('bi-cod').focus(); },200);
 }
@@ -1761,15 +1797,17 @@ function abrirEditarItemBase(cod){
   document.getElementById('bi-grupo-input').value=it.grupo||'';
   document.getElementById('bi-item-err').textContent='';
   document.getElementById('bi-btn-excluir').style.display='';
+  setToggleEstoque(!!it.noEstoque);
   fecharDrawer('baseitens');
   setTimeout(()=>{ abrirDrawer('novoitem'); document.getElementById('bi-nome-input').focus(); },200);
 }
 
 function salvarItemBase(){
-  const nomeRaw = document.getElementById('bi-nome-input').value.trim().toUpperCase();
-  const pesoRaw = document.getElementById('bi-peso-input').value.trim();
-  const grupo   = document.getElementById('bi-grupo-input').value.trim().toUpperCase();
-  const err     = document.getElementById('bi-item-err');
+  const nomeRaw  = document.getElementById('bi-nome-input').value.trim().toUpperCase();
+  const pesoRaw  = document.getElementById('bi-peso-input').value.trim();
+  const grupo    = document.getElementById('bi-grupo-input').value.trim().toUpperCase();
+  const noEstoque= document.getElementById('bi-no-estoque').checked;
+  const err      = document.getElementById('bi-item-err');
   if(!nomeRaw){ err.textContent='Informe o nome do item'; return; }
   if(!grupo)  { err.textContent='Informe o grupo'; return; }
   const peso   = pesoRaw==='' ? 0 : (parseFloat(pesoRaw.replace(',','.'))||0);
@@ -1777,8 +1815,8 @@ function salvarItemBase(){
 
   if(_biEditando!==null){
     const idx=baseItens.findIndex(x=>x.cod===_biEditando);
-    if(idx>=0){ baseItens[idx]={...baseItens[idx],nome:nomeRaw,peso,grupo,granel}; }
-    saveBaseItens(); aplicarBaseItens();
+    if(idx>=0){ baseItens[idx]={...baseItens[idx],nome:nomeRaw,peso,grupo,granel,noEstoque}; }
+    saveBaseItens(); rebuildRegistro();
     fecharDrawer('novoitem');
     setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
     toast('Item atualizado ✓');
@@ -1789,7 +1827,7 @@ function salvarItemBase(){
   const cod = parseInt(codRaw);
   if(!cod && cod!==0){ err.textContent='Informe o código'; return; }
   if(baseItens.find(x=>x.cod===cod)){ err.textContent='Já existe item com este código'; return; }
-  baseItens.push({cod,nome:nomeRaw,peso,grupo,granel});
+  baseItens.push({cod,nome:nomeRaw,peso,grupo,granel,noEstoque});
   saveBaseItens(); aplicarBaseItens();
   fecharDrawer('novoitem');
   setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
@@ -2107,7 +2145,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v22';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v23';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
