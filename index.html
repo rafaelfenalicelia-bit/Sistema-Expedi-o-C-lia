@@ -1648,6 +1648,12 @@ const TABS_ALL=['exp','est','con','dash'];
 const TABS_PADRAO=['est','con'];   // telas padrão de um usuário comum
 function aplicarPermissoes(){
   if(!usuarioAtual) return;
+  // se a própria conta foi excluída pelo admin (via nuvem) -> volta ao login
+  if(usuarioAtual.nome!==ADMIN_NAME){
+    const existe = loadUsers().find(u=>u.nome===usuarioAtual.nome);
+    const excluido = getUsersDel().includes(usuarioAtual.nome);
+    if(excluido || !existe){ contaRemovida(); return; }
+  }
   // pega o registro mais atual (pode ter mudado via nuvem)
   const me = loadUsers().find(u=>u.nome===usuarioAtual.nome) || usuarioAtual;
   usuarioAtual.role = me.role || usuarioAtual.role;
@@ -1803,12 +1809,23 @@ function confirmarResetSenha(){
 function fazerLogout(){
   fecharUserMenu();
   if(!confirm('Sair da conta de '+usuarioAtual.nome+'?')) return;
+  voltarParaLogin();
+}
+// volta ao login sem confirmação (usado no logout e quando a conta é removida)
+function voltarParaLogin(){
+  try{ fecharUserMenu(); }catch(e){}
   clearSession();
-  document.getElementById('l-nome').value='';
+  const ln=document.getElementById('l-nome'); if(ln) ln.value='';
   clearPin('pin-entrar'); clearPin('pin-cadastro');
-  document.getElementById('l-err').textContent='';
+  const le=document.getElementById('l-err'); if(le) le.textContent='';
   loginTab('entrar');
   document.getElementById('login-screen').classList.remove('hidden');
+}
+// chamada quando o admin exclui a conta que está logada neste aparelho
+function contaRemovida(){
+  const nome = usuarioAtual ? usuarioAtual.nome : '';
+  voltarParaLogin();
+  setTimeout(()=>{ const le=document.getElementById('l-err'); if(le) le.textContent='Sua conta foi removida pelo administrador.'; }, 100);
 }
 
 function syncLoginLogo(){
@@ -2337,7 +2354,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v30';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v31';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
