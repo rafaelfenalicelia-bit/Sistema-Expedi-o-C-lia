@@ -742,6 +742,8 @@ let ultimaEdicao=0;          // marca quando o usuário mexeu por último
 let ultimaEdicaoBase=0;      // marca quando baseItens foi editada localmente
 let pushCargasTimer, pushEstTimer;
 let pushPendente=false;      // true enquanto o envio das cargas não foi confirmado pela nuvem
+let metaPronta=false;        // true após receber a meta (baseItens/usuários) da nuvem ao menos 1x
+let metaPushPendente=false;  // guarda um envio de meta que ficou esperando a 1ª sincronização
 
 // ---- guarda local (cache offline) ----
 function saveLocal(){
@@ -792,12 +794,16 @@ function pushEstoque(){
 }
 function pushMeta(){
   if(!API_URL) return;
+  if(!metaPronta){ metaPushPendente=true; return; } // evita enviar dados locais "de fábrica" por cima da nuvem
   pushPendente = true; // bloqueia pull até confirmação
   enviar({action:'meta',meta:{
     contador:val('e-contador'),
     dataContagem:val('e-data'),
     baseItens:baseItens,
     baseItensTs: getBaseItensTs(),
+    users: loadUsers(),
+    usersTs: getUsersTs(),
+    usersDel: getUsersDel(),
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
   }}, ()=>{ pushPendente=false; });
 }
@@ -838,6 +844,7 @@ function pull(silencioso){
           if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
             mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0);
           } else if(d.meta.produtos){ mergeProdutosDaNuvem(d.meta.produtos); }
+          if(Array.isArray(d.meta.users)) mergeUsersDaNuvem(d.meta.users, d.meta.usersTs||0, d.meta.usersDel||[]);
       }
       detectarMudancas(cargasAntes, cargas);
       cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
@@ -849,6 +856,8 @@ function pull(silencioso){
       if(atual==='dash') renderDash();
       status('online');
       if(!silencioso) toast('Sincronizado');
+      metaPronta=true;
+      if(metaPushPendente){ metaPushPendente=false; pushMeta(); }
     })
     .catch(()=>{ status('offline'); if(!silencioso) toast('Sem conexão'); });
 }
@@ -893,6 +902,7 @@ function sincronizarInicial(){
           if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
           if(servBase){ mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0); }
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
+          if(Array.isArray(d.meta.users)) mergeUsersDaNuvem(d.meta.users, d.meta.usersTs||0, d.meta.usersDel||[]);
         }
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         saveLocal();
@@ -900,12 +910,14 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
         status('online'); toast('Conectado');
       }
+      metaPronta=true;
+      if(metaPushPendente){ metaPushPendente=false; pushMeta(); }
     })
     .catch(()=>{ status('offline'); toast('Sem conexão — tente sincronizar de novo'); });
 }
@@ -1533,6 +1545,41 @@ function loadUsers(){
 }
 function saveUsers(u){ try{ localStorage.setItem(USERS_KEY,JSON.stringify(u)); }catch(e){} }
 
+// ---- sincronização de usuários pela nuvem ----
+const USERS_TS_KEY  = 'celia_users_ts';
+const USERS_DEL_KEY = 'celia_users_del';
+function getUsersTs(){ return parseInt(localStorage.getItem(USERS_TS_KEY)||'0'); }
+function setUsersTs(ts){ try{ localStorage.setItem(USERS_TS_KEY,String(ts||0)); }catch(e){} }
+function getUsersDel(){ try{ return JSON.parse(localStorage.getItem(USERS_DEL_KEY)||'[]'); }catch(e){ return []; } }
+function setUsersDel(a){ try{ localStorage.setItem(USERS_DEL_KEY,JSON.stringify(a||[])); }catch(e){} }
+// grava usuários + marca timestamp + envia para a nuvem
+function salvarUsersSync(u){
+  saveUsers(u);
+  setUsersTs(Date.now());
+  if(API_URL) pushMeta();
+}
+// Une a lista da nuvem com a local (ninguém se perde). Exclusões via tombstones.
+function mergeUsersDaNuvem(cloudUsers, cloudTs, cloudDel){
+  if(!Array.isArray(cloudUsers)) return;
+  const localUsers=loadUsers();
+  const localTs=getUsersTs();
+  const del=Array.from(new Set([...(getUsersDel()||[]), ...(cloudDel||[])]));
+  const cloudNewer=(cloudTs||0)>=localTs;
+  const map={};
+  localUsers.forEach(u=>{ map[u.nome]=u; });
+  cloudUsers.forEach(u=>{ if(!map[u.nome]||cloudNewer) map[u.nome]=u; });
+  let merged=Object.values(map).filter(u=> u.nome===ADMIN_NAME || del.indexOf(u.nome)<0 );
+  if(!merged.find(u=>u.nome===ADMIN_NAME)) merged.unshift({nome:ADMIN_NAME,pin:ADMIN_PIN,role:'admin'});
+  const mudou = JSON.stringify(merged)!==JSON.stringify(localUsers) || JSON.stringify(del)!==JSON.stringify(getUsersDel()||[]);
+  setUsersDel(del);
+  setUsersTs(Math.max(localTs, cloudTs||0));
+  if(mudou){
+    saveUsers(merged);
+    if(document.getElementById('admin-users-list')) renderAdminUsers();
+    if(usuarioAtual) aplicarPermissoes();
+  }
+}
+
 let usuarioAtual = null;
 function loadSession(){ try{ const r=localStorage.getItem(SESSION_KEY); if(r){usuarioAtual=JSON.parse(r);return true;} }catch(e){} return false; }
 function saveSession(u){ usuarioAtual=u; try{ localStorage.setItem(SESSION_KEY,JSON.stringify(u)); }catch(e){} }
@@ -1568,7 +1615,7 @@ function fazerLogin(){
   if(pin.length<4){err.textContent='Digite a senha completa (4 dígitos)';return;}
   const user=loadUsers().find(u=>u.nome===nome&&u.pin===pin);
   if(!user){err.textContent='Usuário ou senha incorretos ❌';clearPin('pin-entrar');return;}
-  saveSession({nome:user.nome,role:user.role});
+  saveSession({nome:user.nome,role:user.role,tabs:user.tabs||[]});
   abrirApp();
 }
 function fazerCadastro(){
@@ -1580,8 +1627,10 @@ function fazerCadastro(){
   if(nome===ADMIN_NAME){err.textContent='Este nome é reservado';return;}
   const users=loadUsers();
   if(users.find(u=>u.nome===nome)){err.textContent='Usuário já existe. Faça login.';return;}
-  users.push({nome,pin,role:'user'}); saveUsers(users);
-  saveSession({nome,role:'user'});
+  users.push({nome,pin,role:'user',tabs:['est','con']}); 
+  const del=getUsersDel().filter(n=>n!==nome); setUsersDel(del);
+  salvarUsersSync(users);
+  saveSession({nome,role:'user',tabs:['est','con']});
   toast('Cadastro realizado!');
   setTimeout(()=>abrirApp(),400);
 }
@@ -1592,24 +1641,30 @@ function abrirApp(){
   document.getElementById('user-av').textContent    = usuarioAtual.nome.charAt(0);
   document.getElementById('user-label').textContent = usuarioAtual.nome;
   document.getElementById('dd-nome').textContent    = usuarioAtual.nome;
-  document.getElementById('dd-role').textContent    = usuarioAtual.role==='admin' ? '👑 Administrador' : '👤 Usuário';
+  aplicarPermissoes();
+}
+
+const TABS_ALL=['exp','est','con','dash'];
+const TABS_PADRAO=['est','con'];   // telas padrão de um usuário comum
+function aplicarPermissoes(){
+  if(!usuarioAtual) return;
+  // pega o registro mais atual (pode ter mudado via nuvem)
+  const me = loadUsers().find(u=>u.nome===usuarioAtual.nome) || usuarioAtual;
+  usuarioAtual.role = me.role || usuarioAtual.role;
+  usuarioAtual.tabs = me.tabs || usuarioAtual.tabs;
   const isAdmin = usuarioAtual.role==='admin';
+  document.getElementById('dd-role').textContent = isAdmin ? '👑 Administrador' : '👤 Usuário';
   document.getElementById('dd-btn-admin').style.display = isAdmin ? '' : 'none';
-
-  // Abas admin-only: ocultar completamente para não-admin
-  ['exp','dash'].forEach(t=>{
-    document.getElementById('tab-'+t).classList.toggle('hidden-tab', !isAdmin);
-  });
-
-  // Elementos .admin-only: mostrar só para admin
+  const permitidas = isAdmin ? TABS_ALL : ((me.tabs&&me.tabs.length)?me.tabs:TABS_PADRAO);
+  TABS_ALL.forEach(t=>{ const el=document.getElementById('tab-'+t); if(el) el.classList.toggle('hidden-tab', !permitidas.includes(t)); });
   document.querySelectorAll('.admin-only').forEach(el=>{
-    const tag = el.tagName.toLowerCase();
-    const isBtn = tag==='button' || el.classList.contains('btn');
+    const isBtn = el.tagName.toLowerCase()==='button' || el.classList.contains('btn');
     el.style.display = isAdmin ? (isBtn ? 'inline-flex' : '') : 'none';
   });
-
-  // Não-admin começa no Estoque
-  if(!isAdmin) sw('est');
+  // se a aba ativa não é permitida, vai para a primeira liberada
+  const ativa=document.querySelector('.tab.active');
+  const ativaId=ativa?ativa.dataset.tab:null;
+  if(!permitidas.includes(ativaId)) sw(permitidas[0]||'est');
 }
 
 // ---- Menu dropdown ----
@@ -1652,7 +1707,7 @@ function confirmarAlterarSenha(){
   const users=loadUsers();
   const idx=users.findIndex(u=>u.nome===usuarioAtual.nome);
   if(idx<0||users[idx].pin!==pinAtual){err.textContent='Senha atual incorreta ❌';clearPin('pin-atual');return;}
-  users[idx].pin=pinNova; saveUsers(users);
+  users[idx].pin=pinNova; salvarUsersSync(users);
   fecharDrawer('senha');
   toast('Senha alterada com sucesso ✓');
 }
@@ -1666,16 +1721,55 @@ function renderAdminUsers(){
   const users=loadUsers();
   const el=document.getElementById('admin-users-list');
   if(!users.length){el.innerHTML='<div class="empty">Nenhum usuário</div>';return;}
-  let html=`<table class="user-tbl"><thead><tr><th>Nome</th><th>Perfil</th><th style="text-align:right">Ação</th></tr></thead><tbody>`;
+  const TABS=[['exp','Cargas'],['est','Estoque'],['con','Agenda'],['dash','Painel']];
+  let html='';
   users.forEach(u=>{
-    const badge = u.role==='admin'
+    const isA=u.role==='admin';
+    const badge = isA
       ? '<span class="user-role-badge urb-admin">Admin</span>'
       : '<span class="user-role-badge urb-user">Usuário</span>';
-    const btn = `<button class="btn btn-edit btn-sm btn-pin-reset" onclick="abrirResetSenha('${esc(u.nome)}')">🔑 Senha</button>`;
-    html+=`<tr><td style="font-weight:600">${esc(u.nome)}</td><td>${badge}</td><td style="text-align:right">${btn}</td></tr>`;
+    let corpo;
+    if(isA){
+      corpo='<div style="font-size:11px;color:var(--text3);margin-top:4px">Vê todas as telas</div>';
+    } else {
+      const tabs=(u.tabs&&u.tabs.length)?u.tabs:['est','con'];
+      corpo='<div style="font-size:11px;color:var(--text3);margin:6px 0 3px">Telas liberadas:</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:10px">'+
+        TABS.map(([id,label])=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px"><input type="checkbox" ${tabs.includes(id)?'checked':''} onchange="setUserTab('${esc(u.nome)}','${id}',this.checked)" style="width:17px;height:17px"> ${label}</label>`).join('')+
+        '</div>';
+    }
+    const delBtn = isA ? '' : `<button class="btn btn-danger btn-sm" onclick="excluirUsuario('${esc(u.nome)}')" title="Excluir usuário">🗑</button>`;
+    html+=`<div class="card" style="padding:12px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="font-weight:700">${esc(u.nome)} ${badge}</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-edit btn-sm btn-pin-reset" onclick="abrirResetSenha('${esc(u.nome)}')">🔑 Senha</button>
+          ${delBtn}
+        </div>
+      </div>
+      ${corpo}
+    </div>`;
   });
-  html+='</tbody></table>';
   el.innerHTML=html;
+}
+function setUserTab(nome, tab, ativo){
+  const users=loadUsers();
+  const u=users.find(x=>x.nome===nome); if(!u) return;
+  let tabs=(u.tabs&&u.tabs.length)?u.tabs.slice():['est','con'];
+  if(ativo){ if(!tabs.includes(tab)) tabs.push(tab); }
+  else { tabs=tabs.filter(t=>t!==tab); }
+  u.tabs=tabs;
+  salvarUsersSync(users);
+  toast('Telas de '+nome+' atualizadas ✓');
+}
+function excluirUsuario(nome){
+  if(nome===ADMIN_NAME) return;
+  if(!confirm('Excluir o usuário "'+nome+'"?\nEle não conseguirá mais entrar.')) return;
+  const users=loadUsers().filter(u=>u.nome!==nome);
+  const del=getUsersDel(); if(!del.includes(nome)) del.push(nome); setUsersDel(del);
+  salvarUsersSync(users);
+  renderAdminUsers();
+  toast('Usuário excluído ✓');
 }
 
 // ---- Reset de senha pelo admin ----
@@ -1699,7 +1793,7 @@ function confirmarResetSenha(){
   const users=loadUsers();
   const idx=users.findIndex(u=>u.nome===_resetTarget);
   if(idx<0){err.textContent='Usuário não encontrado';return;}
-  users[idx].pin=pin; saveUsers(users);
+  users[idx].pin=pin; salvarUsersSync(users);
   fecharDrawer('reset');
   toast('Senha de '+_resetTarget+' redefinida ✓');
   _resetTarget=null;
@@ -2243,7 +2337,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v29';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v30';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
