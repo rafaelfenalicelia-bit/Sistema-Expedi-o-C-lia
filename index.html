@@ -344,6 +344,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <button class="btn btn-primary btn-full" onclick="fazerCadastro()">Cadastrar →</button>
     </div>
   </div>
+  <div id="login-ver" style="color:#fff;opacity:.7;font-size:11px;margin-top:18px;text-align:center"></div>
 </div>
 
 <div class="appbar">
@@ -2354,9 +2355,11 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v31';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v32';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
+  const lv=document.getElementById('login-ver');
+  if(lv){ const temLink = !!(localStorage.getItem('controle_expedicao_api')||''); lv.textContent = APP_VERSAO + (temLink ? ' · nuvem conectada' : ' · SEM link da nuvem'); }
   if(!('serviceWorker' in navigator)) return;
   const tinhaControle = !!navigator.serviceWorker.controller;
   function mostrarAtualizando(){
