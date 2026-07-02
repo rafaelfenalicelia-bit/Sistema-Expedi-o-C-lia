@@ -745,6 +745,7 @@ let pushCargasTimer, pushEstTimer;
 let pushPendente=false;      // true enquanto o envio das cargas não foi confirmado pela nuvem
 let metaPronta=false;        // true após receber a meta (baseItens/usuários) da nuvem ao menos 1x
 let metaPushPendente=false;  // guarda um envio de meta que ficou esperando a 1ª sincronização
+let _publicouUsers=false;    // publica a lista local de usuários uma vez por sessão
 
 // ---- guarda local (cache offline) ----
 function saveLocal(){
@@ -816,13 +817,15 @@ function enviar(payload, onSuccess){
 }
 
 // ---- puxar da nuvem ----
-function pull(silencioso){
+function pull(silencioso, forcar){
   if(!API_URL) return;
-  // não sobrescreve enquanto o envio da carga não foi confirmado pela nuvem
+  // sempre respeita um envio de carga ainda não confirmado
   if(pushPendente) return;
-  // não atrapalha quem está digitando
-  if(document.activeElement && document.activeElement.tagName==='INPUT') return;
-  if(Date.now()-ultimaEdicao < 20000) return;
+  if(!forcar){
+    // no modo normal, não atrapalha quem está digitando nem logo após uma edição
+    if(document.activeElement && document.activeElement.tagName==='INPUT') return;
+    if(Date.now()-ultimaEdicao < 20000) return;
+  }
   fetch(API_URL+'?action=load&t='+Date.now())
     .then(r=>r.json()).then(d=>{
       const servCargas = Array.isArray(d.cargas)?d.cargas:[];
@@ -859,6 +862,7 @@ function pull(silencioso){
       if(!silencioso) toast('Sincronizado');
       metaPronta=true;
       if(metaPushPendente){ metaPushPendente=false; pushMeta(); }
+      if(!_publicouUsers){ _publicouUsers=true; setTimeout(()=>{ if(metaPronta) pushMeta(); }, 1500); }
     })
     .catch(()=>{ status('offline'); if(!silencioso) toast('Sem conexão'); });
 }
@@ -919,6 +923,7 @@ function sincronizarInicial(){
       }
       metaPronta=true;
       if(metaPushPendente){ metaPushPendente=false; pushMeta(); }
+      if(!_publicouUsers){ _publicouUsers=true; setTimeout(()=>{ if(metaPronta) pushMeta(); }, 1500); }
     })
     .catch(()=>{ status('offline'); toast('Sem conexão — tente sincronizar de novo'); });
 }
@@ -2349,13 +2354,18 @@ loadNotifs(); atualizarBadge();
 loadBaseItens();
 renderCargas(); filtroDatas(); renderGrupos(); renderDash();
 status(API_URL?'online':'');
-if(API_URL) pull(true);
+if(API_URL) pull(true, true);   // primeira sincronização forçada (destrava o envio de usuários/base)
+// garante que a primeira sincronização conclua mesmo com campos em foco
+let _primeSyncTimer=setInterval(()=>{
+  if(metaPronta || !API_URL){ clearInterval(_primeSyncTimer); return; }
+  pull(true, true);
+}, 3000);
 setInterval(()=>pull(true),15000);
 // inicia autenticação (deve ser o último passo)
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v32';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v33';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
