@@ -582,6 +582,11 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <div class="fg"><label>Nome / descrição</label><input id="ni-nome" placeholder="ex: NOVA MARCA PARBO 30X1"></div>
       <div class="fg"><label>Peso por unidade em kg <span style="color:var(--text3)">(deixe vazio se for a granel / contado em kg)</span></label><input type="number" inputmode="decimal" id="ni-peso" placeholder="ex: 30"></div>
       <div class="fg"><label>Grupo</label><input id="ni-grupo" list="grupos-list" placeholder="ex: PARBO, BRANCO, INTEGRAL, GRANEL..."><datalist id="grupos-list"></datalist></div>
+      <div class="fg">
+        <label>Cobre os itens <span style="color:var(--text3);font-weight:400">— códigos da base de cargas separados por vírgula</span></label>
+        <input id="ni-aliases" placeholder="ex: 49, 1998, 2034" inputmode="text">
+        <span style="font-size:11px;color:var(--text2);margin-top:3px;display:block">A conciliação somará esses itens (convertidos em kg) e comparará com o estoque deste produto</span>
+      </div>
       <div class="btn-row">
         <button class="btn btn-danger" id="btn-excluir-item" style="display:none" onclick="excluirItemAtual()">🗑 Excluir</button>
         <button class="btn" style="flex:1" onclick="fecharCadastro()">Cancelar</button>
@@ -699,6 +704,7 @@ const BASE_PRODUTOS = [
 const TP_BADGE={PARBO:'b-blue',BRANCO:'b-teal',INTEGRAL:'b-purple',MIX:'b-amber',BATATA:'b-green',CÃO:'b-gray',FARINHA:'b-amber',FECULA:'b-gray',TAPIOCA:'b-green',GRANEL:'b-pink'};
 let PRODUTOS = [];
 const PMAP = {};
+let ALIAS_MAP = {}; // alias cod -> cod do item de estoque que o cobre
 const GRUPOS = [];
 let customProdutos = [];   // itens cadastrados
 let prodOverrides = {};    // cod -> {nome,peso,tp,granel} (edições)
@@ -706,15 +712,25 @@ let prodDeleted = [];      // cods excluídos
 let editandoItemCod = null;
 let cargas=[], estoqueQtd={}, novosItens=[], editandoIdx=null, abertos={};
 function rebuildRegistro(){
-  // Fonte única: a Base de Itens (baseItens). Converte grupo->tp para o resto do app.
   const fonte = (typeof baseItens!=='undefined' && baseItens.length)
-    ? baseItens.map(it=>({cod:it.cod, nome:it.nome, peso:it.peso||0, tp:it.grupo||'', granel:!!it.granel, noEstoque:!!it.noEstoque}))
-    : BASE_PRODUTOS.map(p=>({...p, noEstoque:true}));
-  PRODUTOS = fonte;
+    ? baseItens.map(it=>({cod:it.cod, nome:it.nome, peso:it.peso||0, tp:it.grupo||'', granel:!!it.granel, noEstoque:!!it.noEstoque, aliases:it.aliases||[]}))
+    : BASE_PRODUTOS.map(p=>({...p, noEstoque:true, aliases:[]}));
+  // aplica overrides do estoque (que podem ter aliases)
+  const overridesFonte = fonte.map(p=>{
+    const ov = prodOverrides[p.cod];
+    return ov ? {...p, ...ov} : p;
+  });
+  PRODUTOS = overridesFonte;
   for(const k in PMAP) delete PMAP[k];
-  fonte.forEach(p=>PMAP[p.cod]=p);
-  // GRUPOS para estoque: apenas itens marcados como noEstoque
-  const gs=[...new Set(fonte.filter(p=>p.noEstoque).map(p=>p.tp).filter(Boolean))].sort();
+  overridesFonte.forEach(p=>PMAP[p.cod]=p);
+  // Monta mapa reverso: aliasCode -> codEstoque (para conciliação)
+  ALIAS_MAP = {};
+  overridesFonte.forEach(p=>{
+    if(p.aliases && p.aliases.length){
+      p.aliases.forEach(alias=>{ ALIAS_MAP[alias]=p.cod; });
+    }
+  });
+  const gs=[...new Set(overridesFonte.filter(p=>p.noEstoque).map(p=>p.tp).filter(Boolean))].sort();
   GRUPOS.length=0; gs.forEach(g=>GRUPOS.push(g));
   gs.forEach(g=>{ if(!(g in abertos)) abertos[g]=false; });
   if(typeof atualizarListasGrupos==='function') atualizarListasGrupos();
@@ -1155,7 +1171,7 @@ function fecharCadastro(){
   document.getElementById('cad-title').textContent='➕ Novo item';
   document.getElementById('btn-salvar-item').textContent='💾 Salvar item';
   document.getElementById('btn-excluir-item').style.display='none';
-  ['ni-cod','ni-nome','ni-peso','ni-grupo'].forEach(id=>document.getElementById(id).value='');
+  ['ni-cod','ni-nome','ni-peso','ni-grupo','ni-aliases'].forEach(id=>document.getElementById(id).value='');
 }
 function toggleCadastro(){
   const card=document.getElementById('cad-card');
@@ -1174,6 +1190,9 @@ function editarItem(cod){
   document.getElementById('ni-nome').value=p.nome;
   document.getElementById('ni-peso').value = p.peso ? p.peso : (p.granel?'':'0');
   document.getElementById('ni-grupo').value=p.tp;
+  // carrega aliases se existirem
+  const aliases = (p.aliases||[]).join(', ');
+  document.getElementById('ni-aliases').value = aliases;
   document.getElementById('btn-salvar-item').textContent='💾 Salvar alterações';
   document.getElementById('btn-excluir-item').style.display='';
   atualizarListasGrupos();
@@ -1196,12 +1215,15 @@ function salvarNovoItem(){
   const nome=document.getElementById('ni-nome').value.trim().toUpperCase();
   const pesoRaw=document.getElementById('ni-peso').value.trim();
   const tp=document.getElementById('ni-grupo').value.trim().toUpperCase();
+  const aliasesRaw=document.getElementById('ni-aliases').value.trim();
   if(!nome){ toast('Informe o nome'); return; }
   if(!tp){ toast('Informe o grupo'); return; }
   const peso = pesoRaw==='' ? 0 : (parseFloat(pesoRaw.replace(',','.'))||0);
-  const granel = peso===0;   // sem peso por unidade = contado em kg
+  const granel = peso===0;
+  // parse aliases: "49, 1998, 2034" -> [49, 1998, 2034]
+  const aliases = aliasesRaw ? aliasesRaw.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n)) : [];
   if(editandoItemCod!=null){
-    prodOverrides[editandoItemCod]={nome,peso,tp,granel};
+    prodOverrides[editandoItemCod]={nome,peso,tp,granel,aliases};
     saveCustomProdutos(); rebuildRegistro();
     if(API_URL) pushMeta();
     const cod=editandoItemCod;
@@ -1211,7 +1233,7 @@ function salvarNovoItem(){
   const cod=parseInt(document.getElementById('ni-cod').value);
   if(!cod && cod!==0){ toast('Informe o código'); return; }
   if(PMAP[cod]){ toast('Já existe item com código '+cod+' ('+PMAP[cod].nome+')'); return; }
-  customProdutos.push({cod,nome,peso,tp,granel});
+  customProdutos.push({cod,nome,peso,tp,granel,aliases});
   saveCustomProdutos(); rebuildRegistro();
   if(API_URL) pushMeta();
   fecharCadastro(); renderGrupos(); toast('Item cadastrado: '+cod+' · '+nome);
@@ -1315,6 +1337,13 @@ function renderGrupos(){
   resumoEst();
 }
 
+function itemParaKg(cod, qtd){
+  const p = PMAP[cod];
+  if(!p) return qtd; // sem cadastro: assume kg
+  if(p.granel) return qtd; // já está em kg
+  return qtd * (p.peso||1);
+}
+
 function renderCon(){
   const ini=val('con-ini'), fim=val('con-fim');
   const cf=cargas.filter(c=>{
@@ -1323,15 +1352,34 @@ function renderCon(){
     if(fim && d>fim) return false;
     return true;
   });
-  // total programado por produto no período (para conferir cobertura do estoque)
-  const progTot={};
-  cf.forEach(c=>c.itens.forEach(it=>{ progTot[it.cod]=(progTot[it.cod]||0)+it.qtd; }));
+
+  // Demanda total em KG por item de estoque (resolvendo aliases)
+  // progTotKg[codEstoque] = total em kg demandado pelas cargas
+  const progTotKg={};
+  // também guarda demanda original por cod da carga para exibir na tabela
+  const progTotQtd={};
+  cf.forEach(c=>c.itens.forEach(it=>{
+    const codEst = ALIAS_MAP[it.cod] || it.cod; // resolve alias
+    const kg = itemParaKg(it.cod, it.qtd);
+    progTotKg[codEst] = (progTotKg[codEst]||0) + kg;
+    progTotQtd[it.cod] = (progTotQtd[it.cod]||0) + it.qtd;
+  }));
+
+  // Estoque disponível em KG (converte fardos→kg)
+  const estoqueKg={};
+  Object.keys(estoqueQtd).forEach(cod=>{
+    estoqueKg[cod] = itemParaKg(parseInt(cod), estoqueQtd[cod]);
+  });
+
   let nok=0,nf=0;
-  Object.keys(progTot).forEach(cod=>{ const disp=estoqueQtd[cod]||0; if(disp>=progTot[cod]) nok++; else nf++; });
-  document.getElementById('m-prog').textContent=Object.keys(progTot).length;
+  Object.keys(progTotKg).forEach(cod=>{
+    const disp=estoqueKg[cod]||0;
+    if(disp>=progTotKg[cod]) nok++; else nf++;
+  });
+  document.getElementById('m-prog').textContent=Object.keys(progTotKg).length;
   document.getElementById('m-ok').textContent=nok;
   document.getElementById('m-falta').textContent=nf;
-  // tabela agrupada por carga (ordenada por data)
+
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   let rows='', gi=0;
   ord.forEach(c=>{
@@ -1345,21 +1393,26 @@ function renderCon(){
       return;
     }
     itensDisp.forEach((it,i)=>{
-      const disp=estoqueQtd[it.cod]||0, cobre=disp>=(progTot[it.cod]||0);
+      const codEst = ALIAS_MAP[it.cod] || it.cod;
+      const dispKg = estoqueKg[codEst]||0;
+      const demKg  = progTotKg[codEst]||0;
+      const cobre  = dispKg >= demKg;
+      // exibe alias info se houver mapeamento
+      const aliasLabel = ALIAS_MAP[it.cod]
+        ? `<span style="font-size:10px;color:var(--text3)"> →${PMAP[codEst]?PMAP[codEst].nome:codEst}</span>` : '';
       rows+=`<tr class="${i===0?'pg-start':''}${alt}">`;
       if(i===0){
         rows+=`<td rowspan="${n}" class="pg-merge">${fmtData(c.data)}</td>`;
         rows+=`<td rowspan="${n}" class="pg-merge">${diaSemana(c.data)}</td>`;
         rows+=`<td rowspan="${n}" class="pg-dest">${esc(c.nome)}</td>`;
       }
-      rows+=`<td class="pg-desc">${esc(it.nome)}</td>`;
+      rows+=`<td class="pg-desc">${esc(it.nome)}${aliasLabel}</td>`;
       rows+=`<td class="pg-qtd ${cobre?'pg-ok':'pg-falta'}">${it.qtd}${it.granel?' kg':''}</td>`;
       if(i===0){ rows+=`<td rowspan="${n}" class="pg-obs">${esc(c.obs||'')}</td>`; }
       rows+='</tr>';
     });
   });
   document.getElementById('con-body').innerHTML=rows||'<tr><td colspan="6"><div class="empty">Nenhuma carga no período selecionado</div></td></tr>';
-  // total de fardos do período = soma do peso de todas as cargas ÷ 30
   let pesoTot=0;
   cf.forEach(c=>c.itens.forEach(it=>{ pesoTot+=(it.peso||0); }));
   document.getElementById('con-fardos-tot').textContent=fmtFardos(pesoTot/30)+' fardos';
@@ -2182,7 +2235,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v27';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v28';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
