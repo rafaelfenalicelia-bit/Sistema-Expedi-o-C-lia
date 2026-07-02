@@ -723,6 +723,7 @@ const KEY='controle_expedicao_v1';
 const URLKEY='controle_expedicao_api';
 let API_URL=localStorage.getItem(URLKEY)||'';
 let ultimaEdicao=0;          // marca quando o usuário mexeu por último
+let ultimaEdicaoBase=0;      // marca quando baseItens foi editada localmente
 let pushCargasTimer, pushEstTimer;
 let pushPendente=false;      // true enquanto o envio das cargas não foi confirmado pela nuvem
 
@@ -811,8 +812,11 @@ function pull(silencioso){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
         if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
         if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
-          baseItens = d.meta.baseItens; saveBaseItens(); rebuildRegistro();
-          if(typeof renderBaseItens==='function' && document.getElementById('bi-list')) renderBaseItens();
+          // ✅ Não sobrescreve se o admin acabou de editar a base (aguarda 30s para o push chegar)
+          if(Date.now()-ultimaEdicaoBase > 30000){
+            baseItens = d.meta.baseItens; saveBaseItens(); rebuildRegistro();
+            if(typeof renderBaseItens==='function' && document.getElementById('bi-list')) renderBaseItens();
+          }
         } else if(d.meta.produtos){ mergeProdutosDaNuvem(d.meta.produtos); }
       }
       detectarMudancas(cargasAntes, cargas);
@@ -1840,6 +1844,7 @@ function salvarItemBase(){
 
 // aplica mudanças da Base de Itens em todo o app + nuvem
 function aplicarBaseItens(){
+  ultimaEdicaoBase = Date.now(); // 🛡 protege contra pull sobrescrever nos próximos 30s
   rebuildRegistro();
   renderGrupos();
   if(typeof renderDash==='function') renderDash();
@@ -2149,7 +2154,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v24';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v25';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
