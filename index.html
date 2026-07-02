@@ -776,7 +776,13 @@ function pushEstoque(){
 }
 function pushMeta(){
   if(!API_URL) return;
-  enviar({action:'meta',meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+  enviar({action:'meta',meta:{
+    contador:val('e-contador'),
+    dataContagem:val('e-data'),
+    baseItens:baseItens,
+    baseItensTs: getBaseItensTs(),
+    produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
+  }});
 }
 function enviar(payload){
   status('enviando');
@@ -811,13 +817,10 @@ function pull(silencioso){
       if(d.meta){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
         if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
-        if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
-          // ✅ Não sobrescreve se o admin acabou de editar a base (aguarda 30s para o push chegar)
-          if(Date.now()-ultimaEdicaoBase > 30000){
-            baseItens = d.meta.baseItens; saveBaseItens(); rebuildRegistro();
-            if(typeof renderBaseItens==='function' && document.getElementById('bi-list')) renderBaseItens();
-          }
-        } else if(d.meta.produtos){ mergeProdutosDaNuvem(d.meta.produtos); }
+          // ✅ Merge inteligente: só aceita nuvem se for mais recente que local
+          if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
+            mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0);
+          } else if(d.meta.produtos){ mergeProdutosDaNuvem(d.meta.produtos); }
       }
       detectarMudancas(cargasAntes, cargas);
       cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
@@ -871,7 +874,7 @@ function sincronizarInicial(){
         if(d.meta){
           if(d.meta.contador!==undefined) document.getElementById('e-contador').value=d.meta.contador;
           if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
-          if(servBase){ baseItens=d.meta.baseItens; saveBaseItens(); rebuildRegistro(); }
+          if(servBase){ mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0); }
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
         }
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
@@ -1705,7 +1708,27 @@ function loadBaseItens(){
   rebuildRegistro();
 }
 function saveBaseItens(){
-  try{ localStorage.setItem(BASE_ITENS_KEY,JSON.stringify(baseItens)); }catch(e){}
+  try{
+    localStorage.setItem(BASE_ITENS_KEY, JSON.stringify(baseItens));
+    localStorage.setItem(BASE_ITENS_KEY+'_ts', String(Date.now()));
+  }catch(e){}
+}
+function getBaseItensTs(){
+  return parseInt(localStorage.getItem(BASE_ITENS_KEY+'_ts')||'0');
+}
+
+// Aceita baseItens da nuvem SOMENTE se for mais recente que a versão local
+function mergeBaseItensDaNuvem(remota, tsRemota){
+  if(!Array.isArray(remota) || !remota.length) return;
+  const tsLocal = getBaseItensTs();
+  // Se editou localmente nos últimos 60s OU versão local é mais nova → ignora nuvem
+  if(Date.now()-ultimaEdicaoBase < 60000) return;
+  if(tsLocal && tsRemota && tsLocal >= tsRemota) return;
+  // Nuvem é mais recente: aceita
+  baseItens = remota;
+  saveBaseItens();
+  rebuildRegistro();
+  if(typeof renderBaseItens==='function' && document.getElementById('bi-list')) renderBaseItens();
 }
 
 function abrirBaseItens(){
@@ -1844,12 +1867,13 @@ function salvarItemBase(){
 
 // aplica mudanças da Base de Itens em todo o app + nuvem
 function aplicarBaseItens(){
-  ultimaEdicaoBase = Date.now(); // 🛡 protege contra pull sobrescrever nos próximos 30s
+  ultimaEdicaoBase = Date.now();
+  saveBaseItens();        // grava com timestamp ANTES de enviar para nuvem
   rebuildRegistro();
   renderGrupos();
   if(typeof renderDash==='function') renderDash();
   ultimaEdicao = Date.now();
-  if(API_URL) pushMeta();
+  if(API_URL) pushMeta(); // envia versão com timestamp para a nuvem
 }
 
 function excluirItemBase(){
@@ -2154,7 +2178,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v25';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v26';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   if(!('serviceWorker' in navigator)) return;
