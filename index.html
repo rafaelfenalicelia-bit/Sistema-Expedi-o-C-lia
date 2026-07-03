@@ -143,6 +143,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .pg-ok{color:#2E7D32}
 .pg-falta{color:#C8102E}
 .pg-obs{color:#C8102E;font-weight:700;font-size:11px;text-align:center}
+.pg-peso{margin-top:5px;color:var(--text2);font-weight:800;font-size:11px;background:var(--surface2);border-radius:6px;padding:2px 5px;display:inline-block}
 .prog-tbl tr.pg-start td{border-top:3px solid #1A1A18}
 .prog-tbl tr.pg-alt td{background:#F8F7F3}
 .dash-legend{display:flex;gap:16px;font-size:12px;color:var(--text2);margin-bottom:12px}
@@ -585,10 +586,11 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     </div>
   </div>
   <div class="ctitle">Cargas lançadas</div>
-  <div class="frow" style="align-items:end;margin-bottom:10px">
-    <div class="fg" style="margin:0;flex:1"><label>📅 Filtrar por data</label><input type="date" id="cl-data" onchange="renderCargas()"></div>
-    <button class="btn btn-sm" style="height:44px" onclick="document.getElementById('cl-data').value='';renderCargas()">Ver todas</button>
+  <div class="frow" style="align-items:end;margin-bottom:6px;gap:8px">
+    <div class="fg" style="margin:0;flex:0 0 148px"><label>📅 Data</label><input type="date" id="cl-data" onchange="renderCargas()"></div>
+    <div class="fg" style="margin:0;flex:1"><label>🔍 Nº da carga</label><input type="text" id="cl-busca" inputmode="numeric" placeholder="ex: 2877" oninput="renderCargas()"></div>
   </div>
+  <button class="btn btn-sm" style="margin-bottom:10px" onclick="document.getElementById('cl-data').value='';document.getElementById('cl-busca').value='';renderCargas()">Ver todas</button>
   <div id="lista-cargas"></div>
 </div>
 
@@ -1169,10 +1171,12 @@ function renderCargas(){
   const el=document.getElementById('lista-cargas');
   if(!cargas.length){ el.innerHTML='<div class="empty">Nenhuma carga lançada</div>'; return; }
   const fData=(document.getElementById('cl-data')||{}).value||'';
+  const fBusca=((document.getElementById('cl-busca')||{}).value||'').trim().toLowerCase();
   // mais recém lançadas primeiro (última adicionada no topo)
   let ord=cargas.map((c,i)=>({c,i})).sort((a,b)=>b.i-a.i);
   if(fData) ord=ord.filter(({c})=>c.data===fData);
-  if(!ord.length){ el.innerHTML='<div class="empty">Nenhuma carga nessa data</div>'; return; }
+  if(fBusca) ord=ord.filter(({c})=>String(c.num||'').toLowerCase().includes(fBusca));
+  if(!ord.length){ el.innerHTML='<div class="empty">Nenhuma carga encontrada</div>'; return; }
   el.innerHTML=ord.map(({c,i})=>{
     const cons=consolidarItens(c.itens);
     const tot=cons.reduce((s,x)=>s+x.peso,0);
@@ -1553,8 +1557,10 @@ function renderCon(){
     const n=itensDisp.length||1;
     const alt=gi%2===1?' pg-alt':'';
     gi++;
+    const pesoCarga=cons.reduce((s,x)=>s+(x.peso||0),0);
+    const obsCell=`${esc(c.obs||'')}<div class="pg-peso">⚖ ${Math.round(pesoCarga).toLocaleString('pt-BR')} kg</div>`;
     if(!itensDisp.length){
-      rows+=`<tr class="pg-start${alt}"><td class="pg-merge">${fmtData(c.data)}</td><td class="pg-merge">${diaSemana(c.data)}</td><td class="pg-dest">${esc(c.nome)}</td><td class="pg-desc">—</td><td class="pg-qtd">—</td><td class="pg-obs">${esc(c.obs||'')}</td></tr>`;
+      rows+=`<tr class="pg-start${alt}"><td class="pg-merge">${fmtData(c.data)}</td><td class="pg-merge">${diaSemana(c.data)}</td><td class="pg-dest">${esc(c.nome)}</td><td class="pg-desc">—</td><td class="pg-qtd">—</td><td class="pg-obs">${obsCell}</td></tr>`;
       return;
     }
     itensDisp.forEach((it,i)=>{
@@ -1573,7 +1579,7 @@ function renderCon(){
       }
       rows+=`<td class="pg-desc">${esc(it.nome)}${aliasLabel}</td>`;
       rows+=`<td class="pg-qtd ${cobre?'pg-ok':'pg-falta'}">${it.qtd}${it.granel?' kg':''}</td>`;
-      if(i===0){ rows+=`<td rowspan="${n}" class="pg-obs">${esc(c.obs||'')}</td>`; }
+      if(i===0){ rows+=`<td rowspan="${n}" class="pg-obs">${obsCell}</td>`; }
       rows+='</tr>';
     });
   });
@@ -2619,7 +2625,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v35';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v36';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
