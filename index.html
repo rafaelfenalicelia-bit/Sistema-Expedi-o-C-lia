@@ -1380,11 +1380,18 @@ function insumosEstaSemana(){
 }
 function insumosLimpar(){ document.getElementById('ins-ini').value=''; document.getElementById('ins-fim').value=''; renderInsumos(); }
 function tipoInsumo(nome,tp){
-  if(tp==='PARBO') return 'parbo';
-  if(tp==='BRANCO') return 'polido';
-  if(tp==='INTEGRAL') return 'integral';
-  if(tp==='MIX') return 'mix';
-  if(tp==='GRANEL'){ const n=(nome||'').toUpperCase(); if(/PARBO/.test(n))return'parbo'; if(/POLIDO/.test(n))return'polido'; if(/INTEGRAL/.test(n))return'integral'; }
+  const n=(nome||'').toUpperCase();
+  // identifica pelo NOME (mais confiável — funciona p/ granel e grupos diversos)
+  if(/\bMIX\b/.test(n)) return 'mix';
+  if(/POLIDO/.test(n)) return 'polido';
+  if(/PARBO/.test(n)) return 'parbo';        // PARBO, PARBOILIZADO
+  if(/INTEGRAL/.test(n)) return 'integral';
+  // sem palavra-chave no nome: usa o grupo como reserva
+  const t=(tp||'').toUpperCase();
+  if(t==='PARBO') return 'parbo';
+  if(t==='BRANCO'||t==='POLIDO') return 'polido';
+  if(t==='INTEGRAL') return 'integral';
+  if(t==='MIX') return 'mix';
   return null; // não é insumo de arroz (batata, farinha, etc.)
 }
 function insNf(v){ return v? Math.round(v).toLocaleString('pt-BR') : '<span class="ins-zero">—</span>'; }
@@ -2638,7 +2645,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v38';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v39';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
