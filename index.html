@@ -936,6 +936,7 @@ function pull(silencioso, forcar){
       saveLocal();
       renderCargas(); filtroDatas(); renderGrupos();
       if(document.getElementById('est-visual').classList.contains('active')) renderEstVisual();
+      if(document.getElementById('est-insumos').classList.contains('active')) renderInsumos();
       const atual=document.querySelector('.tab.active').dataset.tab;
       if(atual==='con') renderCon();
       if(atual==='dash') renderDash();
@@ -993,7 +994,7 @@ function sincronizarInicial(){
         }
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         saveLocal();
-        renderCargas(); filtroDatas(); renderGrupos(); renderDash();
+        renderCargas(); filtroDatas(); renderGrupos(); renderDash(); refreshEstSubview();
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
@@ -1165,7 +1166,7 @@ function salvarCarga(){
   // para o envio à nuvem concluir antes de qualquer nova leitura.
   ultimaEdicao = Date.now();   // bloqueia pull por 20s para o servidor receber antes
   cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
-  cancelEdit(); renderCargas(); filtroDatas(); saveAll();
+  cancelEdit(); renderCargas(); filtroDatas(); saveAll(); refreshEstSubview();
 }
 function renderCargas(){
   const el=document.getElementById('lista-cargas');
@@ -1212,7 +1213,7 @@ function remCarga(i){
   // ✅ Atualiza snapshot para que o pull não redetecte como mudança
   ultimaEdicao = Date.now();
   cargasSnapshot = cargas.map(x=>({...x,itens:normalizarItens(x.itens)}));
-  renderCargas(); filtroDatas(); saveAll();
+  renderCargas(); filtroDatas(); saveAll(); refreshEstSubview();
 }
 function filtroDatas(){ /* não há mais seletor único; o filtro agora é por intervalo */ }
 function limparPeriodo(){
@@ -1344,6 +1345,12 @@ function salvarNovoItem(){
   fecharCadastro(); renderGrupos(); toast('Item cadastrado: '+cod+' · '+nome);
 }
 
+// re-renderiza a sub-tela ativa da aba Estoque (visual ou insumos)
+function refreshEstSubview(){
+  const vis=document.getElementById('est-visual'), ins=document.getElementById('est-insumos');
+  if(vis && vis.classList.contains('active')) renderEstVisual();
+  if(ins && ins.classList.contains('active')) renderInsumos();
+}
 function toggleEstView(modo){
   const lanc = document.getElementById('est-lancamento');
   const vis  = document.getElementById('est-visual');
@@ -2631,7 +2638,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v37';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v38';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
