@@ -142,8 +142,8 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .pg-qtd{text-align:center;font-weight:700}
 .pg-ok{color:#2E7D32}
 .pg-falta{color:#C8102E}
-.pg-obs{color:#C8102E;font-weight:700;font-size:11px;text-align:center}
-.pg-peso{margin-top:5px;color:var(--text2);font-weight:800;font-size:11px;background:var(--surface2);border-radius:6px;padding:2px 5px;display:inline-block}
+.pg-obs{color:#C8102E;font-weight:700;font-size:11px;text-align:center;position:relative;padding-bottom:20px}
+.pg-peso{position:absolute;right:6px;bottom:4px;color:var(--text2);font-weight:800;font-size:11px}
 .prog-tbl tr.pg-start td{border-top:3px solid #1A1A18}
 .prog-tbl tr.pg-alt td{background:#F8F7F3}
 .dash-legend{display:flex;gap:16px;font-size:12px;color:var(--text2);margin-bottom:12px}
@@ -1557,8 +1557,14 @@ function renderCon(){
     const n=itensDisp.length||1;
     const alt=gi%2===1?' pg-alt':'';
     gi++;
-    const pesoCarga=cons.reduce((s,x)=>s+(x.peso||0),0);
-    const obsCell=`${esc(c.obs||'')}<div class="pg-peso">⚖ ${Math.round(pesoCarga).toLocaleString('pt-BR')} kg</div>`;
+    const pesoCarga=cons.reduce((s,x)=>{
+      const p=PMAP[x.cod];
+      const pu=p?(p.peso||0):0;
+      const granel=p?p.granel:x.granel;
+      const kg=(granel||pu<=0)?(x.qtd||0):(x.qtd||0)*pu;   // granel/sem peso unitário: a qtd já é o kg
+      return s+kg;
+    },0);
+    const obsCell=`${esc(c.obs||'')}<div class="pg-peso">${Math.round(pesoCarga).toLocaleString('pt-BR')} kg</div>`;
     if(!itensDisp.length){
       rows+=`<tr class="pg-start${alt}"><td class="pg-merge">${fmtData(c.data)}</td><td class="pg-merge">${diaSemana(c.data)}</td><td class="pg-dest">${esc(c.nome)}</td><td class="pg-desc">—</td><td class="pg-qtd">—</td><td class="pg-obs">${obsCell}</td></tr>`;
       return;
@@ -2625,7 +2631,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v36';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v37';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
