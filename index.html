@@ -95,6 +95,7 @@ input[readonly]{background:var(--surface2);color:var(--text2)}
 .carga-num{font-size:15px;font-weight:700;color:var(--red)}
 .carga-dest{font-size:13px;color:var(--text2);flex:1;min-width:80px}
 .date-badge{background:#EDE7F6;color:#512DA8;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+.esp-badge{background:#FFF6DA;color:#B8860B;border:1px solid #E7C65B;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .metrics.three{grid-template-columns:1fr 1fr 1fr}
 .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--rmd);padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
@@ -211,6 +212,19 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .est-toggle-btn.active{background:linear-gradient(135deg,var(--red),var(--redD));color:#fff}
 #est-visual{display:none}
 #est-visual.active{display:block}
+#est-insumos{display:none}
+#est-insumos.active{display:block}
+.ins-tbl{border-collapse:collapse;width:100%;min-width:520px}
+.ins-tbl thead th{background:#141414;color:#fff;font-size:11px;text-transform:uppercase;padding:8px 8px;text-align:center;white-space:nowrap;border-right:1px solid #333}
+.ins-tbl thead th.tot{background:#333}
+.ins-tbl tbody td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:7px 8px;text-align:center;font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ins-tbl td.tipo{font-weight:800;text-align:left;background:var(--surface2)}
+.ins-tbl td.cat{text-align:left;font-weight:600;color:var(--text2);background:var(--surface2)}
+.ins-tbl td.tot{font-weight:800;background:#efe9e0;border-left:2px solid #b9b0a2}
+.ins-tbl tr.esp td:not(.tipo){background:#FFF6DA}
+.ins-tbl tr.esp .cat{color:#B8860B}
+.ins-tbl tr.sep td{border-bottom:2px solid #b9b0a2}
+.ins-zero{color:var(--text3)}
 #est-lancamento.hidden{display:none}
 .est-vis-tbl{width:100%;border-collapse:collapse;font-size:12px;background:var(--surface)}
 .est-vis-tbl thead tr th{background:#9B0B22;color:#fff;font-size:11px;font-weight:700;padding:6px 8px;text-align:left;white-space:nowrap;border:1px solid rgba(255,255,255,.15)}
@@ -553,6 +567,9 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="fg"><label>Nome / destino</label><input id="c-dest" placeholder="ex: Supermercado Central"></div>
     <div class="fg"><label>📅 Data de carregamento</label><input type="date" id="c-data"></div>
     <div class="fg"><label>📝 Observações da carga (opcional)</label><textarea id="c-obs" placeholder="ex: SACARIA 50KG · MANDAR STRECH · ARROZ CLARO..."></textarea></div>
+    <label style="display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:14px;font-weight:600;cursor:pointer;color:#B8860B">
+      <input type="checkbox" id="c-especial" style="width:18px;height:18px"> 🌟 Carga com arroz ESPECIAL
+    </label>
     <div class="ctitle" style="margin-top:6px">Adicionar item por código</div>
     <div class="item-add">
       <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="c-cod" placeholder="ex: 5" oninput="lookupCarga()"></div>
@@ -589,6 +606,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="est-toggle-bar">
     <button class="est-toggle-btn active" id="btn-est-lanc" onclick="toggleEstView('lancamento')">📋 Lançamento</button>
     <button class="est-toggle-btn" id="btn-est-vis"  onclick="toggleEstView('visual')">📊 Resumo Visual</button>
+    <button class="est-toggle-btn" id="btn-est-ins"  onclick="toggleEstView('insumos')">🌾 Insumos</button>
   </div>
 
   <!-- PAINEL LANÇAMENTO (existente) -->
@@ -642,6 +660,28 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
         <tbody id="est-vis-body"></tbody>
         <tfoot id="est-vis-foot"></tfoot>
       </table>
+    </div>
+  </div>
+
+  <!-- RESUMO DE INSUMOS (novo) -->
+  <div id="est-insumos">
+    <div class="est-vis-header"><h3>🌾 Resumo de Insumos</h3></div>
+    <div class="filters">
+      <div class="frow">
+        <div class="fg" style="margin:0;flex:1"><label>📅 Início</label><input type="date" id="ins-ini" onchange="renderInsumos()"></div>
+        <div class="fg" style="margin:0;flex:1"><label>📅 Fim</label><input type="date" id="ins-fim" onchange="renderInsumos()"></div>
+      </div>
+      <div class="frow">
+        <button class="btn btn-sm btn-primary" onclick="insumosEstaSemana()">📆 Esta semana (seg–sex)</button>
+        <button class="btn btn-sm" onclick="insumosLimpar()">Ver tudo</button>
+      </div>
+    </div>
+    <div style="overflow:auto;border:1px solid var(--border);border-radius:var(--rlg);background:var(--surface)">
+      <table class="ins-tbl"><thead id="ins-head"></thead><tbody id="ins-body"></tbody></table>
+    </div>
+    <div class="psub" style="margin-top:10px;line-height:1.5">
+      Valores em <b>kg de arroz</b>. Linhas <b style="color:#B8860B">Especial</b> = cargas marcadas como especiais.<br>
+      O <b>MIX</b> é dividido: metade Parbo + metade Polido (na mesma categoria da carga).
     </div>
   </div>
 </div>
@@ -1037,6 +1077,7 @@ function entrarEdicao(idx){
   editandoIdx=idx; const c=cargas[idx];
   document.getElementById('c-num').value=c.num; document.getElementById('c-dest').value=c.nome; document.getElementById('c-data').value=c.data;
   document.getElementById('c-obs').value=c.obs||'';
+  document.getElementById('c-especial').checked=!!c.especial;
   novosItens=c.itens.map(x=>({...x})); renderNovos();
   document.getElementById('form-title').textContent='✏️ Editar carga '+c.num;
   document.getElementById('btn-save-txt').textContent='Salvar alterações';
@@ -1047,6 +1088,7 @@ function cancelEdit(){
   editandoIdx=null; novosItens=[]; setEmpresa('MATRIZ');
   document.getElementById('c-num').value=''; document.getElementById('c-dest').value='';
   document.getElementById('c-obs').value='';
+  document.getElementById('c-especial').checked=false;
   document.getElementById('c-data').value=hoje(); renderNovos();
   document.getElementById('form-title').textContent='➕ Nova carga';
   document.getElementById('btn-save-txt').textContent='Salvar carga';
@@ -1103,16 +1145,17 @@ function salvarCarga(){
   if(!num||!nome){ toast('Preencha número e destino'); return; }
   if(!data){ toast('Informe a data'); return; }
   if(!novosItens.length){ toast('Adicione ao menos um item'); return; }
+  const especial=document.getElementById('c-especial').checked;
   // guarda os itens SEPARADOS (cada lançamento mantém sua linha);
   // a junção por código acontece só na exibição (cartão e agenda).
   const itensFinal = novosItens.map(x=>({...x}));
   if(editandoIdx!==null){
     const antes={...cargas[editandoIdx],itens:[...cargas[editandoIdx].itens]};
-    const nova={id:cargas[editandoIdx].id||novoId(),num,nome,data,obs,itens:itensFinal};
+    const nova={id:cargas[editandoIdx].id||novoId(),num,nome,data,obs,especial,itens:itensFinal};
     cargas[editandoIdx]=nova; toast('Carga atualizada');
     notifSalvarLocal('editada',nova,antes);
   } else {
-    const nova={id:novoId(),num,nome,data,obs,itens:itensFinal};
+    const nova={id:novoId(),num,nome,data,obs,especial,itens:itensFinal};
     cargas.push(nova); toast('Carga salva');
     notifSalvarLocal('nova',nova,null);
   }
@@ -1147,7 +1190,7 @@ function renderCargas(){
     } else {
       corpo=ordenarItens(cons).map(x=>`<tr><td class="prod-cod">${x.cod}</td><td>${x.nome}</td><td>${x.granel?x.qtd+'kg':x.qtd}</td></tr>`).join('');
     }
-    return `<div class="carga-card"><div class="carga-head"><span class="carga-num">${c.num}</span><span class="carga-dest">${c.nome}</span><span class="date-badge">${fmtData(c.data)}</span></div>
+    return `<div class="carga-card"><div class="carga-head"><span class="carga-num">${c.num}</span><span class="carga-dest">${c.nome}</span>${c.especial?'<span class="esp-badge">🌟 ESPECIAL</span>':''}<span class="date-badge">${fmtData(c.data)}</span></div>
     <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody>${corpo}</tbody></table>
     ${c.obs?`<div style="font-size:12px;color:#C0392B;font-weight:600;margin-top:8px">📝 ${esc(c.obs)}</div>`:''}
     <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(${i})">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(${i})">🗑 Excluir</button>${tot>0?`<span class="badge b-gray" style="align-self:center">${tot.toFixed(0)}kg</span>`:''}</div></div>`;
@@ -1300,16 +1343,80 @@ function salvarNovoItem(){
 function toggleEstView(modo){
   const lanc = document.getElementById('est-lancamento');
   const vis  = document.getElementById('est-visual');
-  const btnL = document.getElementById('btn-est-lanc');
-  const btnV = document.getElementById('btn-est-vis');
-  if(modo==='lancamento'){
-    lanc.classList.remove('hidden'); vis.classList.remove('active');
-    btnL.classList.add('active'); btnV.classList.remove('active');
-  } else {
-    lanc.classList.add('hidden'); vis.classList.add('active');
-    btnL.classList.remove('active'); btnV.classList.add('active');
-    renderEstVisual();
+  const ins  = document.getElementById('est-insumos');
+  const bL=document.getElementById('btn-est-lanc'), bV=document.getElementById('btn-est-vis'), bI=document.getElementById('btn-est-ins');
+  lanc.classList.toggle('hidden', modo!=='lancamento');
+  vis.classList.toggle('active', modo==='visual');
+  ins.classList.toggle('active', modo==='insumos');
+  bL.classList.toggle('active', modo==='lancamento');
+  bV.classList.toggle('active', modo==='visual');
+  bI.classList.toggle('active', modo==='insumos');
+  if(modo==='visual') renderEstVisual();
+  if(modo==='insumos') renderInsumos();
+}
+
+// ===== Resumo de Insumos (parbo/polido/integral, normal x especial, MIX dividido) =====
+function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function insumosEstaSemana(){
+  const h=new Date();
+  const dow=h.getDay();                 // 0=dom..6=sáb
+  const diffSeg=(dow===0?-6:1-dow);      // segunda desta semana
+  const seg=new Date(h); seg.setDate(h.getDate()+diffSeg);
+  const sex=new Date(seg); sex.setDate(seg.getDate()+4);
+  document.getElementById('ins-ini').value=isoLocal(seg);
+  document.getElementById('ins-fim').value=isoLocal(sex);
+  renderInsumos();
+}
+function insumosLimpar(){ document.getElementById('ins-ini').value=''; document.getElementById('ins-fim').value=''; renderInsumos(); }
+function tipoInsumo(nome,tp){
+  if(tp==='PARBO') return 'parbo';
+  if(tp==='BRANCO') return 'polido';
+  if(tp==='INTEGRAL') return 'integral';
+  if(tp==='MIX') return 'mix';
+  if(tp==='GRANEL'){ const n=(nome||'').toUpperCase(); if(/PARBO/.test(n))return'parbo'; if(/POLIDO/.test(n))return'polido'; if(/INTEGRAL/.test(n))return'integral'; }
+  return null; // não é insumo de arroz (batata, farinha, etc.)
+}
+function insNf(v){ return v? Math.round(v).toLocaleString('pt-BR') : '<span class="ins-zero">—</span>'; }
+function renderInsumos(){
+  const ini=(document.getElementById('ins-ini')||{}).value||'';
+  const fim=(document.getElementById('ins-fim')||{}).value||'';
+  const cf=cargas.filter(c=>{ const d=c.data||''; if(!d) return false; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
+  const porDia={};
+  const zero=()=>({parbo:{normal:0,especial:0},polido:{normal:0,especial:0},integral:{normal:0,especial:0}});
+  cf.forEach(c=>{
+    const cat=c.especial?'especial':'normal';
+    const d=c.data;
+    if(!porDia[d]) porDia[d]=zero();
+    c.itens.forEach(it=>{
+      const t=tipoInsumo(it.nome,it.tp); if(!t) return;
+      const kg=it.peso||0;
+      if(t==='mix'){ porDia[d].parbo[cat]+=kg/2; porDia[d].polido[cat]+=kg/2; }
+      else porDia[d][t][cat]+=kg;
+    });
+  });
+  const dias=Object.keys(porDia).sort();
+  const DIAS=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+  const fmtCol=iso=>{ const [a,m,dd]=iso.split('-').map(Number); const dt=new Date(a,m-1,dd); return DIAS[dt.getDay()]+' '+String(dd).padStart(2,'0')+'/'+String(m).padStart(2,'0'); };
+
+  if(!dias.length){
+    document.getElementById('ins-head').innerHTML='';
+    document.getElementById('ins-body').innerHTML='<tr><td><div class="empty" style="padding:16px">Nenhuma carga no período. Escolha as datas ou toque em "Esta semana".</div></td></tr>';
+    return;
   }
+  document.getElementById('ins-head').innerHTML='<tr><th colspan="2">INSUMO</th>'+dias.map(d=>`<th>${fmtCol(d)}</th>`).join('')+'<th class="tot">TOTAL</th></tr>';
+
+  const tipos=[['parbo','PARBO'],['polido','POLIDO'],['integral','INTEGRAL']];
+  let body='';
+  tipos.forEach(([key,label])=>{
+    [['normal','Normal',false],['especial','Especial',true]].forEach(([cat,catLabel,isEsp],idx)=>{
+      let tl=0;
+      const cels=dias.map(d=>{ const v=porDia[d][key][cat]; tl+=v; return `<td>${insNf(v)}</td>`; }).join('');
+      body+=`<tr class="${isEsp?'esp sep':''}">`;
+      if(idx===0) body+=`<td class="tipo" rowspan="2">${label}</td>`;
+      body+=`<td class="cat">${catLabel}</td>${cels}<td class="tot">${insNf(tl)}</td></tr>`;
+    });
+  });
+  document.getElementById('ins-body').innerHTML=body;
 }
 
 // Grupos que aparecem no painel visual e suas cores/títulos
@@ -2512,7 +2619,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v34';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v35';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
