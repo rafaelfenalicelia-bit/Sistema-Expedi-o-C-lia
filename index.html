@@ -598,7 +598,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 <div class="screen" id="screen-est">
   <div class="ptitle">Estoque / Produção</div>
   <div class="psub">Preencha a quantidade pronta. No grupo a granel, a quantidade é em kg.</div>
-  <div class="card">
+  <div class="card" id="card-contagem">
     <div class="ctitle">👤 Dados da contagem</div>
     <div class="fg"><label>📅 Data da contagem</label><input type="date" id="e-data" onchange="saveAll()"></div>
     <div class="fg"><label>Contado por</label><input id="e-contador" placeholder="nome de quem contou" oninput="saveAll()"></div>
@@ -1357,11 +1357,13 @@ function toggleEstView(modo){
   const ins  = document.getElementById('est-insumos');
   const bL=document.getElementById('btn-est-lanc'), bV=document.getElementById('btn-est-vis'), bI=document.getElementById('btn-est-ins');
   lanc.classList.toggle('hidden', modo!=='lancamento');
+  const cc=document.getElementById('card-contagem'); if(cc) cc.style.display = (modo==='lancamento')?'':'none';
   vis.classList.toggle('active', modo==='visual');
   ins.classList.toggle('active', modo==='insumos');
   bL.classList.toggle('active', modo==='lancamento');
   bV.classList.toggle('active', modo==='visual');
   bI.classList.toggle('active', modo==='insumos');
+  if(modo==='lancamento') renderGrupos();
   if(modo==='visual') renderEstVisual();
   if(modo==='insumos') renderInsumos();
 }
@@ -1701,7 +1703,7 @@ function sw(tab){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+tab).classList.add('active');
   window.scrollTo(0,0);
-  if(tab==='con')renderCon(); if(tab==='dash')renderDash(); if(tab==='est')renderGrupos(); if(tab==='terc')renderTerc();
+  if(tab==='con')renderCon(); if(tab==='dash')renderDash(); if(tab==='est')toggleEstView('visual'); if(tab==='terc')renderTerc();
 }
 function hoje(){ return new Date().toISOString().slice(0,10); }
 
@@ -2645,7 +2647,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v39';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v40';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
