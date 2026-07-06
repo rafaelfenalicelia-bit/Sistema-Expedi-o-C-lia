@@ -677,7 +677,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <table class="est-vis-tbl" id="est-vis-tbl">
         <thead>
           <tr><th colspan="3" style="text-align:center;letter-spacing:.06em" id="est-vis-titletr">ESTOQUE - MATRIZ</th></tr>
-          <tr><th>Rótulos de Linha</th><th class="td-fat">Soma de Fat.</th><th class="td-kg">Soma de KG</th></tr>
+          <tr><th>Rótulos de Linha</th><th class="td-fat" id="est-vis-th-fat">Soma em Unidades</th><th class="td-kg">Soma de KG</th></tr>
         </thead>
         <tbody id="est-vis-body"></tbody>
         <tfoot id="est-vis-foot"></tfoot>
@@ -1524,11 +1524,16 @@ function nomeEmpresa(emp){ return emp==='CEARA'?'CEARÁ':emp==='OSORIO'?'OSÓRIO
 function renderEstVisual(){
   const est=estoqueDe(empresaVis);
   const nome=nomeEmpresa(empresaVis);
+  const mostraFat = empresaVis!=='OSORIO';   // OSÓRIO mostra só kg
+  const cols = mostraFat ? 3 : 2;
   const tit=document.getElementById('vis-titulo'); if(tit) tit.textContent='📦 Estoque '+nome;
-  const titTr=document.getElementById('est-vis-titletr'); if(titTr) titTr.textContent='ESTOQUE - '+nome.toUpperCase();
+  const titTr=document.getElementById('est-vis-titletr'); if(titTr){ titTr.textContent='ESTOQUE - '+nome.toUpperCase(); titTr.colSpan=cols; }
+  const thFat=document.getElementById('est-vis-th-fat'); if(thFat) thFat.style.display = mostraFat?'':'none';
   const dataLabel = document.getElementById('e-data').value;
   const lbl = document.getElementById('vis-data-label');
   lbl.textContent = (dataLabel ? fmtData(dataLabel) : '');
+
+  const celFat = v => mostraFat ? `<td class="td-fat">${v}</td>` : '';
 
   // agrupa por grupo-label
   const blocos = {}; // label -> {cls, itens:[{nome,fat,kg}]}
@@ -1546,31 +1551,31 @@ function renderEstVisual(){
   let tbody = '', totFat=0, totKg=0;
   Object.entries(blocos).forEach(([label, bloco])=>{
     let bFat=0, bKg=0;
-    tbody += `<tr><td colspan="3" class="est-vis-grupo ${bloco.cls}">${label}</td></tr>`;
+    tbody += `<tr><td colspan="${cols}" class="est-vis-grupo ${bloco.cls}">${label}</td></tr>`;
     bloco.itens.forEach(it=>{
       bFat += it.fat;
       if(it.kg!=null) bKg += it.kg;
       tbody += `<tr>
         <td class="td-nome">${esc(it.nome)}</td>
-        <td class="td-fat">${it.fat.toLocaleString('pt-BR')}</td>
+        ${celFat(it.fat.toLocaleString('pt-BR'))}
         <td class="td-kg">${it.kg!=null ? it.kg.toLocaleString('pt-BR',{maximumFractionDigits:0}) : '—'}</td>
       </tr>`;
     });
     totFat += bFat; totKg += bKg;
     tbody += `<tr style="background:#E8EDF5;font-weight:700">
       <td class="td-nome" style="color:#1A3A5C">Total Geral</td>
-      <td class="td-fat">${bFat.toLocaleString('pt-BR')}</td>
+      ${celFat(bFat.toLocaleString('pt-BR'))}
       <td class="td-kg">${bKg>0?bKg.toLocaleString('pt-BR',{maximumFractionDigits:0}):'—'}</td>
     </tr>`;
   });
 
   if(!tbody){
-    tbody = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text2)">Nenhum item com quantidade lançada.<br>Preencha o estoque no modo Lançamento.</td></tr>';
+    tbody = `<tr><td colspan="${cols}" style="text-align:center;padding:20px;color:var(--text2)">Nenhum item com quantidade lançada.<br>Preencha o estoque no modo Lançamento.</td></tr>`;
   }
 
   document.getElementById('est-vis-body').innerHTML = tbody;
-  document.getElementById('est-vis-foot').innerHTML = totFat>0
-    ? `<tr><td class="td-nome" style="color:#1A3A5C">Total Geral</td><td class="td-fat">${totFat.toLocaleString('pt-BR')}</td><td class="td-kg">${totKg>0?totKg.toLocaleString('pt-BR',{maximumFractionDigits:0}):'—'}</td></tr>`
+  document.getElementById('est-vis-foot').innerHTML = (totFat>0||totKg>0)
+    ? `<tr><td class="td-nome" style="color:#1A3A5C">Total Geral</td>${celFat(totFat.toLocaleString('pt-BR'))}<td class="td-kg">${totKg>0?totKg.toLocaleString('pt-BR',{maximumFractionDigits:0}):'—'}</td></tr>`
     : '';
 }
 function renderGrupos(){
@@ -2738,7 +2743,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v43';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v44';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
