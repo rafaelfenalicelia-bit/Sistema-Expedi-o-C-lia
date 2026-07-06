@@ -530,6 +530,14 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
         <div id="bi-toggle-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
       </div>
     </div>
+    <div id="bi-empresas-box" style="margin:-4px 0 14px">
+      <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:6px">Em quais estoques este item aparece:</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer"><input type="checkbox" class="bi-emp" value="MATRIZ" style="width:18px;height:18px"> MATRIZ</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer"><input type="checkbox" class="bi-emp" value="CEARA" style="width:18px;height:18px"> CEARÁ</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer"><input type="checkbox" class="bi-emp" value="OSORIO" style="width:18px;height:18px"> OSÓRIO</label>
+      </div>
+    </div>
     <div class="login-err" id="bi-item-err"></div>
     <div class="btn-row">
       <button class="btn btn-danger" id="bi-btn-excluir" style="display:none" onclick="excluirItemBase()">🗑 Excluir</button>
@@ -601,7 +609,14 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="card" id="card-contagem">
     <div class="ctitle">👤 Dados da contagem</div>
     <div class="fg"><label>📅 Data da contagem</label><input type="date" id="e-data" onchange="saveAll()"></div>
-    <div class="fg"><label>Contado por</label><input id="e-contador" placeholder="nome de quem contou" oninput="saveAll()"></div>
+    <div class="fg"><label>🏢 Empresa do estoque</label>
+      <select id="e-empresa" onchange="setEmpresaLanc(this.value)">
+        <option value="MATRIZ">MATRIZ</option>
+        <option value="CEARA">CEARÁ</option>
+        <option value="OSORIO">OSÓRIO</option>
+      </select>
+    </div>
+    <input id="e-contador" type="hidden">
   </div>
 
   <!-- Toggle lançamento / visual -->
@@ -637,7 +652,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <div class="frow">
         <button class="btn btn-sm" onclick="expandir(true)">Abrir todos</button>
         <button class="btn btn-sm" onclick="expandir(false)">Fechar todos</button>
-        <button class="btn btn-sm btn-danger" onclick="limparContagem()">Limpar</button>
+        <button class="btn btn-sm btn-danger" id="btn-limpar-cont" onclick="limparContagem()">Limpar contagem (MATRIZ)</button>
       </div>
     </div>
     <div class="metrics">
@@ -650,13 +665,18 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <!-- PAINEL VISUAL (novo) -->
   <div id="est-visual">
     <div class="est-vis-header">
-      <h3>📦 Estoque Matriz</h3>
+      <h3 id="vis-titulo">📦 Estoque Matriz</h3>
       <span class="est-vis-data" id="vis-data-label"></span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn btn-sm terc-tab on" id="vis-b-MATRIZ" onclick="setEmpresaVis('MATRIZ')">MATRIZ</button>
+      <button class="btn btn-sm terc-tab" id="vis-b-CEARA" onclick="setEmpresaVis('CEARA')">CEARÁ</button>
+      <button class="btn btn-sm terc-tab" id="vis-b-OSORIO" onclick="setEmpresaVis('OSORIO')">OSÓRIO</button>
     </div>
     <div class="est-vis-wrap">
       <table class="est-vis-tbl" id="est-vis-tbl">
         <thead>
-          <tr><th colspan="3" style="text-align:center;letter-spacing:.06em">ESTOQUE - MATRIZ</th></tr>
+          <tr><th colspan="3" style="text-align:center;letter-spacing:.06em" id="est-vis-titletr">ESTOQUE - MATRIZ</th></tr>
           <tr><th>Rótulos de Linha</th><th class="td-fat">Soma de Fat.</th><th class="td-kg">Soma de KG</th></tr>
         </thead>
         <tbody id="est-vis-body"></tbody>
@@ -790,10 +810,37 @@ let prodOverrides = {};    // cod -> {nome,peso,tp,granel} (edições)
 let prodDeleted = [];      // cods excluídos
 let editandoItemCod = null;
 let cargas=[], estoqueQtd={}, novosItens=[], editandoIdx=null, abertos={};
+// estoques adicionais por empresa (MATRIZ = estoqueQtd, usado pela Agenda/Painel)
+let estoqueCeara={}, estoqueOsorio={};
+let empresaLanc='MATRIZ', empresaVis='MATRIZ';
+let ultimaEdicaoEstEmp=0, estEmpPushTimer;
+const EST_CEARA_KEY='controle_estoque_ceara_v1', EST_OSORIO_KEY='controle_estoque_osorio_v1', EST_EMP_TS_KEY='controle_estoque_emp_ts';
+function estoqueDe(emp){ return emp==='CEARA'?estoqueCeara : emp==='OSORIO'?estoqueOsorio : estoqueQtd; }
+function loadEstEmp(){ try{ estoqueCeara=JSON.parse(localStorage.getItem(EST_CEARA_KEY)||'{}')||{}; estoqueOsorio=JSON.parse(localStorage.getItem(EST_OSORIO_KEY)||'{}')||{}; }catch(e){} }
+function saveEstEmpLocal(){ try{ localStorage.setItem(EST_CEARA_KEY,JSON.stringify(estoqueCeara)); localStorage.setItem(EST_OSORIO_KEY,JSON.stringify(estoqueOsorio)); }catch(e){} }
+function getEstEmpTs(){ return parseInt(localStorage.getItem(EST_EMP_TS_KEY)||'0'); }
+function setEstEmpTs(ts){ try{ localStorage.setItem(EST_EMP_TS_KEY,String(ts||0)); }catch(e){} }
+function salvarEstEmp(){ ultimaEdicaoEstEmp=Date.now(); setEstEmpTs(Date.now()); saveEstEmpLocal(); clearTimeout(estEmpPushTimer); estEmpPushTimer=setTimeout(()=>{ if(API_URL) pushMeta(); }, 800); }
+function mergeEstEmpDaNuvem(ce, os, ts){
+  if(Date.now()-ultimaEdicaoEstEmp < 8000) return;      // editou agora há pouco → mantém local
+  if(!ts || getEstEmpTs()>=ts) return;                  // local igual/mais novo → mantém
+  if(ce && typeof ce==='object') estoqueCeara=ce;
+  if(os && typeof os==='object') estoqueOsorio=os;
+  setEstEmpTs(ts); saveEstEmpLocal();
+  const vis=document.getElementById('est-visual');
+  if(vis && vis.classList.contains('active') && empresaVis!=='MATRIZ') renderEstVisual();
+  const lanc=document.getElementById('est-lancamento');
+  if(lanc && !lanc.classList.contains('hidden') && empresaLanc!=='MATRIZ') renderGrupos();
+}
+function setEmpresaLanc(emp){ empresaLanc=emp; atualizarBtnLimpar(); renderGrupos(); }
+function atualizarBtnLimpar(){
+  const b=document.getElementById('btn-limpar-cont');
+  if(b) b.textContent='Limpar contagem ('+nomeEmpresa(empresaLanc).toUpperCase()+')';
+}
 function rebuildRegistro(){
   const fonte = (typeof baseItens!=='undefined' && baseItens.length)
-    ? baseItens.map(it=>({cod:it.cod, nome:it.nome, peso:it.peso||0, tp:it.grupo||'', granel:!!it.granel, noEstoque:!!it.noEstoque, aliases:it.aliases||[]}))
-    : BASE_PRODUTOS.map(p=>({...p, noEstoque:true, aliases:[]}));
+    ? baseItens.map(it=>({cod:it.cod, nome:it.nome, peso:it.peso||0, tp:it.grupo||'', granel:!!it.granel, noEstoque:!!it.noEstoque, empresas:(it.empresas&&it.empresas.length?it.empresas:['MATRIZ']), aliases:it.aliases||[]}))
+    : BASE_PRODUTOS.map(p=>({...p, noEstoque:true, empresas:['MATRIZ'], aliases:[]}));
   // aplica overrides do estoque (que podem ter aliases)
   const overridesFonte = fonte.map(p=>{
     const ov = prodOverrides[p.cod];
@@ -886,6 +933,9 @@ function pushMeta(){
     usersDel: getUsersDel(),
     terc: terc,
     tercTs: getTercTs(),
+    estoqueCeara: estoqueCeara,
+    estoqueOsorio: estoqueOsorio,
+    estEmpTs: getEstEmpTs(),
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
   }}, ()=>{ pushPendente=false; });
 }
@@ -930,6 +980,7 @@ function pull(silencioso, forcar){
           } else if(d.meta.produtos){ mergeProdutosDaNuvem(d.meta.produtos); }
           if(Array.isArray(d.meta.users)) mergeUsersDaNuvem(d.meta.users, d.meta.usersTs||0, d.meta.usersDel||[]);
           if(d.meta.terc) mergeTercDaNuvem(d.meta.terc, d.meta.tercTs||0);
+          mergeEstEmpDaNuvem(d.meta.estoqueCeara, d.meta.estoqueOsorio, d.meta.estEmpTs||0);
       }
       detectarMudancas(cargasAntes, cargas);
       cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
@@ -991,6 +1042,7 @@ function sincronizarInicial(){
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
           if(Array.isArray(d.meta.users)) mergeUsersDaNuvem(d.meta.users, d.meta.usersTs||0, d.meta.usersDel||[]);
           if(d.meta.terc) mergeTercDaNuvem(d.meta.terc, d.meta.tercTs||0);
+          mergeEstEmpDaNuvem(d.meta.estoqueCeara, d.meta.estoqueOsorio, d.meta.estEmpTs||0);
         }
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         saveLocal();
@@ -998,7 +1050,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1224,20 +1276,30 @@ function limparPeriodo(){
 
 function setQtd(cod,val){
   ultimaEdicao=Date.now();
+  const est=estoqueDe(empresaLanc);
   const q=parseFloat(val);
-  if(!q||q<=0) delete estoqueQtd[cod]; else estoqueQtd[cod]=q;
-  const r=document.getElementById('er-'+cod); if(r){ estoqueQtd[cod]?r.classList.add('filled'):r.classList.remove('filled'); }
-  resumoEst(); saveAll();
+  if(!q||q<=0) delete est[cod]; else est[cod]=q;
+  const r=document.getElementById('er-'+cod); if(r){ est[cod]?r.classList.add('filled'):r.classList.remove('filled'); }
+  resumoEst();
+  if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
 }
 function resumoEst(){
-  const cods=Object.keys(estoqueQtd); let peso=0;
-  cods.forEach(c=>{ const p=PMAP[c]; if(!p) return; if(p.granel) peso+=estoqueQtd[c]; else if(p.peso>0) peso+=p.peso*estoqueQtd[c]; });
+  const est=estoqueDe(empresaLanc);
+  const cods=Object.keys(est); let peso=0;
+  cods.forEach(c=>{ const p=PMAP[c]; if(!p) return; if(p.granel) peso+=est[c]; else if(p.peso>0) peso+=p.peso*est[c]; });
   document.getElementById('e-itens').textContent=cods.length;
   document.getElementById('e-peso').textContent=peso.toFixed(0)+' kg';
 }
 function toggleG(tp){ abertos[tp]=!abertos[tp]; const b=document.getElementById('gb-'+tp), c=document.getElementById('gc-'+tp); if(b)b.classList.toggle('open',abertos[tp]); if(c)c.classList.toggle('open',abertos[tp]); }
 function expandir(a){ GRUPOS.forEach(t=>abertos[t]=a); renderGrupos(); }
-function limparContagem(){ if(!confirm('Zerar toda a contagem do estoque?')) return; estoqueQtd={}; renderGrupos(); saveAll(); toast('Contagem limpa'); }
+function limparContagem(){
+  const nome=empresaLanc==='CEARA'?'CEARÁ':empresaLanc==='OSORIO'?'OSÓRIO':'MATRIZ';
+  if(!confirm('Zerar toda a contagem do estoque de '+nome+'?')) return;
+  if(empresaLanc==='CEARA') estoqueCeara={}; else if(empresaLanc==='OSORIO') estoqueOsorio={}; else estoqueQtd={};
+  renderGrupos();
+  if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
+  toast('Contagem limpa ('+nome+')');
+}
 
 // ===== Cadastro / edição / exclusão de itens =====
 const CUSTOM_KEY='controle_expedicao_prod_v1';
@@ -1453,20 +1515,29 @@ const VIS_GRUPOS = [
   {tp:'MIX',     label:'MIX',                        cls:'g-mix'},
 ];
 
+function setEmpresaVis(emp){
+  empresaVis=emp;
+  ['MATRIZ','CEARA','OSORIO'].forEach(e=>{ const b=document.getElementById('vis-b-'+e); if(b) b.classList.toggle('on', e===emp); });
+  renderEstVisual();
+}
+function nomeEmpresa(emp){ return emp==='CEARA'?'CEARÁ':emp==='OSORIO'?'OSÓRIO':'Matriz'; }
 function renderEstVisual(){
+  const est=estoqueDe(empresaVis);
+  const nome=nomeEmpresa(empresaVis);
+  const tit=document.getElementById('vis-titulo'); if(tit) tit.textContent='📦 Estoque '+nome;
+  const titTr=document.getElementById('est-vis-titletr'); if(titTr) titTr.textContent='ESTOQUE - '+nome.toUpperCase();
   const dataLabel = document.getElementById('e-data').value;
-  const contador  = document.getElementById('e-contador').value;
   const lbl = document.getElementById('vis-data-label');
-  lbl.textContent = (dataLabel ? fmtData(dataLabel) : '') + (contador ? ' · ' + contador : '');
+  lbl.textContent = (dataLabel ? fmtData(dataLabel) : '');
 
   // agrupa por grupo-label
   const blocos = {}; // label -> {cls, itens:[{nome,fat,kg}]}
   VIS_GRUPOS.forEach(g=>{
-    const prods = PRODUTOS.filter(p=>p.tp===g.tp && p.noEstoque && estoqueQtd[p.cod]);
+    const prods = PRODUTOS.filter(p=>p.tp===g.tp && p.noEstoque && (p.empresas||['MATRIZ']).includes(empresaVis) && est[p.cod]);
     if(!prods.length) return;
     if(!blocos[g.label]) blocos[g.label]={cls:g.cls, itens:[]};
     prods.forEach(p=>{
-      const qtd = estoqueQtd[p.cod]||0;
+      const qtd = est[p.cod]||0;
       const kg  = p.granel ? qtd : (p.peso>0 ? p.peso*qtd : null);
       blocos[g.label].itens.push({nome:p.nome, fat:qtd, kg});
     });
@@ -1503,16 +1574,18 @@ function renderEstVisual(){
     : '';
 }
 function renderGrupos(){
+  const est=estoqueDe(empresaLanc);
+  atualizarBtnLimpar();
   const busca=(document.getElementById('e-busca').value||'').toLowerCase(), tf=document.getElementById('e-tipo').value;
   let html='';
   GRUPOS.filter(tp=>!tf||tp===tf).forEach(tp=>{
     // ✅ Apenas itens marcados para o estoque
-    const itens=PRODUTOS.filter(p=>p.tp===tp && p.noEstoque && (!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)));
+    const itens=PRODUTOS.filter(p=>p.tp===tp && p.noEstoque && (p.empresas||['MATRIZ']).includes(empresaLanc) && (!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)));
     if(!itens.length) return;
-    const granel=tp==='GRANEL', pre=itens.filter(p=>estoqueQtd[p.cod]).length, ab=abertos[tp]||!!busca;
+    const granel=tp==='GRANEL', pre=itens.filter(p=>est[p.cod]).length, ab=abertos[tp]||!!busca;
     html+=`<div class="grupo"><div class="grupo-head" onclick="toggleG('${tp}')"><div class="grupo-title"><span class="chev ${ab?'open':''}" id="gc-${tp}">▶</span><span class="badge ${TP_BADGE[tp]}">${tp}</span> ${itens.length} itens${granel?' · kg':''}</div>${pre>0?`<span class="badge b-green">${pre} ✓</span>`:''}</div>
     <div class="grupo-body ${ab?'open':''}" id="gb-${tp}"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">${granel?'Qtd kg':'Qtd'}</span></div>`;
-    itens.forEach(p=>{ const v=estoqueQtd[p.cod]||''; const h=p.granel?'<span class="est-peso">granel · kg</span>':(p.peso>0?`<span class="est-peso">${p.peso}kg/un</span>`:'');
+    itens.forEach(p=>{ const v=est[p.cod]||''; const h=p.granel?'<span class="est-peso">granel · kg</span>':(p.peso>0?`<span class="est-peso">${p.peso}kg/un</span>`:'');
       const lapisBtn = (usuarioAtual&&usuarioAtual.role==='admin') ? `<button class="lapis" onclick="editarItem(${p.cod})" title="Editar item">✏️</button>` : '';
       html+=`<div class="est-row ${v?'filled':''}" id="er-${p.cod}"><span class="prod-cod">${p.cod}</span><span><span class="est-nome">${p.nome}</span> ${lapisBtn}<br>${h}</span><input type="number" inputmode="numeric" min="0" placeholder="0" value="${v}" oninput="setQtd(${p.cod},this.value)"></div>`;
     });
@@ -2148,6 +2221,8 @@ function loadBaseItens(){
       // ✅ Migração: itens antigos sem campo noEstoque recebem true (comportamento anterior)
       let migrou=false;
       baseItens.forEach(it=>{ if(it.noEstoque===undefined){ it.noEstoque=true; migrou=true; } });
+      // ✅ Migração: itens sem empresas recebem MATRIZ (estoque principal)
+      baseItens.forEach(it=>{ if(!it.empresas||!it.empresas.length){ it.empresas=['MATRIZ']; migrou=true; } });
       if(migrou) saveBaseItens();
       rebuildRegistro(); return;
     }
@@ -2233,12 +2308,14 @@ function renderBaseItens(){
     grupos[g].forEach(it=>{
       const peso = it.granel ? 'granel · kg' : (it.peso>0 ? it.peso+'kg/un' : '');
       const estBadge = it.noEstoque ? '<span style="font-size:10px;background:#E8F5E9;color:#2E7D32;font-weight:700;padding:1px 6px;border-radius:999px;white-space:nowrap">📦 Estoque</span>' : '';
+      const empMap={MATRIZ:'MTZ',CEARA:'CE',OSORIO:'OS'};
+      const empBadges = it.noEstoque ? (it.empresas&&it.empresas.length?it.empresas:['MATRIZ']).map(e=>`<span style="font-size:10px;background:#E6F1FB;color:#185FA5;font-weight:700;padding:1px 6px;border-radius:999px;white-space:nowrap">${empMap[e]||e}</span>`).join(' ') : '';
       const editBtn = isAdmin
         ? `<button class="btn btn-sm btn-edit" style="padding:4px 8px;min-height:28px;font-size:11px" onclick="abrirEditarItemBase(${it.cod})">✏️</button>`
         : '';
       html+=`<div class="bi-item${isAdmin?' bi-item-admin':''}">
         <span class="bi-cod">${it.cod}</span>
-        <span class="bi-nome">${esc(it.nome)} ${estBadge}</span>
+        <span class="bi-nome">${esc(it.nome)} ${estBadge} ${empBadges}</span>
         <span class="bi-peso">${peso}</span>
         ${editBtn}
       </div>`;
@@ -2257,9 +2334,19 @@ function setToggleEstoque(val){
   _biNoEstoque = !!val;
   const toggle = document.getElementById('bi-toggle');
   const thumb  = document.getElementById('bi-toggle-thumb');
+  const box    = document.getElementById('bi-empresas-box');
+  if(box) box.style.display = _biNoEstoque ? '' : 'none';
   if(!toggle || !thumb) return;
   toggle.style.background = _biNoEstoque ? 'var(--red)' : 'var(--border2)';
   thumb.style.transform   = _biNoEstoque ? 'translateX(20px)' : 'translateX(0)';
+}
+function setEmpresasBox(emps){
+  const set=new Set((emps&&emps.length)?emps:['MATRIZ']);
+  document.querySelectorAll('.bi-emp').forEach(c=>{ c.checked=set.has(c.value); });
+}
+function getEmpresasBox(){
+  const arr=[]; document.querySelectorAll('.bi-emp').forEach(c=>{ if(c.checked) arr.push(c.value); });
+  return arr.length?arr:['MATRIZ'];
 }
 document.addEventListener('change', e=>{ if(e.target.id==='bi-no-estoque') setToggleEstoque(e.target.checked); });
 
@@ -2274,6 +2361,7 @@ function abrirNovoItemBase(){
   document.getElementById('bi-item-err').textContent='';
   document.getElementById('bi-btn-excluir').style.display='none';
   setToggleEstoque(false); // novo item NÃO entra no estoque por padrão
+  setEmpresasBox(['MATRIZ']);
   fecharDrawer('baseitens');
   setTimeout(()=>{ abrirDrawer('novoitem'); document.getElementById('bi-cod').focus(); },200);
 }
@@ -2291,6 +2379,7 @@ function abrirEditarItemBase(cod){
   document.getElementById('bi-item-err').textContent='';
   document.getElementById('bi-btn-excluir').style.display='';
   setToggleEstoque(!!it.noEstoque);
+  setEmpresasBox(it.empresas&&it.empresas.length?it.empresas:['MATRIZ']);
   fecharDrawer('baseitens');
   setTimeout(()=>{ abrirDrawer('novoitem'); document.getElementById('bi-nome-input').focus(); },200);
 }
@@ -2305,11 +2394,12 @@ function salvarItemBase(){
   if(!grupo)  { err.textContent='Informe o grupo'; return; }
   const peso   = pesoRaw==='' ? 0 : (parseFloat(pesoRaw.replace(',','.'))||0);
   const granel = peso===0;
+  const empresas = noEstoque ? getEmpresasBox() : ['MATRIZ'];
 
   if(_biEditando!==null){
     const idx=baseItens.findIndex(x=>x.cod===_biEditando);
-    if(idx>=0){ baseItens[idx]={...baseItens[idx],nome:nomeRaw,peso,grupo,granel,noEstoque}; }
-    saveBaseItens(); rebuildRegistro();
+    if(idx>=0){ baseItens[idx]={...baseItens[idx],nome:nomeRaw,peso,grupo,granel,noEstoque,empresas}; }
+    aplicarBaseItens();
     fecharDrawer('novoitem');
     setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
     toast('Item atualizado ✓');
@@ -2320,8 +2410,8 @@ function salvarItemBase(){
   const cod = parseInt(codRaw);
   if(!cod && cod!==0){ err.textContent='Informe o código'; return; }
   if(baseItens.find(x=>x.cod===cod)){ err.textContent='Já existe item com este código'; return; }
-  baseItens.push({cod,nome:nomeRaw,peso,grupo,granel,noEstoque});
-  saveBaseItens(); aplicarBaseItens();
+  baseItens.push({cod,nome:nomeRaw,peso,grupo,granel,noEstoque,empresas});
+  aplicarBaseItens();
   fecharDrawer('novoitem');
   setTimeout(()=>{ abrirDrawer('baseitens'); renderBaseItens(); },200);
   toast('Item adicionado à base ✓');
@@ -2634,6 +2724,7 @@ cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
 loadNotifs(); atualizarBadge();
 loadBaseItens();
 loadTerc();
+loadEstEmp();
 renderCargas(); filtroDatas(); renderGrupos(); renderDash();
 status(API_URL?'online':'');
 if(API_URL) pull(true, true);   // primeira sincronização forçada (destrava o envio de usuários/base)
@@ -2647,7 +2738,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v40';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v43';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
