@@ -727,7 +727,10 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <div class="fg" style="margin:0;flex:1"><label>📅 Data início</label><input type="date" id="con-ini" onchange="renderCon()"></div>
       <div class="fg" style="margin:0;flex:1"><label>📅 Data fim</label><input type="date" id="con-fim" onchange="renderCon()"></div>
     </div>
-    <button class="btn btn-sm" onclick="limparPeriodo()">Limpar período (ver tudo)</button>
+    <div class="frow">
+      <button class="btn btn-sm btn-primary" onclick="agendaEstaSemana()">📆 Esta semana (seg–sex)</button>
+      <button class="btn btn-sm" onclick="limparPeriodo()">Limpar período (ver tudo)</button>
+    </div>
   </div>
   <div class="metrics three">
     <div class="metric"><div class="metric-label">Programados</div><div class="metric-val" id="m-prog">0</div></div>
@@ -1285,6 +1288,16 @@ function remCarga(i){
   renderCargas(); filtroDatas(); saveAll(); refreshEstSubview();
 }
 function filtroDatas(){ /* não há mais seletor único; o filtro agora é por intervalo */ }
+function agendaEstaSemana(){
+  const h=new Date();
+  const dow=h.getDay();                 // 0=dom..6=sáb
+  const diffSeg=(dow===0?-6:1-dow);      // segunda desta semana
+  const seg=new Date(h); seg.setDate(h.getDate()+diffSeg);
+  const sex=new Date(seg); sex.setDate(seg.getDate()+4);
+  document.getElementById('con-ini').value=isoLocal(seg);
+  document.getElementById('con-fim').value=isoLocal(sex);
+  renderCon();
+}
 function limparPeriodo(){
   document.getElementById('con-ini').value='';
   document.getElementById('con-fim').value='';
@@ -2827,7 +2840,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v46';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v47';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
