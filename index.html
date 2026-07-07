@@ -1509,7 +1509,10 @@ function renderInsumos(){
     if(!porDia[d]) porDia[d]=zero();
     c.itens.forEach(it=>{
       const t=tipoInsumo(it.nome,it.tp); if(!t) return;
-      const kg=it.peso||0;
+      const p=PMAP[it.cod];
+      const pu=p?(p.peso||0):0;
+      const granel=p?p.granel:it.granel;
+      const kg=(granel||pu<=0)?(it.qtd||0):(it.qtd||0)*pu;   // granel/sem peso unitário: a qtd já é o kg
       if(t==='mix'){ porDia[d].parbo[cat]+=kg/2; porDia[d].polido[cat]+=kg/2; }
       else porDia[d][t][cat]+=kg;
     });
@@ -2840,7 +2843,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v47';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v48';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
