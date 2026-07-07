@@ -236,6 +236,16 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .est-vis-tbl td{padding:5px 8px;border:1px solid var(--border);vertical-align:middle}
 .est-vis-tbl td.td-nome{font-size:12px;font-weight:500;white-space:nowrap}
 .est-vis-tbl td.td-fat{text-align:right;font-weight:700;color:#9B0B22}
+.df-tbl{border-collapse:collapse;width:100%;min-width:520px}
+.df-tbl thead th{background:#141414;color:#fff;font-size:10px;text-transform:uppercase;padding:8px 6px;text-align:center;white-space:nowrap;border-right:1px solid #333}
+.df-tbl th.df-desc{text-align:left}
+.df-tbl td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.df-tbl td.df-desc{text-align:left;font-weight:600;white-space:normal}
+.df-tbl tbody tr:nth-child(even){background:var(--surface2)}
+.df-tbl td.df-falta{color:var(--red);font-weight:800}
+.df-tbl td.df-ok{color:var(--green);font-weight:700}
+.df-tbl td.df-kg{color:var(--red);font-weight:800}
+.df-tbl tfoot td{font-weight:800;background:#efe9e0;border-top:2px solid #b9b0a2}
 .est-vis-tbl td.td-kg{text-align:right;color:var(--text2);font-size:11px}
 .est-vis-tbl tfoot td{background:var(--surface2);font-weight:700;padding:7px 8px;border-top:2px solid var(--border2)}
 .est-vis-tbl tfoot td.td-fat{color:#9B0B22;text-align:right}
@@ -759,9 +769,16 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     </div>
   </div>
   <div class="card">
-    <div class="ctitle">📊 Estoque × A carregar (kg) por grupo</div>
-    <div class="dash-legend"><span><span class="dash-dot" style="background:var(--green)"></span>Em estoque</span><span><span class="dash-dot" style="background:var(--blue)"></span>A carregar</span></div>
-    <div id="dash-bars"></div>
+    <div class="ctitle">📊 Estoque × A carregar</div>
+    <div style="display:flex;gap:8px;margin:6px 0 12px">
+      <button class="btn btn-sm terc-tab on" id="dash-tg-graf" onclick="setDashView('graf')">📊 Gráfico</button>
+      <button class="btn btn-sm terc-tab" id="dash-tg-fard" onclick="setDashView('fard')">🔢 Fardos</button>
+    </div>
+    <div id="dash-graf">
+      <div class="dash-legend"><span><span class="dash-dot" style="background:var(--green)"></span>Em estoque</span><span><span class="dash-dot" style="background:var(--blue)"></span>A carregar</span></div>
+      <div id="dash-bars"></div>
+    </div>
+    <div id="dash-fardos" style="display:none;overflow:auto"></div>
   </div>
   <div class="card">
     <div class="ctitle">🚚 Cargas do período · fardos</div>
@@ -1701,6 +1718,16 @@ function renderCon(){
 function fmtKg(n){ return Math.round(n).toLocaleString('pt-BR')+' kg'; }
 function fmtFardos(n){ const r=Math.round(n*10)/10; return (Number.isInteger(r)?r:r.toFixed(1)).toString().replace('.',','); }
 function limparDash(){ document.getElementById('d-ini').value=''; document.getElementById('d-fim').value=''; renderDash(); }
+let dashView='graf';
+function setDashView(v){ dashView=v; aplicarDashView(); }
+function aplicarDashView(){
+  const g=document.getElementById('dash-graf'), f=document.getElementById('dash-fardos');
+  const bg=document.getElementById('dash-tg-graf'), bf=document.getElementById('dash-tg-fard');
+  if(g) g.style.display = dashView==='graf'?'':'none';
+  if(f) f.style.display = dashView==='fard'?'':'none';
+  if(bg) bg.classList.toggle('on', dashView==='graf');
+  if(bf) bf.classList.toggle('on', dashView==='fard');
+}
 function renderDash(){
   const ini=val('d-ini'), fim=val('d-fim');
   const cf=cargas.filter(c=>{ const d=c.data||''; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
@@ -1734,6 +1761,41 @@ function renderDash(){
   document.getElementById('dash-bars').innerHTML=bars||'<div class="empty">Nada programado no período</div>';
   document.getElementById('d-car').textContent=fmtKg(totalCar);
   document.getElementById('d-est').textContent=fmtKg(totalEst);
+
+  // ----- Visual em fardos: por item (un), falta produzir e conversão em kg -----
+  const carItem={};
+  cf.forEach(c=>c.itens.forEach(it=>{
+    const cod=it.cod;
+    if(!carItem[cod]){ const p=PMAP[cod]; carItem[cod]={nome:(p?p.nome:it.nome),tp:(p?p.tp:it.tp),granel:(p?!!p.granel:!!it.granel),peso:(p?(p.peso||0):0),qtd:0}; }
+    carItem[cod].qtd += (it.qtd||0);
+  }));
+  const linhas=Object.keys(carItem).map(cod=>{
+    const d=carItem[cod];
+    const est=estoqueQtd[cod]||0;
+    const falta=Math.max(0, d.qtd-est);
+    const faltaKg = d.granel ? falta : (d.peso>0 ? falta*d.peso : 0);
+    return {nome:d.nome, tp:d.tp, granel:d.granel, aCar:d.qtd, est, falta, faltaKg};
+  });
+  linhas.sort((a,b)=>{ const ra=ORD_GRUPO[a.tp]!=null?ORD_GRUPO[a.tp]:50, rb=ORD_GRUPO[b.tp]!=null?ORD_GRUPO[b.tp]:50; if(ra!==rb)return ra-rb; return (a.nome||'').localeCompare(b.nome||''); });
+  const un=(v,g)=> (Math.round(v)).toLocaleString('pt-BR')+(g?' kg':'');
+  let tCar=0,tEst=0,tFalta=0,tKg=0, corpo='';
+  linhas.forEach(l=>{
+    tCar+=l.aCar; tEst+=l.est; tFalta+=l.falta; tKg+=l.faltaKg;
+    corpo+=`<tr>
+      <td class="df-desc">${esc(l.nome)}</td>
+      <td>${un(l.aCar,l.granel)}</td>
+      <td>${un(l.est,l.granel)}</td>
+      <td class="${l.falta>0?'df-falta':'df-ok'}">${l.falta>0?un(l.falta,l.granel):'—'}</td>
+      <td class="df-kg">${l.faltaKg>0?fmtKg(l.faltaKg):'—'}</td>
+    </tr>`;
+  });
+  const fardHtml = linhas.length
+    ? `<table class="df-tbl"><thead><tr><th class="df-desc">Descrição</th><th>A carregar</th><th>Em estoque</th><th>Falta produzir</th><th>Falta (kg)</th></tr></thead>
+       <tbody>${corpo}</tbody>
+       <tfoot><tr><td class="df-desc">TOTAL</td><td>${un(tCar)}</td><td>${un(tEst)}</td><td class="df-falta">${un(tFalta)}</td><td class="df-kg">${fmtKg(tKg)}</td></tr></tfoot></table>`
+    : '<div class="empty">Nada programado no período</div>';
+  document.getElementById('dash-fardos').innerHTML=fardHtml;
+  aplicarDashView();
   // resumo de cargas + fardos (peso total / 30)
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   let resumo='', totFardos=0;
@@ -2765,7 +2827,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v45';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v46';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
