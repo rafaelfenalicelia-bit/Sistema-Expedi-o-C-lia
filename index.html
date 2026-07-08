@@ -2323,8 +2323,11 @@ function loadBaseItens(){
     const r=localStorage.getItem(BASE_ITENS_KEY);
     if(r){
       baseItens=JSON.parse(r)||[];
+      // ✅ Remove duplicatas por código (podem causar item "sumir" do estoque)
+      const antesLen=baseItens.length;
+      baseItens=dedupeBase(baseItens);
+      let migrou = baseItens.length!==antesLen;
       // ✅ Migração: itens antigos sem campo noEstoque recebem true (comportamento anterior)
-      let migrou=false;
       baseItens.forEach(it=>{ if(it.noEstoque===undefined){ it.noEstoque=true; migrou=true; } });
       // ✅ Migração: itens sem empresas recebem MATRIZ (estoque principal)
       baseItens.forEach(it=>{ if(!it.empresas||!it.empresas.length){ it.empresas=['MATRIZ']; migrou=true; } });
@@ -2352,20 +2355,39 @@ function getBaseItensTs(){
 
 // Recebe a Base da nuvem. Regra: só o admin edita a Base, então os usuários
 // comuns SEMPRE seguem a nuvem. O admin mantém a própria edição por 60s.
+// remove duplicatas por código (mantém "no estoque" e une empresas das duplicatas)
+function dedupeBase(arr){
+  const map={};
+  (arr||[]).forEach(it=>{
+    const k=it.cod;
+    if(map[k]===undefined){ map[k]={...it, empresas:(it.empresas&&it.empresas.length?it.empresas.slice():undefined)}; }
+    else {
+      const cur=map[k];
+      cur.noEstoque = cur.noEstoque || it.noEstoque;
+      const s=new Set([...(cur.empresas||[]),...(it.empresas||[])]);
+      if(s.size) cur.empresas=[...s];
+      if(it.nome) cur.nome=it.nome;
+      if(it.peso!=null) cur.peso=it.peso;
+      if(it.grupo) cur.grupo=it.grupo;
+      if(it.granel!=null) cur.granel=it.granel;
+    }
+  });
+  return Object.values(map);
+}
 function mergeBaseItensDaNuvem(remota, tsRemota){
   if(!Array.isArray(remota) || !remota.length) return;
   const souAdmin = !!(usuarioAtual && usuarioAtual.role==='admin');
   const tsLocal = getBaseItensTs();
   if(souAdmin){
-    // admin acabou de editar → sua versão prevalece por 60s
-    if(Date.now()-ultimaEdicaoBase < 60000) return;
-    // senão, adota a nuvem só se for genuinamente mais recente
-    if(!tsRemota || tsLocal>=tsRemota) return;
+    // O admin é a AUTORIDADE da Base: uma vez que tem a própria versão (ts>0),
+    // nunca deixa a nuvem reverter suas marcações (ex.: item aparecer/sumir do estoque).
+    // Só adota a nuvem na 1ª sincronização (quando ainda não tem versão local).
+    if(tsLocal>0) return;
   } else {
     // usuário comum segue a nuvem, mas não re-renderiza se já está nessa versão
     if(tsRemota && tsRemota===tsLocal) return;
   }
-  baseItens = remota;
+  baseItens = dedupeBase(remota);
   setBaseItensTs(tsRemota||0);
   saveBaseItens();
   rebuildRegistro();
@@ -2524,6 +2546,7 @@ function salvarItemBase(){
 
 // aplica mudanças da Base de Itens em todo o app + nuvem
 function aplicarBaseItens(){
+  baseItens = dedupeBase(baseItens);   // garante 1 item por código
   ultimaEdicaoBase = Date.now();
   setBaseItensTs(Date.now());  // esta edição é a nova versão (timestamp novo)
   saveBaseItens();
@@ -2843,7 +2866,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v48';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v49';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
