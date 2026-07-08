@@ -618,7 +618,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="psub">Preencha a quantidade pronta. No grupo a granel, a quantidade é em kg.</div>
   <div class="card" id="card-contagem">
     <div class="ctitle">👤 Dados da contagem</div>
-    <div class="fg"><label>📅 Data da contagem</label><input type="date" id="e-data" onchange="saveAll()"></div>
+    <div class="fg"><label>📅 Data da contagem</label><input type="date" id="e-data" onchange="onDataContagem()"></div>
     <div class="fg"><label>🏢 Empresa do estoque</label>
       <select id="e-empresa" onchange="setEmpresaLanc(this.value)">
         <option value="MATRIZ">MATRIZ</option>
@@ -832,6 +832,18 @@ let editandoItemCod = null;
 let cargas=[], estoqueQtd={}, novosItens=[], editandoIdx=null, abertos={};
 // estoques adicionais por empresa (MATRIZ = estoqueQtd, usado pela Agenda/Painel)
 let estoqueCeara={}, estoqueOsorio={};
+let dataEmp={MATRIZ:'',CEARA:'',OSORIO:''};   // data da contagem por empresa
+const EST_DATA_KEY='controle_data_emp_v1';
+function saveDataEmpLocal(){ try{ localStorage.setItem(EST_DATA_KEY,JSON.stringify(dataEmp)); }catch(e){} }
+function loadDataEmp(){ try{ const d=JSON.parse(localStorage.getItem(EST_DATA_KEY)||'null'); if(d) dataEmp={MATRIZ:d.MATRIZ||'',CEARA:d.CEARA||'',OSORIO:d.OSORIO||''}; }catch(e){} }
+function adotarDataEmp(obj){ if(obj&&typeof obj==='object'){ dataEmp={MATRIZ:obj.MATRIZ||dataEmp.MATRIZ||'',CEARA:obj.CEARA||dataEmp.CEARA||'',OSORIO:obj.OSORIO||dataEmp.OSORIO||''}; saveDataEmpLocal(); } }
+function aplicarDataNoCampo(){ const el=document.getElementById('e-data'); if(el) el.value = dataEmp[empresaLanc]||''; }
+function onDataContagem(){
+  dataEmp[empresaLanc]=val('e-data');
+  if(empresaLanc==='MATRIZ') dataEmp.MATRIZ=val('e-data');
+  saveDataEmpLocal();
+  saveAll();
+}
 let empresaLanc='MATRIZ', empresaVis='MATRIZ';
 let ultimaEdicaoEstEmp=0, estEmpPushTimer;
 const EST_CEARA_KEY='controle_estoque_ceara_v1', EST_OSORIO_KEY='controle_estoque_osorio_v1', EST_EMP_TS_KEY='controle_estoque_emp_ts';
@@ -852,7 +864,7 @@ function mergeEstEmpDaNuvem(ce, os, ts){
   const lanc=document.getElementById('est-lancamento');
   if(lanc && !lanc.classList.contains('hidden') && empresaLanc!=='MATRIZ') renderGrupos();
 }
-function setEmpresaLanc(emp){ empresaLanc=emp; atualizarBtnLimpar(); renderGrupos(); }
+function setEmpresaLanc(emp){ empresaLanc=emp; aplicarDataNoCampo(); atualizarBtnLimpar(); renderGrupos(); }
 function atualizarBtnLimpar(){
   const b=document.getElementById('btn-limpar-cont');
   if(b) b.textContent='Limpar contagem ('+nomeEmpresa(empresaLanc).toUpperCase()+')';
@@ -956,6 +968,7 @@ function pushMeta(){
     estoqueCeara: estoqueCeara,
     estoqueOsorio: estoqueOsorio,
     estEmpTs: getEstEmpTs(),
+    dataEmp: dataEmp,
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
   }}, ()=>{ pushPendente=false; });
 }
@@ -993,7 +1006,8 @@ function pull(silencioso, forcar){
       cargas=servCargas; estoqueQtd=servEst;
       if(d.meta){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
-        if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
+        if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
+        if(document.activeElement.id!=='e-data') aplicarDataNoCampo();
           // ✅ Merge inteligente: só aceita nuvem se for mais recente que local
           if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
             mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0);
@@ -1057,7 +1071,8 @@ function sincronizarInicial(){
         cargas=servCargas; estoqueQtd=servEst;
         if(d.meta){
           if(d.meta.contador!==undefined) document.getElementById('e-contador').value=d.meta.contador;
-          if(d.meta.dataContagem) document.getElementById('e-data').value=d.meta.dataContagem;
+          if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
+          aplicarDataNoCampo();
           if(servBase){ mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0); }
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
           if(Array.isArray(d.meta.users)) mergeUsersDaNuvem(d.meta.users, d.meta.usersTs||0, d.meta.usersDel||[]);
@@ -1070,7 +1085,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1570,7 +1585,7 @@ function renderEstVisual(){
   const tit=document.getElementById('vis-titulo'); if(tit) tit.textContent='📦 Estoque '+nome;
   const titTr=document.getElementById('est-vis-titletr'); if(titTr){ titTr.textContent='ESTOQUE - '+nome.toUpperCase(); titTr.colSpan=cols; }
   const thFat=document.getElementById('est-vis-th-fat'); if(thFat) thFat.style.display = mostraFat?'':'none';
-  const dataLabel = document.getElementById('e-data').value;
+  const dataLabel = dataEmp[empresaVis]||'';
   const lbl = document.getElementById('vis-data-label');
   lbl.textContent = (dataLabel ? fmtData(dataLabel) : '');
 
@@ -2853,6 +2868,10 @@ loadNotifs(); atualizarBadge();
 loadBaseItens();
 loadTerc();
 loadEstEmp();
+loadDataEmp();
+// migra a data única (se existir) para a MATRIZ e reflete no campo
+if(!dataEmp.MATRIZ){ dataEmp.MATRIZ = document.getElementById('e-data').value || hoje(); saveDataEmpLocal(); }
+aplicarDataNoCampo();
 renderCargas(); filtroDatas(); renderGrupos(); renderDash();
 status(API_URL?'online':'');
 if(API_URL) pull(true, true);   // primeira sincronização forçada (destrava o envio de usuários/base)
@@ -2866,7 +2885,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v49';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v50';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
