@@ -43,13 +43,16 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .psub{font-size:12px;color:var(--text2);margin-bottom:14px}
 .terc-tab{border:1.5px solid var(--blue);background:var(--surface);color:var(--blue);font-weight:700}
 .terc-tab.on{background:var(--blue);color:#fff}
-.terc-tbl{border-collapse:collapse;width:100%;min-width:760px}
-.terc-tbl thead th{background:#141414;color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.02em;padding:8px 6px;text-align:center;white-space:nowrap;border-right:1px solid #333}
-.terc-tbl tbody td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:3px 5px;text-align:center;font-size:12px;height:34px}
-.terc-tbl tbody td.tprod{text-align:left;white-space:nowrap;padding-left:8px}
+.terc-tbl{border-collapse:collapse;width:auto;min-width:680px;border:2px solid #141414;border-radius:8px;overflow:hidden}
+.terc-tbl thead th{background:#141414;color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.02em;padding:8px 14px;text-align:center;white-space:nowrap;border-right:1px solid #333}
+.terc-tbl tbody td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:4px 12px;text-align:center;font-size:12px;height:34px}
+.terc-tbl tbody td.tprod{text-align:left;white-space:nowrap;padding-left:10px;padding-right:18px}
 .terc-tbl tbody td.tcod{color:var(--text3);font-weight:700}
 .terc-tbl tbody tr:nth-child(even){background:var(--surface2)}
-.terc-cel{width:64px;height:30px;border:1px solid var(--border2);border-radius:5px;text-align:center;font-size:13px;background:var(--surface);color:var(--text)}
+.terc-tbl tbody tr:last-child td{border-bottom:none}
+.terc-cel{width:84px;height:30px;border:1px solid var(--border2);border-radius:5px;text-align:center;font-size:13px;background:var(--surface);color:var(--text);padding:0 4px}
+.terc-cel::-webkit-outer-spin-button,.terc-cel::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.terc-cel{-moz-appearance:textfield}
 .terc-calc{font-weight:800}
 .terc-calc.neg{color:var(--red)}
 .terc-st{font-weight:800;font-size:10px;border-radius:5px;padding:4px 6px;display:inline-block;min-width:92px;white-space:nowrap}
@@ -794,20 +797,16 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 
 <!-- ESTOQUE x CARTEIRA (terceirizados) -->
 <div class="screen" id="screen-terc">
-  <div class="ptitle">Estoque × Carteira</div>
-  <div class="psub">Controle de terceirizados — quando comprar</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+  <div class="ptitle" style="text-align:center">Estoque × Carteira</div>
+  <div class="psub" style="text-align:center">Controle de terceirizados — quando comprar</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:12px">
     <button class="btn btn-sm terc-tab on" id="terc-b-matriz" onclick="setTercTela('matriz')">MATRIZ</button>
     <button class="btn btn-sm terc-tab" id="terc-b-ceara" onclick="setTercTela('ceara')">CD · CEARÁ</button>
     <div class="fg" style="margin:0"><input type="date" id="terc-data" style="height:38px" onchange="tercSetData(this.value)"></div>
-    <button class="btn btn-success btn-sm" style="margin-left:auto" onclick="tercAdd()">＋ Item</button>
+    <button class="btn btn-success btn-sm" onclick="tercAdd()">＋ Item</button>
   </div>
-  <div style="overflow:auto;border:1px solid var(--border);border-radius:var(--rlg);background:var(--surface)">
+  <div style="overflow:auto;display:flex;justify-content:center">
     <table class="terc-tbl"><thead id="terc-head"></thead><tbody id="terc-body"></tbody></table>
-  </div>
-  <div class="psub" style="margin-top:10px;line-height:1.5">
-    Saldo = Estoque atual − Carteira · Estoque final = Saldo + Comprado<span id="terc-rod-transf"> + Transferência</span>.<br>
-    Status: <b style="color:var(--red)">COMPRAR URGENTE</b> se o final ≤ 0 · <b style="color:#B8860B">COMPRAR</b> se abaixo do mínimo · <b style="color:var(--green)">OK</b> caso contrário.
   </div>
 </div>
 
@@ -1928,10 +1927,28 @@ function tercStatus(final,min){
   if(final<min) return ['tst-comprar','COMPRAR'];
   return ['tst-ok','OK'];
 }
+function tercFoco(r,c){
+  const el=document.querySelector(`.terc-cel[data-r="${r}"][data-c="${c}"]`);
+  if(el){ el.focus(); if(el.select) el.select(); return true; }
+  return false;
+}
+function tercNav(e){
+  const r=parseInt(e.target.dataset.r), c=parseInt(e.target.dataset.c);
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(!tercFoco(r+1,c)) tercFoco(0,c);   // desce; se acabar, volta ao topo da mesma coluna
+  } else if(e.key==='Tab' && !e.shiftKey){
+    // anda para o lado; ao fim da linha, pula para a 1ª coluna da linha de baixo
+    if(!document.querySelector(`.terc-cel[data-r="${r}"][data-c="${c+1}"]`)){
+      e.preventDefault();
+      if(!tercFoco(r+1,0)) tercFoco(0,0);
+    }
+  }
+}
 function renderTerc(){
   const ceara = tercTela==='ceara';
   document.getElementById('terc-data').value = terc[tercTela].data||'';
-  document.getElementById('terc-rod-transf').style.display = ceara?'inline':'none';
+  const rt=document.getElementById('terc-rod-transf'); if(rt) rt.style.display = ceara?'inline':'none';
   const th = ceara
     ? ['Cód','Produto','Est. atual','Carteira','Saldo','Comprado','Transf.','Est. final','Est. mínimo','Status','']
     : ['Cód','Produto','Est. atual','Carteira','Saldo','Comprado','Est. final','Est. mínimo','Status',''];
@@ -1950,13 +1967,13 @@ function renderTerc(){
     rows+=`<tr>
       <td class="tcod">${esc(String(it.cod))}</td>
       <td class="tprod">${esc(it.nome)}</td>
-      <td><input class="terc-cel" type="number" inputmode="numeric" value="${it.atual!=null?it.atual:''}" oninput="tercUpd(${i},'atual',this.value)"></td>
-      <td><input class="terc-cel" type="number" inputmode="numeric" value="${it.carteira!=null?it.carteira:''}" oninput="tercUpd(${i},'carteira',this.value)"></td>
+      <td><input class="terc-cel" data-r="${i}" data-c="0" onkeydown="tercNav(event)" type="number" inputmode="numeric" value="${it.atual!=null?it.atual:''}" oninput="tercUpd(${i},'atual',this.value)"></td>
+      <td><input class="terc-cel" data-r="${i}" data-c="1" onkeydown="tercNav(event)" type="number" inputmode="numeric" value="${it.carteira!=null?it.carteira:''}" oninput="tercUpd(${i},'carteira',this.value)"></td>
       <td class="terc-calc${saldo<0?' neg':''}" id="terc-saldo-${i}">${saldo}</td>
-      <td><input class="terc-cel" type="number" inputmode="numeric" value="${it.comprado?it.comprado:''}" oninput="tercUpd(${i},'comprado',this.value)"></td>
-      ${ceara?`<td><input class="terc-cel" type="number" inputmode="numeric" value="${it.transf?it.transf:''}" oninput="tercUpd(${i},'transf',this.value)"></td>`:''}
+      <td><input class="terc-cel" data-r="${i}" data-c="2" onkeydown="tercNav(event)" type="number" inputmode="numeric" value="${it.comprado?it.comprado:''}" oninput="tercUpd(${i},'comprado',this.value)"></td>
+      ${ceara?`<td><input class="terc-cel" data-r="${i}" data-c="3" onkeydown="tercNav(event)" type="number" inputmode="numeric" value="${it.transf?it.transf:''}" oninput="tercUpd(${i},'transf',this.value)"></td>`:''}
       <td class="terc-calc${final<0?' neg':''}" id="terc-final-${i}">${final}</td>
-      <td><input class="terc-cel" type="number" inputmode="numeric" value="${it.min!=null?it.min:''}" oninput="tercUpd(${i},'min',this.value)"></td>
+      <td><input class="terc-cel" data-r="${i}" data-c="${ceara?4:3}" onkeydown="tercNav(event)" type="number" inputmode="numeric" value="${it.min!=null?it.min:''}" oninput="tercUpd(${i},'min',this.value)"></td>
       <td id="terc-st-${i}"><span class="terc-st ${cls}">${txt}</span></td>
       <td><button class="terc-del" onclick="tercDel(${i})" title="Remover">🗑</button></td>
     </tr>`;
@@ -2885,7 +2902,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v50';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v53';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
