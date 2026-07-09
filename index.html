@@ -136,16 +136,19 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .con-fardos b{font-size:17px;color:var(--text)}
 .legenda b{font-weight:700}
 .prog-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--rlg)}
+@media (min-width:760px){
+  #screen-con .prog-wrap{ width:min(1120px,94vw); margin-left:50%; transform:translateX(-50%); }
+}
 .prog-tbl{border-collapse:collapse;width:100%;min-width:640px;font-size:12px;background:var(--surface)}
 .prog-tbl th{background:#1A1A18;color:#F4C400;font-weight:700;padding:9px 8px;border:1px solid rgba(255,255,255,.15);text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.02em}
 .prog-tbl td{border:1px solid var(--border);padding:7px 9px;vertical-align:middle;background:var(--surface)}
 .pg-merge{text-align:center;font-weight:600;white-space:nowrap}
-.pg-dest{font-weight:700;text-align:center}
-.pg-desc{}
-.pg-qtd{text-align:center;font-weight:700}
+.pg-dest{font-weight:700;text-align:center;white-space:nowrap}
+.pg-desc{white-space:nowrap}
+.pg-qtd{text-align:center;font-weight:700;white-space:nowrap}
 .pg-ok{color:#2E7D32}
 .pg-falta{color:#C8102E}
-.pg-obs{color:#C8102E;font-weight:700;font-size:11px;text-align:center;position:relative;padding-bottom:20px}
+.pg-obs{color:#C8102E;font-weight:700;font-size:11px;text-align:center;position:relative;padding-bottom:20px;white-space:normal;min-width:150px}
 .pg-peso{position:absolute;right:6px;bottom:4px;color:var(--text2);font-weight:800;font-size:11px}
 .prog-tbl tr.pg-start td{border-top:3px solid #1A1A18}
 .prog-tbl tr.pg-alt td{background:#F8F7F3}
@@ -735,11 +738,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <button class="btn btn-sm" onclick="limparPeriodo()">Limpar período (ver tudo)</button>
     </div>
   </div>
-  <div class="metrics three">
-    <div class="metric"><div class="metric-label">Programados</div><div class="metric-val" id="m-prog">0</div></div>
-    <div class="metric"><div class="metric-label">OK</div><div class="metric-val ok" id="m-ok">0</div></div>
-    <div class="metric"><div class="metric-label">Falta</div><div class="metric-val falta" id="m-falta">0</div></div>
-  </div>
+  <button class="btn btn-full" style="border-color:var(--blue);color:var(--blue);font-weight:700;margin-bottom:10px" onclick="abrirFardosAgenda()">📦 Estoque × A carregar (fardos)</button>
   <div class="con-fardos">🧱 Total de fardos no período: <b id="con-fardos-tot">0</b></div>
   <div class="legenda">Qtd em <b class="ok">verde</b> = estoque cobre &nbsp;·&nbsp; <b class="falta">vermelho</b> = falta no estoque</div>
   <div class="prog-wrap">
@@ -1696,9 +1695,6 @@ function renderCon(){
     const disp=estoqueKg[cod]||0;
     if(disp>=progTotKg[cod]) nok++; else nf++;
   });
-  document.getElementById('m-prog').textContent=Object.keys(progTotKg).length;
-  document.getElementById('m-ok').textContent=nok;
-  document.getElementById('m-falta').textContent=nf;
 
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   let rows='', gi=0;
@@ -1758,6 +1754,61 @@ function aplicarDashView(){
   if(bg) bg.classList.toggle('on', dashView==='graf');
   if(bf) bf.classList.toggle('on', dashView==='fard');
 }
+// tabela "Estoque × A carregar em fardos" (item a item) para um conjunto de cargas
+function buildFardosTable(cargasPeriodo){
+  const carItem={};
+  cargasPeriodo.forEach(c=>c.itens.forEach(it=>{
+    const cod=it.cod;
+    if(!carItem[cod]){ const p=PMAP[cod]; carItem[cod]={nome:(p?p.nome:it.nome),tp:(p?p.tp:it.tp),granel:(p?!!p.granel:!!it.granel),peso:(p?(p.peso||0):0),qtd:0}; }
+    carItem[cod].qtd += (it.qtd||0);
+  }));
+  const linhas=Object.keys(carItem).map(cod=>{
+    const d=carItem[cod];
+    const est=estoqueQtd[cod]||0;
+    const falta=Math.max(0, d.qtd-est);
+    const faltaKg = d.granel ? falta : (d.peso>0 ? falta*d.peso : 0);
+    return {nome:d.nome, tp:d.tp, granel:d.granel, aCar:d.qtd, est, falta, faltaKg};
+  });
+  linhas.sort((a,b)=>{ const ra=ORD_GRUPO[a.tp]!=null?ORD_GRUPO[a.tp]:50, rb=ORD_GRUPO[b.tp]!=null?ORD_GRUPO[b.tp]:50; if(ra!==rb)return ra-rb; return (a.nome||'').localeCompare(b.nome||''); });
+  const un=(v,g)=> (Math.round(v)).toLocaleString('pt-BR')+(g?' kg':'');
+  let tCar=0,tEst=0,tFalta=0,tKg=0, corpo='';
+  linhas.forEach(l=>{
+    tCar+=l.aCar; tEst+=l.est; tFalta+=l.falta; tKg+=l.faltaKg;
+    corpo+=`<tr>
+      <td class="df-desc">${esc(l.nome)}</td>
+      <td>${un(l.aCar,l.granel)}</td>
+      <td>${un(l.est,l.granel)}</td>
+      <td class="${l.falta>0?'df-falta':'df-ok'}">${l.falta>0?un(l.falta,l.granel):'—'}</td>
+      <td class="df-kg">${l.faltaKg>0?fmtKg(l.faltaKg):'—'}</td>
+    </tr>`;
+  });
+  return linhas.length
+    ? `<table class="df-tbl"><thead><tr><th class="df-desc">Descrição</th><th>A carregar</th><th>Em estoque</th><th>Falta produzir</th><th>Falta (kg)</th></tr></thead>
+       <tbody>${corpo}</tbody>
+       <tfoot><tr><td class="df-desc">TOTAL</td><td>${un(tCar)}</td><td>${un(tEst)}</td><td class="df-falta">${un(tFalta)}</td><td class="df-kg">${fmtKg(tKg)}</td></tr></tfoot></table>`
+    : '<div class="empty">Nada programado no período</div>';
+}
+// abre a tabela de fardos num modal, usando o período filtrado da Agenda
+function abrirFardosAgenda(){
+  const ini=val('con-ini'), fim=val('con-fim');
+  const cf=cargas.filter(c=>{ const d=c.data||''; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
+  const html=buildFardosTable(cf);
+  let ov=document.getElementById('fard-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='fard-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px';
+    ov.onclick=(e)=>{ if(e.target===ov) fecharFardosAgenda(); };
+    document.body.appendChild(ov); }
+  ov.innerHTML=`<div style="background:var(--surface);border-radius:14px;max-width:680px;width:100%;max-height:90vh;overflow:auto;padding:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-weight:800;font-size:16px">📦 Estoque × A carregar (fardos)</div>
+      <button class="btn btn-sm" onclick="fecharFardosAgenda()">Fechar</button>
+    </div>
+    <div style="overflow:auto">${html}</div>
+    <div class="psub" style="margin-top:8px">Estoque considerado: MATRIZ. Falta (kg) = falta × peso do fardo (granel já em kg).</div>
+  </div>`;
+  ov.style.display='flex';
+}
+function fecharFardosAgenda(){ const ov=document.getElementById('fard-ov'); if(ov) ov.style.display='none'; }
 function renderDash(){
   const ini=val('d-ini'), fim=val('d-fim');
   const cf=cargas.filter(c=>{ const d=c.data||''; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
@@ -1793,38 +1844,7 @@ function renderDash(){
   document.getElementById('d-est').textContent=fmtKg(totalEst);
 
   // ----- Visual em fardos: por item (un), falta produzir e conversão em kg -----
-  const carItem={};
-  cf.forEach(c=>c.itens.forEach(it=>{
-    const cod=it.cod;
-    if(!carItem[cod]){ const p=PMAP[cod]; carItem[cod]={nome:(p?p.nome:it.nome),tp:(p?p.tp:it.tp),granel:(p?!!p.granel:!!it.granel),peso:(p?(p.peso||0):0),qtd:0}; }
-    carItem[cod].qtd += (it.qtd||0);
-  }));
-  const linhas=Object.keys(carItem).map(cod=>{
-    const d=carItem[cod];
-    const est=estoqueQtd[cod]||0;
-    const falta=Math.max(0, d.qtd-est);
-    const faltaKg = d.granel ? falta : (d.peso>0 ? falta*d.peso : 0);
-    return {nome:d.nome, tp:d.tp, granel:d.granel, aCar:d.qtd, est, falta, faltaKg};
-  });
-  linhas.sort((a,b)=>{ const ra=ORD_GRUPO[a.tp]!=null?ORD_GRUPO[a.tp]:50, rb=ORD_GRUPO[b.tp]!=null?ORD_GRUPO[b.tp]:50; if(ra!==rb)return ra-rb; return (a.nome||'').localeCompare(b.nome||''); });
-  const un=(v,g)=> (Math.round(v)).toLocaleString('pt-BR')+(g?' kg':'');
-  let tCar=0,tEst=0,tFalta=0,tKg=0, corpo='';
-  linhas.forEach(l=>{
-    tCar+=l.aCar; tEst+=l.est; tFalta+=l.falta; tKg+=l.faltaKg;
-    corpo+=`<tr>
-      <td class="df-desc">${esc(l.nome)}</td>
-      <td>${un(l.aCar,l.granel)}</td>
-      <td>${un(l.est,l.granel)}</td>
-      <td class="${l.falta>0?'df-falta':'df-ok'}">${l.falta>0?un(l.falta,l.granel):'—'}</td>
-      <td class="df-kg">${l.faltaKg>0?fmtKg(l.faltaKg):'—'}</td>
-    </tr>`;
-  });
-  const fardHtml = linhas.length
-    ? `<table class="df-tbl"><thead><tr><th class="df-desc">Descrição</th><th>A carregar</th><th>Em estoque</th><th>Falta produzir</th><th>Falta (kg)</th></tr></thead>
-       <tbody>${corpo}</tbody>
-       <tfoot><tr><td class="df-desc">TOTAL</td><td>${un(tCar)}</td><td>${un(tEst)}</td><td class="df-falta">${un(tFalta)}</td><td class="df-kg">${fmtKg(tKg)}</td></tr></tfoot></table>`
-    : '<div class="empty">Nada programado no período</div>';
-  document.getElementById('dash-fardos').innerHTML=fardHtml;
+  document.getElementById('dash-fardos').innerHTML=buildFardosTable(cf);
   aplicarDashView();
   // resumo de cargas + fardos (peso total / 30)
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||''));
@@ -2902,7 +2922,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v53';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v55';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
