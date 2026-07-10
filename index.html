@@ -147,6 +147,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .prog-tbl{border-collapse:collapse;width:100%;min-width:640px;font-size:12px;background:var(--surface)}
 .prog-tbl th{background:#1A1A18;color:#F4C400;font-weight:700;padding:9px 8px;border:1px solid rgba(255,255,255,.15);text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.02em}
 .prog-tbl td{border:1px solid var(--border);padding:7px 9px;vertical-align:middle;background:var(--surface)}
+.prog-tbl tr.pg-multi td{padding-top:2px;padding-bottom:2px}
 .pg-merge{text-align:center;font-weight:600;white-space:nowrap}
 .pg-dest{font-weight:700;text-align:center;white-space:nowrap}
 .pg-desc{white-space:nowrap}
@@ -743,11 +744,14 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <button class="btn btn-sm" onclick="limparPeriodo()">Limpar período (ver tudo)</button>
     </div>
   </div>
-  <button class="btn btn-full" style="border-color:var(--blue);color:var(--blue);font-weight:700;margin-bottom:10px" onclick="abrirFardosAgenda()">📦 Estoque × A carregar (fardos)</button>
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button class="btn" style="flex:1;border-color:var(--blue);color:var(--blue);font-weight:700" onclick="abrirFardosAgenda()">📦 Estoque × A carregar (fardos)</button>
+    <button class="btn" style="flex:1;border-color:var(--blue);color:var(--blue);font-weight:700" onclick="imprimirAgenda()">🖨️ Imprimir agenda</button>
+  </div>
   <div class="con-fardos">🧱 Total de fardos no período: <b id="con-fardos-tot">0</b></div>
   <div class="legenda">Qtd em <b class="ok">verde</b> = estoque cobre &nbsp;·&nbsp; <b class="falta">vermelho</b> = falta no estoque</div>
   <div class="prog-wrap">
-    <table class="prog-tbl">
+    <table class="prog-tbl" id="prog-tbl">
       <thead><tr><th>Data</th><th>Dia</th><th>Destino</th><th>Descrição</th><th>Qtd Total (un)</th><th>Observações</th></tr></thead>
       <tbody id="con-body"></tbody>
     </table>
@@ -1741,7 +1745,7 @@ function renderCon(){
       // exibe alias info se houver mapeamento
       const aliasLabel = ALIAS_MAP[it.cod]
         ? `<span style="font-size:10px;color:var(--text3)"> →${PMAP[codEst]?PMAP[codEst].nome:codEst}</span>` : '';
-      rows+=`<tr class="${i===0?'pg-start':''}${alt}">`;
+      rows+=`<tr class="${i===0?'pg-start':''}${alt}${n>1?' pg-multi':''}">`;
       if(i===0){
         rows+=`<td rowspan="${n}" class="pg-merge">${fmtData(c.data)}</td>`;
         rows+=`<td rowspan="${n}" class="pg-merge">${diaSemana(c.data)}</td>`;
@@ -1854,6 +1858,38 @@ function imprimirFardos(){
   w.document.close();
 }
 function fecharFardosAgenda(){ const ov=document.getElementById('fard-ov'); if(ov) ov.style.display='none'; }
+function imprimirAgenda(){
+  const tbl=document.getElementById('prog-tbl'); if(!tbl) return;
+  const ini=val('con-ini'), fim=val('con-fim');
+  const periodo = (ini||fim) ? ('Período: '+(ini?fmtData(ini):'início')+' a '+(fim?fmtData(fim):'fim')) : 'Todos os períodos';
+  const totFardos = document.getElementById('con-fardos-tot').textContent;
+  const w=window.open('','_print','width=1000,height=700');
+  if(!w){ toast('Permita pop-ups para imprimir'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Agenda de Carregamentos</title>
+    <style>
+      body{font-family:system-ui,Arial,sans-serif;color:#000;margin:18px}
+      h1{font-size:18px;margin:0 0 2px}
+      .sub{font-size:12px;color:#555;margin-bottom:12px}
+      table{border-collapse:collapse;width:100%}
+      th,td{border:1px solid #999;padding:5px 7px;font-size:11px;vertical-align:middle}
+      tr.pg-multi td{padding-top:1px;padding-bottom:1px}
+      th{background:#222;color:#fff;text-align:center}
+      .pg-merge,.pg-dest,.pg-qtd{text-align:center}
+      .pg-desc{white-space:nowrap}
+      .pg-ok{color:#137a13;font-weight:bold}
+      .pg-falta{color:#c00;font-weight:bold}
+      .pg-obs{color:#c00;font-weight:bold;font-size:10px;text-align:right}
+      .pg-peso{font-weight:bold}
+      tr.pg-start td{border-top:2px solid #000}
+      @media print{ @page{ margin:10mm; size:landscape } }
+    </style></head><body>
+    <h1>Agenda de Carregamentos</h1>
+    <div class="sub">${periodo} · Total de fardos no período: ${totFardos}</div>
+    <table>${tbl.innerHTML}</table>
+    <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`);
+  w.document.close();
+}
 function renderDash(){
   const ini=val('d-ini'), fim=val('d-fim');
   const cf=cargas.filter(c=>{ const d=c.data||''; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
@@ -2968,7 +3004,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v59';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v62';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
