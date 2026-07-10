@@ -48,6 +48,11 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .terc-tbl tbody td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:4px 12px;text-align:center;font-size:12px;height:34px}
 .terc-tbl tbody td.tprod{text-align:left;white-space:nowrap;padding-left:10px;padding-right:18px}
 .terc-tbl tbody td.tcod{color:var(--text3);font-weight:700}
+/* Congela Cód e Produto para ficarem visíveis ao rolar no celular */
+.terc-tbl td.tcod, .terc-tbl th.tcod{position:sticky;left:0;z-index:2;background:var(--surface);box-sizing:border-box;width:52px;min-width:52px;max-width:52px;padding-left:4px;padding-right:4px}
+.terc-tbl td.tprod, .terc-tbl th.tprod{position:sticky;left:52px;z-index:2;background:var(--surface);box-shadow:3px 0 5px rgba(0,0,0,.10)}
+.terc-tbl thead th.tcod, .terc-tbl thead th.tprod{background:#141414;z-index:3}
+.terc-tbl tbody tr:nth-child(even) td.tcod, .terc-tbl tbody tr:nth-child(even) td.tprod{background:var(--surface2)}
 .terc-tbl tbody tr:nth-child(even){background:var(--surface2)}
 .terc-tbl tbody tr:last-child td{border-bottom:none}
 .terc-cel{width:84px;height:30px;border:1px solid var(--border2);border-radius:5px;text-align:center;font-size:13px;background:var(--surface);color:var(--text);padding:0 4px}
@@ -623,15 +628,15 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="ptitle">Estoque / Produção</div>
   <div class="psub">Preencha a quantidade pronta. No grupo a granel, a quantidade é em kg.</div>
   <div class="card" id="card-contagem">
-    <div class="ctitle">👤 Dados da contagem</div>
-    <div class="fg"><label>📅 Data da contagem</label><input type="date" id="e-data" onchange="onDataContagem()"></div>
-    <div class="fg"><label>🏢 Empresa do estoque</label>
+    <div class="ctitle">🏢 Empresa do estoque</div>
+    <div class="fg" style="margin:0"><label>Selecione a empresa para lançar/ver o estoque</label>
       <select id="e-empresa" onchange="setEmpresaLanc(this.value)">
         <option value="MATRIZ">MATRIZ</option>
         <option value="CEARA">CEARÁ</option>
         <option value="OSORIO">OSÓRIO</option>
       </select>
     </div>
+    <input id="e-data" type="hidden">
     <input id="e-contador" type="hidden">
   </div>
 
@@ -831,6 +836,13 @@ let cargas=[], estoqueQtd={}, novosItens=[], editandoIdx=null, abertos={};
 // estoques adicionais por empresa (MATRIZ = estoqueQtd, usado pela Agenda/Painel)
 let estoqueCeara={}, estoqueOsorio={};
 let dataEmp={MATRIZ:'',CEARA:'',OSORIO:''};   // data da contagem por empresa
+let atualizadoEmp={MATRIZ:0,CEARA:0,OSORIO:0}; // carimbo automático (ms) da última alteração por empresa
+const EST_UPD_KEY='controle_est_upd_v1';
+function saveAtualizadoLocal(){ try{ localStorage.setItem(EST_UPD_KEY,JSON.stringify(atualizadoEmp)); }catch(e){} }
+function loadAtualizado(){ try{ const d=JSON.parse(localStorage.getItem(EST_UPD_KEY)||'null'); if(d) atualizadoEmp={MATRIZ:d.MATRIZ||0,CEARA:d.CEARA||0,OSORIO:d.OSORIO||0}; }catch(e){} }
+function adotarAtualizado(obj){ if(obj&&typeof obj==='object'){ ['MATRIZ','CEARA','OSORIO'].forEach(e=>{ atualizadoEmp[e]=Math.max(atualizadoEmp[e]||0, obj[e]||0); }); saveAtualizadoLocal(); } }
+function carimbarAtualizacao(emp){ atualizadoEmp[emp]=Date.now(); saveAtualizadoLocal(); }
+function fmtDataHora(ms){ if(!ms) return ''; const d=new Date(ms); const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes()); }
 const EST_DATA_KEY='controle_data_emp_v1';
 function saveDataEmpLocal(){ try{ localStorage.setItem(EST_DATA_KEY,JSON.stringify(dataEmp)); }catch(e){} }
 function loadDataEmp(){ try{ const d=JSON.parse(localStorage.getItem(EST_DATA_KEY)||'null'); if(d) dataEmp={MATRIZ:d.MATRIZ||'',CEARA:d.CEARA||'',OSORIO:d.OSORIO||''}; }catch(e){} }
@@ -967,6 +979,7 @@ function pushMeta(){
     estoqueOsorio: estoqueOsorio,
     estEmpTs: getEstEmpTs(),
     dataEmp: dataEmp,
+    atualizadoEmp: atualizadoEmp,
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
   }}, ()=>{ pushPendente=false; });
 }
@@ -1005,6 +1018,7 @@ function pull(silencioso, forcar){
       if(d.meta){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
         if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
+        if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(document.activeElement.id!=='e-data') aplicarDataNoCampo();
           // ✅ Merge inteligente: só aceita nuvem se for mais recente que local
           if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
@@ -1070,6 +1084,7 @@ function sincronizarInicial(){
         if(d.meta){
           if(d.meta.contador!==undefined) document.getElementById('e-contador').value=d.meta.contador;
           if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
+        if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
           aplicarDataNoCampo();
           if(servBase){ mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0); }
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
@@ -1083,7 +1098,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1331,6 +1346,7 @@ function setQtd(cod,val){
   if(!q||q<=0) delete est[cod]; else est[cod]=q;
   const r=document.getElementById('er-'+cod); if(r){ est[cod]?r.classList.add('filled'):r.classList.remove('filled'); }
   resumoEst();
+  carimbarAtualizacao(empresaLanc);
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
 }
 function resumoEst(){
@@ -1347,6 +1363,7 @@ function limparContagem(){
   const nome=empresaLanc==='CEARA'?'CEARÁ':empresaLanc==='OSORIO'?'OSÓRIO':'MATRIZ';
   if(!confirm('Zerar toda a contagem do estoque de '+nome+'?')) return;
   if(empresaLanc==='CEARA') estoqueCeara={}; else if(empresaLanc==='OSORIO') estoqueOsorio={}; else estoqueQtd={};
+  carimbarAtualizacao(empresaLanc);
   renderGrupos();
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
   toast('Contagem limpa ('+nome+')');
@@ -1583,9 +1600,9 @@ function renderEstVisual(){
   const tit=document.getElementById('vis-titulo'); if(tit) tit.textContent='📦 Estoque '+nome;
   const titTr=document.getElementById('est-vis-titletr'); if(titTr){ titTr.textContent='ESTOQUE - '+nome.toUpperCase(); titTr.colSpan=cols; }
   const thFat=document.getElementById('est-vis-th-fat'); if(thFat) thFat.style.display = mostraFat?'':'none';
-  const dataLabel = dataEmp[empresaVis]||'';
   const lbl = document.getElementById('vis-data-label');
-  lbl.textContent = (dataLabel ? fmtData(dataLabel) : '');
+  const upd = atualizadoEmp[empresaVis]||0;
+  lbl.innerHTML = upd ? '<span style="color:var(--text2)">🕒 atualizado '+fmtDataHora(upd)+'</span>' : '';
 
   const celFat = v => mostraFat ? `<td class="td-fat">${v}</td>` : '';
 
@@ -1972,7 +1989,7 @@ function renderTerc(){
   const th = ceara
     ? ['Cód','Produto','Est. atual','Carteira','Saldo','Comprado','Transf.','Est. final','Est. mínimo','Status','']
     : ['Cód','Produto','Est. atual','Carteira','Saldo','Comprado','Est. final','Est. mínimo','Status',''];
-  document.getElementById('terc-head').innerHTML='<tr>'+th.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  document.getElementById('terc-head').innerHTML='<tr>'+th.map((h,i)=>`<th class="${i===0?'tcod':i===1?'tprod':''}">${h}</th>`).join('')+'</tr>';
   const lista=terc[tercTela].itens;
   if(!lista.length){
     const cols=ceara?11:10;
@@ -2906,6 +2923,7 @@ loadBaseItens();
 loadTerc();
 loadEstEmp();
 loadDataEmp();
+loadAtualizado();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
 if(!dataEmp.MATRIZ){ dataEmp.MATRIZ = document.getElementById('e-data').value || hoje(); saveDataEmpLocal(); }
 aplicarDataNoCampo();
@@ -2922,7 +2940,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v55';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v58';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
