@@ -1816,14 +1816,42 @@ function abrirFardosAgenda(){
     ov.onclick=(e)=>{ if(e.target===ov) fecharFardosAgenda(); };
     document.body.appendChild(ov); }
   ov.innerHTML=`<div style="background:var(--surface);border-radius:14px;max-width:680px;width:100%;max-height:90vh;overflow:auto;padding:16px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
       <div style="font-weight:800;font-size:16px">📦 Estoque × A carregar (fardos)</div>
-      <button class="btn btn-sm" onclick="fecharFardosAgenda()">Fechar</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-primary" onclick="imprimirFardos()">🖨️ Imprimir</button>
+        <button class="btn btn-sm" onclick="fecharFardosAgenda()">Fechar</button>
+      </div>
     </div>
-    <div style="overflow:auto">${html}</div>
+    <div style="overflow:auto" id="fard-print">${html}</div>
     <div class="psub" style="margin-top:8px">Estoque considerado: MATRIZ. Falta (kg) = falta × peso do fardo (granel já em kg).</div>
   </div>`;
   ov.style.display='flex';
+}
+function imprimirFardos(){
+  const tbl=document.getElementById('fard-print'); if(!tbl) return;
+  const ini=val('con-ini'), fim=val('con-fim');
+  const periodo = (ini||fim) ? ('Período: '+(ini?fmtData(ini):'início')+' a '+(fim?fmtData(fim):'fim')) : 'Todos os períodos';
+  const w=window.open('','_print','width=900,height=700');
+  if(!w){ toast('Permita pop-ups para imprimir'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Estoque × A carregar (fardos)</title>
+    <style>
+      body{font-family:system-ui,Arial,sans-serif;color:#000;margin:24px}
+      h1{font-size:18px;margin:0 0 2px}
+      .sub{font-size:12px;color:#555;margin-bottom:14px}
+      table{border-collapse:collapse;width:100%}
+      th,td{border:1px solid #999;padding:6px 8px;font-size:12px;text-align:center}
+      th{background:#eee}
+      th:first-child,td:first-child{text-align:left}
+      tfoot td{font-weight:bold;background:#f2f2f2}
+      @media print{ @page{ margin:14mm } }
+    </style></head><body>
+    <h1>Estoque × A carregar (fardos)</h1>
+    <div class="sub">${periodo} · Estoque considerado: MATRIZ · Falta (kg) = falta × peso do fardo</div>
+    ${tbl.innerHTML}
+    <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`);
+  w.document.close();
 }
 function fecharFardosAgenda(){ const ov=document.getElementById('fard-ov'); if(ov) ov.style.display='none'; }
 function renderDash(){
@@ -2940,7 +2968,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v58';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v59';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
