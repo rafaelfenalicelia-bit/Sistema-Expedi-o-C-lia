@@ -618,7 +618,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="ctitle">Cargas lançadas</div>
   <div class="frow" style="align-items:end;margin-bottom:6px;gap:8px">
     <div class="fg" style="margin:0;flex:0 0 148px"><label>📅 Data</label><input type="date" id="cl-data" onchange="renderCargas()"></div>
-    <div class="fg" style="margin:0;flex:1"><label>🔍 Nº da carga</label><input type="text" id="cl-busca" inputmode="numeric" placeholder="ex: 2877" oninput="renderCargas()"></div>
+    <div class="fg" style="margin:0;flex:1"><label>🔍 Consultar carga</label><input type="text" id="cl-busca" placeholder="ex: cod ou nome" oninput="renderCargas()"></div>
   </div>
   <button class="btn btn-sm" style="margin-bottom:10px" onclick="document.getElementById('cl-data').value='';document.getElementById('cl-busca').value='';renderCargas()">Ver todas</button>
   <div id="lista-cargas"></div>
@@ -1283,7 +1283,19 @@ function renderCargas(){
   // mais recém lançadas primeiro (última adicionada no topo)
   let ord=cargas.map((c,i)=>({c,i})).sort((a,b)=>b.i-a.i);
   if(fData) ord=ord.filter(({c})=>c.data===fData);
-  if(fBusca) ord=ord.filter(({c})=>String(c.num||'').toLowerCase().includes(fBusca));
+  if(fBusca){
+    const termos=fBusca.split(/\s+/).filter(Boolean);
+    ord=ord.filter(({c})=>{
+      const alvo=[
+        String(c.num||''),
+        c.nome||'',
+        c.obs||'',
+        (c.itens||[]).map(i=>i.nome||'').join(' '),
+        (c.itens||[]).map(i=>String(i.cod||'')).join(' ')
+      ].join(' ').toLowerCase();
+      return termos.every(t=>alvo.includes(t));   // todas as palavras precisam bater
+    });
+  }
   if(!ord.length){ el.innerHTML='<div class="empty">Nenhuma carga encontrada</div>'; return; }
   el.innerHTML=ord.map(({c,i})=>{
     const cons=consolidarItens(c.itens);
@@ -3073,7 +3085,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v66';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v67';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
