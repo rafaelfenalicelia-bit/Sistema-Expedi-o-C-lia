@@ -210,7 +210,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .ni-edit{background:var(--redXL)}
 .ni-del{background:#FFEBEE}
 .notif-content{flex:1;min-width:0}
-.notif-title{font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notif-title{font-size:13px;font-weight:700;margin-bottom:2px;white-space:normal;overflow:hidden;line-height:1.3}
 .notif-desc{font-size:12px;color:var(--text2);line-height:1.35}
 .notif-time{font-size:11px;color:var(--text3);margin-top:3px}
 .notif-unread-dot{width:8px;height:8px;background:var(--red);border-radius:50%;flex-shrink:0;margin-top:5px}
@@ -2728,16 +2728,24 @@ function saveAudit(){
   try{ localStorage.setItem(AUDIT_KEY,JSON.stringify(auditLog.slice(0,60))); }catch(e){}
   try{ localStorage.setItem(AUDIT_VISTAS_KEY,JSON.stringify(auditVistas.slice(0,300))); }catch(e){}
 }
-// registra uma ação (agrupando alterações seguidas na mesma área por 6s)
+const AUDIT_JANELA = 30*60*1000;   // agrupa alterações da mesma área por 30 min
+// registra uma ação; alterações seguidas na mesma área viram UM único registro (janela de 30 min)
 function registrarAcao(acao){
   if(!usuarioAtual) return;
   const chave=acao;
   clearTimeout(_auditTimers[chave]);
   _auditTimers[chave]=setTimeout(()=>{
-    const ent={ id: Date.now()+'_'+Math.random().toString(36).slice(2), user: usuarioAtual.nome, acao, ts: Date.now() };
-    auditLog.unshift(ent);
-    auditLog=auditLog.slice(0,60);
-    if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // não notifica a si mesmo
+    const agora=Date.now();
+    // já existe registro recente meu, da mesma área? então só atualiza o horário
+    const existente = auditLog.find(e=> e.user===usuarioAtual.nome && e.acao===acao && (agora-e.ts)<AUDIT_JANELA );
+    if(existente){
+      existente.ts = agora;
+    } else {
+      const ent={ id: agora+'_'+Math.random().toString(36).slice(2), user: usuarioAtual.nome, acao, ts: agora };
+      auditLog.unshift(ent);
+      auditLog=auditLog.slice(0,60);
+      if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // não notifica a si mesmo
+    }
     saveAudit();
     if(API_URL) pushMeta();
   }, 6000);
@@ -2753,8 +2761,11 @@ function mergeAuditDaNuvem(remoto){
       if(auditVistas.includes(e.id)) return;
       auditVistas.push(e.id);
       if(e.user===usuarioAtual.nome) return;         // não notifica as próprias ações
-      addNotif('alteracao', 'Usuário '+e.user+' '+e.acao,
-        ['👤 '+e.user, '🕒 '+fmtDataHora(e.ts)], '', '');
+      const titulo='Usuário '+e.user+' '+e.acao;
+      // não repete a mesma notificação (mesmo usuário/área) dentro da janela
+      const jaTem = notificacoes.find(n=> n.tipo==='alteracao' && n.titulo===titulo && (Date.now()-n.ts)<AUDIT_JANELA );
+      if(jaTem) return;
+      addNotif('alteracao', titulo, ['👤 '+e.user, '🕒 '+fmtDataHora(e.ts)], '', '');
     });
   } else {
     auditLog.forEach(e=>{ if(!auditVistas.includes(e.id)) auditVistas.push(e.id); });
@@ -3061,7 +3072,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v63';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v64';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
