@@ -2744,7 +2744,9 @@ function registrarAcao(acao){
       const ent={ id: agora+'_'+Math.random().toString(36).slice(2), user: usuarioAtual.nome, acao, ts: agora };
       auditLog.unshift(ent);
       auditLog=auditLog.slice(0,60);
-      if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // não notifica a si mesmo
+      if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // já tratada aqui (não duplica pela nuvem)
+      // registra a PRÓPRIA alteração na lista de notificações, com data e hora
+      addNotif('alteracao', 'Você '+acao, ['👤 '+usuarioAtual.nome, '🕒 '+fmtDataHora(agora)], '', '');
     }
     saveAudit();
     if(API_URL) pushMeta();
@@ -3072,7 +3074,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v64';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v65';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
