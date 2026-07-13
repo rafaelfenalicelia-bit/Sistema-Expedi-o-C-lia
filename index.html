@@ -1274,7 +1274,6 @@ function salvarCarga(){
   ultimaEdicao = Date.now();   // bloqueia pull por 20s para o servidor receber antes
   cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
   cancelEdit(); renderCargas(); filtroDatas(); saveAll(); refreshEstSubview();
-  registrarAcao('alterou as cargas (Lançamento)');
 }
 function renderCargas(){
   const el=document.getElementById('lista-cargas');
@@ -1322,7 +1321,6 @@ function remCarga(i){
   ultimaEdicao = Date.now();
   cargasSnapshot = cargas.map(x=>({...x,itens:normalizarItens(x.itens)}));
   renderCargas(); filtroDatas(); saveAll(); refreshEstSubview();
-  registrarAcao('excluiu uma carga (Lançamento)');
 }
 function filtroDatas(){ /* não há mais seletor único; o filtro agora é por intervalo */ }
 function agendaEstaSemana(){
@@ -2744,9 +2742,7 @@ function registrarAcao(acao){
       const ent={ id: agora+'_'+Math.random().toString(36).slice(2), user: usuarioAtual.nome, acao, ts: agora };
       auditLog.unshift(ent);
       auditLog=auditLog.slice(0,60);
-      if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // já tratada aqui (não duplica pela nuvem)
-      // registra a PRÓPRIA alteração na lista de notificações, com data e hora
-      addNotif('alteracao', 'Você '+acao, ['👤 '+usuarioAtual.nome, '🕒 '+fmtDataHora(agora)], '', '');
+      if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // não notifica a si mesmo
     }
     saveAudit();
     if(API_URL) pushMeta();
@@ -2846,13 +2842,16 @@ function _notifDedup(tipo, cargaNum, hash){
 }
 
 function addNotif(tipo, titulo, linhasDetalhe, cargaNum, cargaData){
-  const hash = (linhasDetalhe||[]).join('|');
+  let linhas = linhasDetalhe || [];
+  // carimba a data/hora da mudança nas notificações de carga
+  if(tipo!=='alteracao'){ linhas = [...linhas, '🕒 '+fmtDataHora(Date.now())]; }
+  const hash = linhas.join('|');
   if(_notifDedup(tipo, cargaNum, hash)) return; // 🛡 evita duplicata
   const n = {
     id: Date.now()+'_'+Math.random().toString(36).slice(2),
     tipo,
     titulo,
-    detalhe: linhasDetalhe,
+    detalhe: linhas,
     hash,
     cargaNum: cargaNum||'',
     cargaData: cargaData||'',
@@ -3074,7 +3073,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v65';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v66';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
