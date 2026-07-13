@@ -984,6 +984,7 @@ function pushMeta(){
     estEmpTs: getEstEmpTs(),
     dataEmp: dataEmp,
     atualizadoEmp: atualizadoEmp,
+    audit: auditLog,
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
   }}, ()=>{ pushPendente=false; });
 }
@@ -1023,6 +1024,7 @@ function pull(silencioso, forcar){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
         if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
+        if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(document.activeElement.id!=='e-data') aplicarDataNoCampo();
           // ✅ Merge inteligente: só aceita nuvem se for mais recente que local
           if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
@@ -1089,6 +1091,7 @@ function sincronizarInicial(){
           if(d.meta.contador!==undefined) document.getElementById('e-contador').value=d.meta.contador;
           if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
+        if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
           aplicarDataNoCampo();
           if(servBase){ mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0); }
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
@@ -1102,7 +1105,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1271,6 +1274,7 @@ function salvarCarga(){
   ultimaEdicao = Date.now();   // bloqueia pull por 20s para o servidor receber antes
   cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
   cancelEdit(); renderCargas(); filtroDatas(); saveAll(); refreshEstSubview();
+  registrarAcao('alterou as cargas (Lançamento)');
 }
 function renderCargas(){
   const el=document.getElementById('lista-cargas');
@@ -1318,6 +1322,7 @@ function remCarga(i){
   ultimaEdicao = Date.now();
   cargasSnapshot = cargas.map(x=>({...x,itens:normalizarItens(x.itens)}));
   renderCargas(); filtroDatas(); saveAll(); refreshEstSubview();
+  registrarAcao('excluiu uma carga (Lançamento)');
 }
 function filtroDatas(){ /* não há mais seletor único; o filtro agora é por intervalo */ }
 function agendaEstaSemana(){
@@ -1351,6 +1356,7 @@ function setQtd(cod,val){
   const r=document.getElementById('er-'+cod); if(r){ est[cod]?r.classList.add('filled'):r.classList.remove('filled'); }
   resumoEst();
   carimbarAtualizacao(empresaLanc);
+  registrarAcao('atualizou o estoque da '+nomeEmpresa(empresaLanc).toUpperCase());
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
 }
 function resumoEst(){
@@ -1368,6 +1374,7 @@ function limparContagem(){
   if(!confirm('Zerar toda a contagem do estoque de '+nome+'?')) return;
   if(empresaLanc==='CEARA') estoqueCeara={}; else if(empresaLanc==='OSORIO') estoqueOsorio={}; else estoqueQtd={};
   carimbarAtualizacao(empresaLanc);
+  registrarAcao('limpou a contagem do estoque da '+nomeEmpresa(empresaLanc).toUpperCase());
   renderGrupos();
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
   toast('Contagem limpa ('+nome+')');
@@ -2003,6 +2010,7 @@ function loadTerc(){
 }
 function saveTercLocal(){ try{ localStorage.setItem(TERC_KEY,JSON.stringify(terc)); }catch(e){} }
 function salvarTerc(){
+  registrarAcao('atualizou a aba Compras ('+(tercTela==='ceara'?'CD-CEARÁ':'MATRIZ')+')');
   ultimaEdicaoTerc=Date.now();
   setTercTs(Date.now());
   saveTercLocal();
@@ -2679,6 +2687,7 @@ function salvarItemBase(){
 
 // aplica mudanças da Base de Itens em todo o app + nuvem
 function aplicarBaseItens(){
+  registrarAcao('alterou a Base de Itens');
   baseItens = dedupeBase(baseItens);   // garante 1 item por código
   ultimaEdicaoBase = Date.now();
   setBaseItensTs(Date.now());  // esta edição é a nova versão (timestamp novo)
@@ -2705,6 +2714,53 @@ function excluirItemBase(){
 // SISTEMA DE NOTIFICAÇÕES
 // ============================================================
 let notificacoes = [];
+// ===== AUDITORIA: registra quem alterou o quê (sincronizado; o admin é notificado) =====
+let auditLog = [];                 // [{id,user,acao,ts}]
+const AUDIT_KEY='controle_audit_v1';
+const AUDIT_VISTAS_KEY='controle_audit_vistas_v1';
+let auditVistas = [];              // ids já notificados neste aparelho
+let _auditTimers = {};
+function loadAudit(){
+  try{ auditLog=JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]')||[]; }catch(e){ auditLog=[]; }
+  try{ auditVistas=JSON.parse(localStorage.getItem(AUDIT_VISTAS_KEY)||'[]')||[]; }catch(e){ auditVistas=[]; }
+}
+function saveAudit(){
+  try{ localStorage.setItem(AUDIT_KEY,JSON.stringify(auditLog.slice(0,60))); }catch(e){}
+  try{ localStorage.setItem(AUDIT_VISTAS_KEY,JSON.stringify(auditVistas.slice(0,300))); }catch(e){}
+}
+// registra uma ação (agrupando alterações seguidas na mesma área por 6s)
+function registrarAcao(acao){
+  if(!usuarioAtual) return;
+  const chave=acao;
+  clearTimeout(_auditTimers[chave]);
+  _auditTimers[chave]=setTimeout(()=>{
+    const ent={ id: Date.now()+'_'+Math.random().toString(36).slice(2), user: usuarioAtual.nome, acao, ts: Date.now() };
+    auditLog.unshift(ent);
+    auditLog=auditLog.slice(0,60);
+    if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // não notifica a si mesmo
+    saveAudit();
+    if(API_URL) pushMeta();
+  }, 6000);
+}
+// recebe o log da nuvem: o ADMIN vira notificação para ações de OUTROS usuários
+function mergeAuditDaNuvem(remoto){
+  if(!Array.isArray(remoto)) return;
+  const mapa={}; [...remoto, ...auditLog].forEach(e=>{ if(e&&e.id) mapa[e.id]=e; });
+  auditLog=Object.values(mapa).sort((a,b)=>b.ts-a.ts).slice(0,60);
+  const souAdmin = !!(usuarioAtual && usuarioAtual.role==='admin');
+  if(souAdmin){
+    auditLog.slice().reverse().forEach(e=>{
+      if(auditVistas.includes(e.id)) return;
+      auditVistas.push(e.id);
+      if(e.user===usuarioAtual.nome) return;         // não notifica as próprias ações
+      addNotif('alteracao', 'Usuário '+e.user+' '+e.acao,
+        ['👤 '+e.user, '🕒 '+fmtDataHora(e.ts)], '', '');
+    });
+  } else {
+    auditLog.forEach(e=>{ if(!auditVistas.includes(e.id)) auditVistas.push(e.id); });
+  }
+  saveAudit();
+}
 let cargasSnapshot = null;
 const NOTIF_KEY = 'controle_expedicao_notif_v1';
 
@@ -2838,8 +2894,8 @@ function renderNotifList(){
     el.innerHTML='<div class="notif-empty">Nenhuma notificação ainda.<br>Novos lançamentos e alterações de cargas aparecerão aqui.</div>';
     return;
   }
-  const icones = {nova:'🚚',editada:'✏️',excluida:'🗑️'};
-  const classes = {nova:'ni-new',editada:'ni-edit',excluida:'ni-del'};
+  const icones = {nova:'🚚',editada:'✏️',excluida:'🗑️',alteracao:'👤'};
+  const classes = {nova:'ni-new',editada:'ni-edit',excluida:'ni-del',alteracao:'ni-edit'};
   el.innerHTML = notificacoes.map(n=>{
     const detalheHtml = (n.detalhe||[]).map(l=>`<div class="notif-detalhe-linha">${l}</div>`).join('');
     const podeFiltrar = n.tipo !== 'excluida' && n.cargaData;
@@ -2988,6 +3044,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
+loadAudit();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
 if(!dataEmp.MATRIZ){ dataEmp.MATRIZ = document.getElementById('e-data').value || hoje(); saveDataEmpLocal(); }
 aplicarDataNoCampo();
@@ -3004,7 +3061,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v62';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v63';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
