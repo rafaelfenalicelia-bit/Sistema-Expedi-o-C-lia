@@ -258,6 +258,14 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .df-tbl td.df-ok{color:var(--green);font-weight:700}
 .df-tbl td.df-kg{color:var(--red);font-weight:800}
 .df-tbl tfoot td{font-weight:800;background:#efe9e0;border-top:2px solid #b9b0a2}
+.cf-tbl{border-collapse:collapse;width:100%;min-width:560px}
+.cf-tbl thead th{background:#141414;color:#fff;font-size:10px;text-transform:uppercase;padding:7px 6px;text-align:center;white-space:nowrap;border-right:1px solid #333}
+.cf-tbl th.cf-desc{text-align:left}
+.cf-tbl td{border-bottom:1px solid var(--border);padding:6px;text-align:center;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cf-tbl td.cf-desc{text-align:left;font-weight:600;white-space:normal}
+.cf-tbl tr.cf-dif{background:#FDECEE}
+.cf-tbl tr.cf-dif .cf-difcell{color:var(--red);font-weight:800}
+.cf-tbl tr.cf-ok .cf-difcell{color:var(--green);font-weight:700}
 .est-vis-tbl td.td-kg{text-align:right;color:var(--text2);font-size:11px}
 .est-vis-tbl tfoot td{background:var(--surface2);font-weight:700;padding:7px 8px;border-top:2px solid var(--border2)}
 .est-vis-tbl tfoot td.td-fat{color:#9B0B22;text-align:right}
@@ -628,6 +636,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 <div class="screen" id="screen-est">
   <div class="ptitle">Estoque / Produção</div>
   <div class="psub">Preencha a quantidade pronta. No grupo a granel, a quantidade é em kg.</div>
+  <button class="btn btn-full admin-only" id="btn-confer" style="border-color:var(--blue);color:var(--blue);font-weight:700;margin-bottom:12px" onclick="abrirConferencia()">🔎 Conferência de terceirizados</button>
   <div class="card" id="card-contagem">
     <div class="ctitle">🏢 Empresa do estoque</div>
     <div class="fg" style="margin:0"><label>Selecione a empresa para lançar/ver o estoque</label>
@@ -841,6 +850,35 @@ let cargas=[], estoqueQtd={}, novosItens=[], editandoIdx=null, abertos={};
 let estoqueCeara={}, estoqueOsorio={};
 let dataEmp={MATRIZ:'',CEARA:'',OSORIO:''};   // data da contagem por empresa
 let atualizadoEmp={MATRIZ:0,CEARA:0,OSORIO:0}; // carimbo automático (ms) da última alteração por empresa
+// ===== Conferência de terceirizados: retrato diário do estoque MATRIZ =====
+const GRUPOS_TERC=['FARINHA','TAPIOCA','FECULA','BATATA'];
+let snapTerc={};                 // { 'YYYY-MM-DD': {cod:qtd,...} }  (só itens terceirizados, MATRIZ)
+let _meuSnapHoje='';             // data do retrato que ESTE aparelho escreveu hoje
+const SNAP_TERC_KEY='controle_snap_terc_v1';
+function ehTerc(cod){ const p=PMAP[cod]; return !!(p && GRUPOS_TERC.includes(p.tp)); }
+function saveSnapTercLocal(){ try{ localStorage.setItem(SNAP_TERC_KEY,JSON.stringify(snapTerc)); }catch(e){} }
+function loadSnapTerc(){ try{ snapTerc=JSON.parse(localStorage.getItem(SNAP_TERC_KEY)||'{}')||{}; }catch(e){ snapTerc={}; } }
+function snapshotTerc(){
+  const d=isoLocal(new Date());
+  const obj={};
+  PRODUTOS.forEach(p=>{ if(p.noEstoque && GRUPOS_TERC.includes(p.tp) && (p.empresas||['MATRIZ']).includes('MATRIZ')){ if(estoqueQtd[p.cod]!=null) obj[p.cod]=estoqueQtd[p.cod]; } });
+  snapTerc[d]=obj; _meuSnapHoje=d;
+  // mantém só os últimos ~40 dias
+  const datas=Object.keys(snapTerc).sort();
+  while(datas.length>40){ delete snapTerc[datas.shift()]; }
+  saveSnapTercLocal();
+}
+function mergeSnapTerc(remoto){
+  if(!remoto||typeof remoto!=='object') return;
+  Object.keys(remoto).forEach(d=>{
+    // adota do remoto, exceto o retrato de hoje que ESTE aparelho está escrevendo
+    if(d===_meuSnapHoje) return;
+    snapTerc[d]=remoto[d];
+  });
+  const datas=Object.keys(snapTerc).sort();
+  while(datas.length>40){ delete snapTerc[datas.shift()]; }
+  saveSnapTercLocal();
+}
 const EST_UPD_KEY='controle_est_upd_v1';
 function saveAtualizadoLocal(){ try{ localStorage.setItem(EST_UPD_KEY,JSON.stringify(atualizadoEmp)); }catch(e){} }
 function loadAtualizado(){ try{ const d=JSON.parse(localStorage.getItem(EST_UPD_KEY)||'null'); if(d) atualizadoEmp={MATRIZ:d.MATRIZ||0,CEARA:d.CEARA||0,OSORIO:d.OSORIO||0}; }catch(e){} }
@@ -879,6 +917,88 @@ function mergeEstEmpDaNuvem(ce, os, ts){
   if(lanc && !lanc.classList.contains('hidden') && empresaLanc!=='MATRIZ') renderGrupos();
 }
 function setEmpresaLanc(emp){ empresaLanc=emp; aplicarDataNoCampo(); atualizarBtnLimpar(); renderGrupos(); }
+// ===== Conferência de estoque de terceirizados =====
+function menosUmDia(iso){ const [a,m,d]=iso.split('-').map(Number); const dt=new Date(a,m-1,d); dt.setDate(dt.getDate()-1); return isoLocal(dt); }
+function comprodoTerc(cod){
+  // "comprado" lançado na aba Compras (MATRIZ) para este item
+  try{ const it=(terc.matriz.itens||[]).find(x=>x.cod===cod); return it? (parseFloat(it.comprado)||0):0; }catch(e){ return 0; }
+}
+function saidaCargasDia(cod, dia){
+  let s=0;
+  cargas.filter(c=>c.data===dia).forEach(c=>c.itens.forEach(it=>{ if(it.cod===cod) s+=(it.qtd||0); }));
+  return s;
+}
+function construirConferencia(dataRef){
+  // dataRef = dia da NOVA contagem (D). Compara com a contagem anterior (D-1) menos as cargas de D-1 mais compras.
+  const diaAnt = menosUmDia(dataRef);
+  const snapAnt = snapTerc[diaAnt] || null;                 // contagem do dia anterior
+  const snapHoje = snapTerc[dataRef] || null;               // contagem lançada no dia da referência
+  const linhas=[];
+  PRODUTOS.forEach(p=>{
+    if(!(p.noEstoque && GRUPOS_TERC.includes(p.tp) && (p.empresas||['MATRIZ']).includes('MATRIZ'))) return;
+    const temAnterior = snapAnt && (snapAnt[p.cod]!=null);
+    const anterior = temAnterior ? snapAnt[p.cod] : null;
+    const atual = snapHoje && (snapHoje[p.cod]!=null) ? snapHoje[p.cod] : (estoqueQtd[p.cod]!=null?estoqueQtd[p.cod]:null);
+    if(anterior==null && atual==null) return;               // item sem dados: ignora
+    const saida = saidaCargasDia(p.cod, diaAnt);
+    const comprado = comprodoTerc(p.cod);
+    const esperado = temAnterior ? (anterior - saida + comprado) : null;
+    const dif = (esperado!=null && atual!=null) ? (atual - esperado) : null;
+    linhas.push({cod:p.cod, nome:p.nome, tp:p.tp, anterior, saida, comprado, esperado, atual, dif, temAnterior});
+  });
+  // ordena: divergências primeiro, depois por nome
+  linhas.sort((a,b)=>{ const da=(a.dif!=null&&a.dif!==0)?0:1, db=(b.dif!=null&&b.dif!==0)?0:1; if(da!==db)return da-db; return (a.nome||'').localeCompare(b.nome||''); });
+  return {diaAnt, linhas};
+}
+function abrirConferencia(){
+  let ov=document.getElementById('confer-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='confer-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;padding:14px;overflow:auto';
+    ov.onclick=(e)=>{ if(e.target===ov) fecharConferencia(); };
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML=`<div style="background:var(--surface);border-radius:14px;max-width:760px;width:100%;margin-top:10px;padding:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
+      <div style="font-weight:800;font-size:16px">🔎 Conferência de terceirizados</div>
+      <button class="btn btn-sm" onclick="fecharConferencia()">Fechar</button>
+    </div>
+    <div class="psub" style="margin-bottom:8px">Confere FARINHA, TAPIOCA, FÉCULA e BATATA no estoque da MATRIZ.<br>Esperado = contagem anterior − cargas do dia anterior + comprado (aba Compras).</div>
+    <div class="fg" style="margin:0 0 10px;max-width:220px"><label>📅 Dia da contagem a conferir</label><input type="date" id="confer-data" value="${isoLocal(new Date())}" onchange="renderConferencia()"></div>
+    <div id="confer-corpo" style="overflow:auto"></div>
+  </div>`;
+  ov.style.display='flex';
+  renderConferencia();
+}
+function fecharConferencia(){ const ov=document.getElementById('confer-ov'); if(ov) ov.style.display='none'; }
+function renderConferencia(){
+  const dataRef=(document.getElementById('confer-data')||{}).value||isoLocal(new Date());
+  const {diaAnt, linhas}=construirConferencia(dataRef);
+  const nf=v=> v==null?'—':Math.round(v).toLocaleString('pt-BR');
+  const p=n=>String(n).padStart(2,'0'); const fmt=iso=>{const[a,m,d]=iso.split('-');return d+'/'+m;};
+  const divergentes=linhas.filter(l=>l.dif!=null && l.dif!==0).length;
+  let corpo='';
+  if(!linhas.length){
+    corpo='<div class="empty" style="padding:16px">Sem dados de terceirizados para conferir. Lance o estoque desses grupos em dias diferentes para o app criar o histórico.</div>';
+  } else {
+    corpo=`<div style="margin-bottom:8px;font-size:13px">${divergentes>0?`<b style="color:var(--red)">⚠ ${divergentes} item(ns) não batem</b>`:'<b style="color:var(--green)">✓ Tudo batendo</b>'} · comparando com a contagem de <b>${fmt(diaAnt)}</b></div>
+    <table class="cf-tbl"><thead><tr><th class="cf-desc">Produto</th><th>Anterior</th><th>Saída (${fmt(diaAnt)})</th><th>Comprado</th><th>Esperado</th><th>Lançado</th><th>Diferença</th></tr></thead><tbody>`;
+    linhas.forEach(l=>{
+      const cls = l.dif==null?'' : l.dif===0?'cf-ok':'cf-dif';
+      const difTxt = l.dif==null?'—' : (l.dif>0?'+':'')+nf(l.dif);
+      corpo+=`<tr class="${cls}">
+        <td class="cf-desc">${esc(l.nome)}</td>
+        <td>${l.temAnterior?nf(l.anterior):'<span style="color:var(--text3)">sem base</span>'}</td>
+        <td>${nf(l.saida)}</td>
+        <td>${nf(l.comprado)}</td>
+        <td>${nf(l.esperado)}</td>
+        <td>${nf(l.atual)}</td>
+        <td class="cf-difcell">${difTxt}</td>
+      </tr>`;
+    });
+    corpo+='</tbody></table>';
+  }
+  document.getElementById('confer-corpo').innerHTML=corpo;
+}
 function atualizarBtnLimpar(){
   const b=document.getElementById('btn-limpar-cont');
   if(b) b.textContent='Limpar contagem ('+nomeEmpresa(empresaLanc).toUpperCase()+')';
@@ -985,6 +1105,7 @@ function pushMeta(){
     dataEmp: dataEmp,
     atualizadoEmp: atualizadoEmp,
     audit: auditLog,
+    snapTerc: snapTerc,
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
   }}, ()=>{ pushPendente=false; });
 }
@@ -1025,6 +1146,7 @@ function pull(silencioso, forcar){
         if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
+        if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
         if(document.activeElement.id!=='e-data') aplicarDataNoCampo();
           // ✅ Merge inteligente: só aceita nuvem se for mais recente que local
           if(Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
@@ -1092,6 +1214,7 @@ function sincronizarInicial(){
           if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
+        if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
           aplicarDataNoCampo();
           if(servBase){ mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0); }
           else if(d.meta.produtos) mergeProdutosDaNuvem(d.meta.produtos);
@@ -1105,7 +1228,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,snapTerc:snapTerc,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1367,6 +1490,7 @@ function setQtd(cod,val){
   resumoEst();
   carimbarAtualizacao(empresaLanc);
   registrarAcao('atualizou o estoque da '+nomeEmpresa(empresaLanc).toUpperCase());
+  if(empresaLanc==='MATRIZ' && ehTerc(cod)) snapshotTerc();
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
 }
 function resumoEst(){
@@ -3069,6 +3193,7 @@ loadEstEmp();
 loadDataEmp();
 loadAtualizado();
 loadAudit();
+loadSnapTerc();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
 if(!dataEmp.MATRIZ){ dataEmp.MATRIZ = document.getElementById('e-data').value || hoje(); saveDataEmpLocal(); }
 aplicarDataNoCampo();
@@ -3085,7 +3210,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v68';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v69';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
