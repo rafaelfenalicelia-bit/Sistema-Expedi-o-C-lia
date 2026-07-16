@@ -154,8 +154,8 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .pg-qtd{text-align:center;font-weight:700;white-space:nowrap}
 .pg-ok{color:#2E7D32}
 .pg-falta{color:#C8102E}
-.pg-obs{color:#C8102E;font-weight:700;font-size:11px;text-align:center;position:relative;padding-bottom:20px;white-space:normal;min-width:150px}
-.pg-peso{position:absolute;right:6px;bottom:4px;color:var(--text2);font-weight:800;font-size:11px}
+.pg-obs{color:#C8102E;font-weight:700;font-size:11px;text-align:center;white-space:normal;min-width:150px}
+.pg-peso{display:block;text-align:right;margin-top:10px;color:var(--text2);font-weight:800;font-size:11px}
 .prog-tbl tr.pg-start td{border-top:3px solid #1A1A18}
 .prog-tbl tr.pg-alt td{background:#F8F7F3}
 .dash-legend{display:flex;gap:16px;font-size:12px;color:var(--text2);margin-bottom:12px}
@@ -1895,8 +1895,8 @@ function imprimirAgenda(){
       .pg-desc{white-space:nowrap}
       .pg-ok{color:#137a13;font-weight:bold}
       .pg-falta{color:#c00;font-weight:bold}
-      .pg-obs{color:#c00;font-weight:bold;font-size:10px;text-align:right}
-      .pg-peso{font-weight:bold}
+      .pg-obs{color:#c00;font-weight:bold;font-size:10px;text-align:center}
+      .pg-peso{display:block;text-align:right;margin-top:8px;font-weight:bold;color:#333}
       tr.pg-start td{border-top:2px solid #000}
       @media print{ @page{ margin:10mm; size:landscape } }
     </style></head><body>
@@ -3085,7 +3085,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v67';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v68';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
