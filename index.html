@@ -526,6 +526,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <h2>📋 Base de Itens</h2>
     <div style="display:flex;align-items:center;gap:8px">
       <button class="btn btn-primary btn-sm admin-only" id="bi-btn-cadastrar" onclick="abrirNovoItemBase()">➕ Cadastrar</button>
+      <button class="btn btn-sm admin-only" id="bi-btn-puxar" style="border-color:var(--blue);color:var(--blue)" onclick="forcarBaseDaNuvem()">☁️ Puxar da nuvem</button>
       <button class="drawer-close" onclick="fecharDrawer('baseitens')">✕</button>
     </div>
   </div>
@@ -2649,24 +2650,22 @@ function dedupeBase(arr){
   });
   return Object.values(map);
 }
+let maxBaseTsVisto=0;   // maior carimbo de Base já visto (local ou nuvem)
 function mergeBaseItensDaNuvem(remota, tsRemota){
   if(!Array.isArray(remota) || !remota.length) return;
-  const souAdmin = !!(usuarioAtual && usuarioAtual.role==='admin');
   const tsLocal = getBaseItensTs();
-  if(souAdmin){
-    // O admin é a AUTORIDADE da Base: uma vez que tem a própria versão (ts>0),
-    // nunca deixa a nuvem reverter suas marcações (ex.: item aparecer/sumir do estoque).
-    // Só adota a nuvem na 1ª sincronização (quando ainda não tem versão local).
-    if(tsLocal>0) return;
-  } else {
-    // usuário comum segue a nuvem, mas não re-renderiza se já está nessa versão
-    if(tsRemota && tsRemota===tsLocal) return;
-  }
+  if(tsRemota>maxBaseTsVisto) maxBaseTsVisto=tsRemota;
+  // acabei de editar? minha versão prevalece por 90s (não reverte no meio de um cadastro)
+  if(Date.now()-ultimaEdicaoBase < 90000) return;
+  // adota a nuvem só se for GENUINAMENTE mais recente que a minha (mais recente vence)
+  if(!tsRemota || tsRemota<=tsLocal) return;
   baseItens = dedupeBase(remota);
-  setBaseItensTs(tsRemota||0);
+  setBaseItensTs(tsRemota);
   saveBaseItens();
   rebuildRegistro();
   renderGrupos();
+  if(typeof renderDash==='function') renderDash();
+  if(typeof refreshEstSubview==='function') refreshEstSubview();
   if(typeof renderBaseItens==='function' && document.getElementById('bi-list')) renderBaseItens();
 }
 
@@ -2819,12 +2818,33 @@ function salvarItemBase(){
   toast('Item adicionado à base ✓');
 }
 
+// força este aparelho a adotar a Base de Itens que está na nuvem (resolve divergência entre 2 admins)
+function forcarBaseDaNuvem(){
+  if(!API_URL){ toast('Sem link de nuvem configurado'); return; }
+  if(!confirm('Substituir a Base de Itens DESTE aparelho pela versão que está na nuvem?')) return;
+  toast('Puxando da nuvem...');
+  fetch(API_URL+'?action=load').then(r=>r.json()).then(d=>{
+    if(d && d.meta && Array.isArray(d.meta.baseItens) && d.meta.baseItens.length){
+      baseItens=dedupeBase(d.meta.baseItens);
+      const ts=d.meta.baseItensTs||Date.now();
+      if(ts>maxBaseTsVisto) maxBaseTsVisto=ts;
+      setBaseItensTs(ts);
+      saveBaseItens(); rebuildRegistro(); renderGrupos();
+      if(document.getElementById('bi-list')) renderBaseItens();
+      if(typeof renderDash==='function') renderDash();
+      if(typeof refreshEstSubview==='function') refreshEstSubview();
+      toast('Base de Itens atualizada da nuvem ✓');
+    } else { toast('A nuvem não tem Base de Itens salva'); }
+  }).catch(()=>toast('Falha ao puxar da nuvem'));
+}
 // aplica mudanças da Base de Itens em todo o app + nuvem
 function aplicarBaseItens(){
   registrarAcao('alterou a Base de Itens');
   baseItens = dedupeBase(baseItens);   // garante 1 item por código
   ultimaEdicaoBase = Date.now();
-  setBaseItensTs(Date.now());  // esta edição é a nova versão (timestamp novo)
+  const novoTs = Math.max(Date.now(), getBaseItensTs()+1, maxBaseTsVisto+1); // sempre maior que qualquer versão vista
+  maxBaseTsVisto = novoTs;
+  setBaseItensTs(novoTs);  // esta edição é a nova versão (carimbo novo)
   saveBaseItens();
   rebuildRegistro();
   renderGrupos();
@@ -3210,7 +3230,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v69';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v71';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
