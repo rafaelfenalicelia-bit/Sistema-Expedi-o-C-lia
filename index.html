@@ -1107,6 +1107,7 @@ function pushMeta(){
     atualizadoEmp: atualizadoEmp,
     audit: auditLog,
     snapTerc: snapTerc,
+    cargasDel: cargasDel,
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
   }}, ()=>{ pushPendente=false; });
 }
@@ -1141,7 +1142,7 @@ function pull(silencioso, forcar){
         return;
       }
       const cargasAntes = cargasSnapshot ? cargasSnapshot.map(c=>({...c,itens:[...c.itens]})) : null;
-      cargas=servCargas; estoqueQtd=servEst;
+      cargas = mergeCargasNuvem(servCargas, (d.meta&&d.meta.cargasDel)||{}); estoqueQtd=servEst;
       if(d.meta){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
         if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
@@ -1209,7 +1210,7 @@ function sincronizarInicial(){
 
       if(nuvemTemDados){
         // adota a nuvem
-        cargas=servCargas; estoqueQtd=servEst;
+        cargas=mergeCargasNuvem(servCargas,(d.meta&&d.meta.cargasDel)||{}); estoqueQtd=servEst;
         if(d.meta){
           if(d.meta.contador!==undefined) document.getElementById('e-contador').value=d.meta.contador;
           if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
@@ -1229,7 +1230,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,snapTerc:snapTerc,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1385,11 +1386,11 @@ function salvarCarga(){
   const itensFinal = novosItens.map(x=>({...x}));
   if(editandoIdx!==null){
     const antes={...cargas[editandoIdx],itens:[...cargas[editandoIdx].itens]};
-    const nova={id:cargas[editandoIdx].id||novoId(),num,nome,data,obs,especial,itens:itensFinal};
+    const nova={id:cargas[editandoIdx].id||novoId(),num,nome,data,obs,especial,itens:itensFinal,ed:Date.now()};
     cargas[editandoIdx]=nova; toast('Carga atualizada');
     notifSalvarLocal('editada',nova,antes);
   } else {
-    const nova={id:novoId(),num,nome,data,obs,especial,itens:itensFinal};
+    const nova={id:novoId(),num,nome,data,obs,especial,itens:itensFinal,ed:Date.now()};
     cargas.push(nova); toast('Carga salva');
     notifSalvarLocal('nova',nova,null);
   }
@@ -1449,6 +1450,7 @@ function remCarga(i){
   const c=cargas[i];
   if(editandoIdx===i) cancelEdit();
   cargas.splice(i,1);
+  tombCarga(c.id);
   if(editandoIdx!==null&&editandoIdx>i) editandoIdx--;
   addNotif('excluida','Carga excluída: '+c.num,
     ['📍 '+esc(c.nome),'📅 '+fmtData(c.data),'🗑 Removida do sistema'],
@@ -2927,6 +2929,39 @@ function mergeAuditDaNuvem(remoto){
   saveAudit();
 }
 let cargasSnapshot = null;
+// ===== Merge de cargas por id, com marcadores de exclusão (tombstones) =====
+let cargasDel = {};   // { id: tsDaExclusao }
+const CARGAS_DEL_KEY='controle_cargas_del_v1';
+function loadCargasDel(){ try{ cargasDel=JSON.parse(localStorage.getItem(CARGAS_DEL_KEY)||'{}')||{}; }catch(e){ cargasDel={}; } }
+function saveCargasDel(){ try{ localStorage.setItem(CARGAS_DEL_KEY,JSON.stringify(cargasDel)); }catch(e){} }
+function tombCarga(id){ if(id){ cargasDel[id]=Date.now(); podarCargasDel(); saveCargasDel(); } }
+function podarCargasDel(){
+  const ids=Object.keys(cargasDel);
+  if(ids.length>300){ ids.sort((a,b)=>cargasDel[a]-cargasDel[b]); while(Object.keys(cargasDel).length>300){ delete cargasDel[ids.shift()]; } }
+}
+function garantirIdCargas(arr){ (arr||[]).forEach(c=>{ if(!c.id) c.id=novoId(); if(c.ed==null) c.ed=0; }); return arr; }
+// une cargas locais + da nuvem por id; exclusão (tombstone) mais nova que a edição prevalece
+function mergeCargasNuvem(servCargas, servDel){
+  garantirIdCargas(cargas); garantirIdCargas(servCargas);
+  // tombstones combinados (maior ts por id)
+  if(servDel && typeof servDel==='object'){
+    Object.keys(servDel).forEach(id=>{ cargasDel[id]=Math.max(cargasDel[id]||0, servDel[id]||0); });
+  }
+  const mapa={};
+  cargas.forEach(c=>{ mapa[c.id]=c; });
+  servCargas.forEach(c=>{
+    const cur=mapa[c.id];
+    if(!cur) mapa[c.id]=c;
+    else if((c.ed||0) >= (cur.ed||0)) mapa[c.id]=c;   // fica a edição mais recente
+  });
+  // aplica exclusões: remove se a exclusão é mais nova que a última edição
+  Object.keys(mapa).forEach(id=>{
+    const tomb=cargasDel[id]||0;
+    if(tomb && tomb >= (mapa[id].ed||0)) delete mapa[id];
+  });
+  podarCargasDel(); saveCargasDel();
+  return Object.values(mapa);
+}
 const NOTIF_KEY = 'controle_expedicao_notif_v1';
 
 function loadNotifs(){
@@ -3205,6 +3240,7 @@ GRUPOS.forEach(t=>{ if(!(t in abertos)) abertos[t]=false; });
 atualizarListasGrupos();
 document.getElementById('e-contador').addEventListener('input',()=>{ultimaEdicao=Date.now();});
 loadLocal();
+garantirIdCargas(cargas);
 cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
 loadNotifs(); atualizarBadge();
 loadBaseItens();
@@ -3214,6 +3250,7 @@ loadDataEmp();
 loadAtualizado();
 loadAudit();
 loadSnapTerc();
+loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
 if(!dataEmp.MATRIZ){ dataEmp.MATRIZ = document.getElementById('e-data').value || hoje(); saveDataEmpLocal(); }
 aplicarDataNoCampo();
@@ -3230,7 +3267,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v71';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v72';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
