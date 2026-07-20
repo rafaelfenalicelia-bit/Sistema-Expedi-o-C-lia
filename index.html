@@ -823,8 +823,8 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="fg" style="margin:0"><input type="date" id="terc-data" style="height:38px" onchange="tercSetData(this.value)"></div>
     <button class="btn btn-success btn-sm" onclick="tercAdd()">＋ Item</button>
   </div>
-  <div style="overflow:auto;display:flex;justify-content:center">
-    <table class="terc-tbl"><thead id="terc-head"></thead><tbody id="terc-body"></tbody></table>
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table class="terc-tbl" style="margin:0 auto"><thead id="terc-head"></thead><tbody id="terc-body"></tbody></table>
   </div>
 </div>
 
@@ -3267,7 +3267,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v72';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v73';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
