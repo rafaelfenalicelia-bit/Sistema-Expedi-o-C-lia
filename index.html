@@ -1078,7 +1078,7 @@ function enviarCargas(){
   if(!API_URL){ pushPendente=false; return; }
   status('enviando');
   fetch(API_URL,{method:'POST',body:JSON.stringify({action:'cargas',cargas})})
-    .then(r=>r.json())
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(()=>{ pushPendente=false; status('online'); })
     .catch(()=>{ status('offline'); clearTimeout(pushCargasTimer); pushCargasTimer=setTimeout(enviarCargas,5000); }); // mantém pendente e re-tenta
 }
@@ -1115,7 +1115,8 @@ function pushMeta(){
 function enviar(payload, onSuccess){
   status('enviando');
   fetch(API_URL,{method:'POST',body:JSON.stringify(payload)})
-    .then(r=>r.json()).then(()=>{ status('online'); pushPendente=false; if(onSuccess) onSuccess(); })
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(()=>{ status('online'); pushPendente=false; if(onSuccess) onSuccess(); })
     .catch(()=>{ status('offline'); pushPendente=false; });  // 🛡 nunca deixa o pull travado para sempre
 }
 
@@ -1132,7 +1133,7 @@ function pull(silencioso, forcar){
     if(Date.now()-ultimaEdicao < 20000) return;
   }
   fetch(API_URL+'?action=load&t='+Date.now())
-    .then(r=>r.json()).then(d=>{
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(d=>{
       const servCargas = Array.isArray(d.cargas)?d.cargas:[];
       const servEst = (d.estoqueQtd&&typeof d.estoqueQtd==='object')?d.estoqueQtd:{};
       const nuvemVazia = servCargas.length===0 && Object.keys(servEst).length===0;
@@ -1202,7 +1203,7 @@ function sincronizarInicial(){
   if(!API_URL) return;
   status('enviando');
   fetch(API_URL+'?action=load&t='+Date.now())
-    .then(r=>r.json()).then(d=>{
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(d=>{
       const servCargas = Array.isArray(d.cargas) ? d.cargas : [];
       const servEst = (d.estoqueQtd && typeof d.estoqueQtd==='object') ? d.estoqueQtd : {};
       const prod = d.meta && d.meta.produtos;
@@ -3270,7 +3271,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v74';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v75';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
