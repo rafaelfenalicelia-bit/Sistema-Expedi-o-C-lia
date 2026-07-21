@@ -1035,6 +1035,7 @@ let ultimaEdicao=0;          // marca quando o usuário mexeu por último
 let ultimaEdicaoBase=0;      // marca quando baseItens foi editada localmente
 let pushCargasTimer, pushEstTimer;
 let pushPendente=false;      // true enquanto o envio das cargas não foi confirmado pela nuvem
+let pushPendenteDesde=0;     // quando pushPendente foi ativado (trava de segurança)
 let metaPronta=false;        // true após receber a meta (baseItens/usuários) da nuvem ao menos 1x
 let metaPushPendente=false;  // guarda um envio de meta que ficou esperando a 1ª sincronização
 let _publicouUsers=false;    // publica a lista local de usuários uma vez por sessão
@@ -1069,7 +1070,7 @@ function saveAll(){ saveLocal(); pushCargas(); pushEstoque(); pushMeta(); }
 
 function pushCargas(){
   saveLocal(); if(!API_URL) return;
-  pushPendente=true;                       // trava a leitura até a nuvem confirmar
+  pushPendente=true; pushPendenteDesde=Date.now();   // trava a leitura até a nuvem confirmar
   clearTimeout(pushCargasTimer);
   pushCargasTimer=setTimeout(enviarCargas,300);
 }
@@ -1089,7 +1090,7 @@ function pushEstoque(){
 function pushMeta(){
   if(!API_URL) return;
   if(!metaPronta){ metaPushPendente=true; return; } // evita enviar dados locais "de fábrica" por cima da nuvem
-  pushPendente = true; // bloqueia pull até confirmação
+  pushPendente = true; pushPendenteDesde=Date.now(); // bloqueia pull até confirmação
   enviar({action:'meta',meta:{
     contador:val('e-contador'),
     dataContagem:val('e-data'),
@@ -1114,13 +1115,15 @@ function pushMeta(){
 function enviar(payload, onSuccess){
   status('enviando');
   fetch(API_URL,{method:'POST',body:JSON.stringify(payload)})
-    .then(r=>r.json()).then(()=>{ status('online'); if(onSuccess) onSuccess(); })
-    .catch(()=>status('offline'));
+    .then(r=>r.json()).then(()=>{ status('online'); pushPendente=false; if(onSuccess) onSuccess(); })
+    .catch(()=>{ status('offline'); pushPendente=false; });  // 🛡 nunca deixa o pull travado para sempre
 }
 
 // ---- puxar da nuvem ----
 function pull(silencioso, forcar){
   if(!API_URL) return;
+  // 🛡 se o envio travou (falha/sem resposta), não bloqueia o pull para sempre
+  if(pushPendente && (Date.now()-pushPendenteDesde > 15000)) pushPendente=false;
   // sempre respeita um envio de carga ainda não confirmado
   if(pushPendente) return;
   if(!forcar){
@@ -3267,7 +3270,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v73';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v74';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
