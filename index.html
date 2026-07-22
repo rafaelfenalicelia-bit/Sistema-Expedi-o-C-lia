@@ -581,7 +581,8 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 <div class="tabbar">
   <button class="tab active" id="tab-exp"  data-tab="exp"  onclick="sw('exp')"><i class="icon">🚚</i>Cargas</button>
   <button class="tab"        id="tab-est"  data-tab="est"  onclick="sw('est')"><i class="icon">📦</i>Estoque</button>
-  <button class="tab"        id="tab-con"  data-tab="con"  onclick="sw('con')"><i class="icon">📅</i>Agenda</button>
+  <button class="tab"        id="tab-con"  data-tab="con"  onclick="sw('con')"><i class="icon">📅</i>Programação</button>
+  <button class="tab hidden-tab" id="tab-comercial" data-tab="comercial" onclick="sw('comercial')"><i class="icon">📆</i>Agenda</button>
   <button class="tab"        id="tab-dash" data-tab="dash" onclick="sw('dash')"><i class="icon">📊</i>Painel</button>
   <button class="tab"        id="tab-terc" data-tab="terc" onclick="sw('terc')"><i class="icon">🛒</i>Compras</button>
 </div>
@@ -765,6 +766,50 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <thead><tr><th>Data</th><th>Dia</th><th>Destino</th><th>Descrição</th><th>Qtd Total (un)</th><th>Observações</th></tr></thead>
       <tbody id="con-body"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- AGENDA COMERCIAL (adormecida - ativa na integração com o ERP) -->
+<div class="screen" id="screen-comercial">
+  <div class="ptitle">Agenda</div>
+  <div class="psub">Brechas de produção — onde encaixar um novo pedido</div>
+
+  <div class="card">
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px">🎯 Simular pedido</div>
+    <div class="frow">
+      <div class="fg" style="margin:0;flex:2;min-width:180px"><label>Produto</label>
+        <select id="cm-prod" onchange="renderComercial()"><option value="">— escolha —</option></select></div>
+      <div class="fg" style="margin:0;flex:1;min-width:110px"><label>Quantidade (fardos)</label>
+        <input type="number" id="cm-qtd" min="0" step="1" oninput="renderComercial()"></div>
+    </div>
+    <div id="cm-simres" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:700;font-size:14px;margin-bottom:4px">⚙️ Capacidades por dia</div>
+    <div class="psub" style="margin-bottom:10px">10X1 e arroz são estimativas provisórias — virão do ERP na integração.</div>
+    <div class="frow">
+      <div class="fg" style="margin:0;flex:1;min-width:90px"><label>6X5 (fardos)</label><input type="number" id="cm-cap6" oninput="cmSalvarCaps()"></div>
+      <div class="fg" style="margin:0;flex:1;min-width:90px"><label>30X1 (fardos)</label><input type="number" id="cm-cap30" oninput="cmSalvarCaps()"></div>
+      <div class="fg" style="margin:0;flex:1;min-width:90px"><label>10X1 (fardos)</label><input type="number" id="cm-cap10" oninput="cmSalvarCaps()"></div>
+      <div class="fg" style="margin:0;flex:1;min-width:110px"><label>Arroz (kg)</label><input type="number" id="cm-caparroz" oninput="cmSalvarCaps()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-sm" id="cm-btn-mes" onclick="cmSetView('mes')">Mês</button>
+      <button class="btn btn-sm" id="cm-btn-sem" onclick="cmSetView('semana')">Semana</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-sm" onclick="cmNav(-1)">‹</button>
+      <div id="cm-periodo" style="font-weight:700;font-size:14px;min-width:150px;text-align:center"></div>
+      <button class="btn btn-sm" onclick="cmNav(1)">›</button>
+    </div>
+    <div id="cm-grade"></div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--text2)">
+      <span><b style="color:var(--green)">■</b> LIVRE</span>
+      <span><b style="color:var(--amber)">■</b> APERTADO (75%+)</span>
+      <span><b style="color:var(--red)">■</b> LOTADO</span>
+    </div>
   </div>
 </div>
 
@@ -2116,6 +2161,194 @@ function renderMaquinas(){
   document.getElementById('maq-6x5').innerHTML=gaugeHTML('Empacotadeira 6X5', falta6, CAP_6X5, '1 conjunto');
   document.getElementById('maq-30x1').innerHTML=gaugeHTML('Empacotadeiras 30X1', falta30, CAP_30X1, '2 conjuntos');
 }
+
+// ===== AGENDA COMERCIAL (calendário de brechas) =====
+const CM_TIPOS_ARROZ = ['PARBO','BRANCO','INTEGRAL','MIX','CÃO'];
+const CM_CAPS_PADRAO = {'6X5':CAP_6X5, '30X1':CAP_30X1, '10X1':3000, arroz:150000};
+let cmView='mes';
+let cmRef=new Date();
+
+function cmCaps(){
+  let s={};
+  try{ s=JSON.parse(localStorage.getItem('cm_caps')||'{}')||{}; }catch(e){ s={}; }
+  return {
+    '6X5':  +(s['6X5']  ?? CM_CAPS_PADRAO['6X5']),
+    '30X1': +(s['30X1'] ?? CM_CAPS_PADRAO['30X1']),
+    '10X1': +(s['10X1'] ?? CM_CAPS_PADRAO['10X1']),
+    arroz:  +(s.arroz   ?? CM_CAPS_PADRAO.arroz)
+  };
+}
+function cmSalvarCaps(){
+  const c={'6X5':+val('cm-cap6')||0,'30X1':+val('cm-cap30')||0,'10X1':+val('cm-cap10')||0,arroz:+val('cm-caparroz')||0};
+  try{ localStorage.setItem('cm_caps', JSON.stringify(c)); }catch(e){}
+  renderComercial();
+}
+// qual máquina empacota o produto (mesma dedução do Painel, + 10X1)
+function cmMaquina(p){
+  if(!p||!p.nome) return null;
+  if(/10X1/i.test(p.nome)) return '10X1';
+  if(/6X5/i.test(p.nome))  return '6X5';
+  if(/30X1/i.test(p.nome)) return '30X1';
+  return null;
+}
+function cmEhArroz(p){ return !!p && CM_TIPOS_ARROZ.includes(p.tp); }
+
+// Ocupação por dia, descontando o estoque em ordem cronológica:
+// o estoque pronto atende as cargas mais próximas primeiro; só o que sobra vira produção.
+function cmOcupacao(){
+  const porDia={};
+  cargas.forEach(c=>{
+    const d=c.data||''; if(!d) return;
+    (c.itens||[]).forEach(it=>{
+      porDia[d]=porDia[d]||{};
+      porDia[d][it.cod]=(porDia[d][it.cod]||0)+(it.qtd||0);
+    });
+  });
+  const restante={};
+  Object.keys(estoqueQtd||{}).forEach(cod=>{ restante[cod]=estoqueQtd[cod]||0; });
+  const out={};
+  Object.keys(porDia).sort().forEach(d=>{
+    const o={'6X5':0,'30X1':0,'10X1':0,arrozKg:0};
+    Object.keys(porDia[d]).forEach(cod=>{
+      const codN=parseInt(cod,10);
+      const p=PMAP[codN]; if(!p) return;
+      const codEst=ALIAS_MAP[codN]||codN;
+      const pedido=porDia[d][cod];
+      const usaEstoque=Math.min(pedido, restante[codEst]||0);
+      restante[codEst]=(restante[codEst]||0)-usaEstoque;
+      const falta=pedido-usaEstoque;          // o que realmente precisa ser produzido
+      if(falta<=0) return;
+      const m=cmMaquina(p); if(m) o[m]+=falta;
+      if(cmEhArroz(p) && !p.granel) o.arrozKg += falta*(p.peso||0);
+      else if(cmEhArroz(p) && p.granel) o.arrozKg += falta;
+    });
+    out[d]=o;
+  });
+  return out;
+}
+function cmStatus(o,C){
+  const u=[];
+  ['6X5','30X1','10X1'].forEach(m=>{ if(C[m]>0) u.push(o[m]/C[m]); });
+  if(C.arroz>0) u.push(o.arrozKg/C.arroz);
+  const pico=Math.max(0,...u);
+  if(pico>=1) return 'cheio';
+  if(pico>=0.75) return 'apertado';
+  return 'livre';
+}
+function cmComporta(o,C,p,qtd){
+  if(!p||!qtd) return null;
+  const m=cmMaquina(p);
+  const folgaMaq = m ? (C[m]-o[m]) : Infinity;
+  const precisaKg = cmEhArroz(p) ? (p.granel?qtd:qtd*(p.peso||0)) : 0;
+  const folgaArroz = C.arroz-o.arrozKg;
+  return (folgaMaq>=qtd && folgaArroz>=precisaKg);
+}
+function cmSetView(v){ cmView=v; renderComercial(); }
+function cmNav(n){
+  if(cmView==='mes') cmRef=new Date(cmRef.getFullYear(), cmRef.getMonth()+n, 1);
+  else { const d=new Date(cmRef); d.setDate(d.getDate()+7*n); cmRef=d; }
+  renderComercial();
+}
+function cmSegunda(base){ const d=new Date(base); const dow=d.getDay(); d.setDate(d.getDate()+(dow===0?-6:1-dow)); return d; }
+function cmDiasUteis(){
+  const out=[];
+  if(cmView==='mes'){
+    const d=new Date(cmRef.getFullYear(), cmRef.getMonth(), 1);
+    while(d.getMonth()===cmRef.getMonth()){ const w=d.getDay(); if(w>=1&&w<=5) out.push(new Date(d)); d.setDate(d.getDate()+1); }
+  } else {
+    const s=cmSegunda(cmRef);
+    for(let i=0;i<5;i++){ const d=new Date(s); d.setDate(s.getDate()+i); out.push(d); }
+  }
+  return out;
+}
+function cmNum(v){ return Math.round(v).toLocaleString('pt-BR'); }
+
+function cmPopularProdutos(){
+  const sel=document.getElementById('cm-prod'); if(!sel) return;
+  const lista=(typeof PRODUTOS!=='undefined' && PRODUTOS.length?PRODUTOS:Object.values(PMAP))
+    .filter(p=>cmMaquina(p))
+    .sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+  if(sel.dataset.n===String(lista.length)) return;   // já está atualizada
+  const escolhido=sel.value;
+  sel.innerHTML='<option value="">— escolha —</option>'+
+    lista.map(p=>`<option value="${p.cod}">${esc(p.nome)}</option>`).join('');
+  sel.value=escolhido;
+  sel.dataset.n=String(lista.length);
+}
+
+function renderComercial(){
+  cmPopularProdutos();
+  const C=cmCaps();
+  const i6=document.getElementById('cm-cap6');
+  if(i6 && document.activeElement!==i6) i6.value=C['6X5'];
+  const i30=document.getElementById('cm-cap30');
+  if(i30 && document.activeElement!==i30) i30.value=C['30X1'];
+  const i10=document.getElementById('cm-cap10');
+  if(i10 && document.activeElement!==i10) i10.value=C['10X1'];
+  const ia=document.getElementById('cm-caparroz');
+  if(ia && document.activeElement!==ia) ia.value=C.arroz;
+
+  document.getElementById('cm-btn-mes').classList.toggle('btn-primary', cmView==='mes');
+  document.getElementById('cm-btn-sem').classList.toggle('btn-primary', cmView==='semana');
+
+  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const dias=cmDiasUteis();
+  const pz=n=>String(n).padStart(2,'0');
+  document.getElementById('cm-periodo').textContent = cmView==='mes'
+    ? MESES[cmRef.getMonth()]+' '+cmRef.getFullYear()
+    : pz(dias[0].getDate())+'/'+pz(dias[0].getMonth()+1)+' a '+pz(dias[4].getDate())+'/'+pz(dias[4].getMonth()+1);
+
+  const ocup=cmOcupacao();
+  const prod=PMAP[parseInt(val('cm-prod'),10)]||null;
+  const qtd=+val('cm-qtd')||0;
+  const hoje=isoLocal(new Date());
+  const CORES={livre:'var(--green)',apertado:'var(--amber)',cheio:'var(--red)'};
+  const ROTULO={livre:'LIVRE',apertado:'APERTADO',cheio:'LOTADO'};
+
+  let html='', cabem=[];
+  dias.forEach(d=>{
+    const k=isoLocal(d);
+    const o=ocup[k]||{'6X5':0,'30X1':0,'10X1':0,arrozKg:0};
+    const st=cmStatus(o,C);
+    const cab=cmComporta(o,C,prod,qtd);
+    if(cab===true) cabem.push(d);
+    const borda = cab===true ? '2px solid var(--green)' : (cab===false ? '1px solid var(--border)' : '1px solid var(--border)');
+    const opac = cab===false ? '.45' : '1';
+    let barras='';
+    ['6X5','30X1','10X1'].forEach(m=>{
+      const cap=C[m]||0, us=o[m]||0, pct=cap?Math.min(100,us/cap*100):0;
+      const cor = pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--green)';
+      barras+=`<div style="display:flex;align-items:center;gap:5px;margin-top:3px">
+        <span style="font-size:9px;color:var(--text3);width:30px">${m}</span>
+        <span style="flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;display:block"><i style="display:block;height:100%;width:${pct}%;background:${cor}"></i></span>
+        <span style="font-size:9px;color:var(--text2);width:52px;text-align:right">${cmNum(cap-us)}</span>
+      </div>`;
+    });
+    const folgaArroz=C.arroz-o.arrozKg;
+    html+=`<div style="border:${borda};border-radius:var(--rmd);padding:8px;background:var(--surface);opacity:${opac}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <b style="font-size:13px">${pz(d.getDate())}/${pz(d.getMonth()+1)}${k===hoje?' •':''}</b>
+        <span style="font-size:9px;font-weight:700;color:${CORES[st]}">${ROTULO[st]}</span>
+      </div>
+      ${barras}
+      <div style="font-size:9px;color:${folgaArroz<0?'var(--red)':'var(--text2)'};margin-top:5px;border-top:1px solid var(--border);padding-top:4px">
+        arroz livre: <b>${cmNum(folgaArroz)}</b> kg</div>
+    </div>`;
+  });
+  const cols = cmView==='mes' ? 'repeat(auto-fill,minmax(150px,1fr))' : 'repeat(auto-fill,minmax(150px,1fr))';
+  document.getElementById('cm-grade').innerHTML=`<div style="display:grid;grid-template-columns:${cols};gap:8px">${html}</div>`;
+
+  const res=document.getElementById('cm-simres');
+  if(!prod || !qtd){
+    res.innerHTML='Escolha um produto e a quantidade para ver em quais dias o pedido cabe.';
+  } else if(!cabem.length){
+    res.innerHTML=`<b style="color:var(--red)">Nenhum dia deste período comporta ${cmNum(qtd)} fardos de ${esc(prod.nome)}.</b> Tente outro período ou quantidade menor.`;
+  } else {
+    res.innerHTML=`<b style="color:var(--green)">${cabem.length} dia(s) comportam o pedido:</b> `+
+      cabem.map(d=>pz(d.getDate())+'/'+pz(d.getMonth()+1)).join(', ');
+  }
+}
+
 function gaugeHTML(titulo, falta, cap, sub){
   const pct = cap>0 ? (falta/cap*100) : 0;
   const ring = Math.min(100, pct);
@@ -2132,7 +2365,7 @@ function sw(tab){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+tab).classList.add('active');
   window.scrollTo(0,0);
-  if(tab==='con')renderCon(); if(tab==='dash')renderDash(); if(tab==='est')toggleEstView('visual'); if(tab==='terc')renderTerc();
+  if(tab==='con')renderCon(); if(tab==='comercial')renderComercial(); if(tab==='dash')renderDash(); if(tab==='est')toggleEstView('visual'); if(tab==='terc')renderTerc();
 }
 function hoje(){ return new Date().toISOString().slice(0,10); }
 
@@ -2379,7 +2612,7 @@ function abrirApp(){
   aplicarPermissoes();
 }
 
-const TABS_ALL=['exp','est','con','dash','terc'];
+const TABS_ALL=['exp','est','con','comercial','dash','terc'];
 const TABS_PADRAO=['est','con'];   // telas padrão de um usuário comum
 function aplicarPermissoes(){
   if(!usuarioAtual) return;
@@ -2465,7 +2698,7 @@ function renderAdminUsers(){
   const users=loadUsers();
   const el=document.getElementById('admin-users-list');
   if(!users.length){el.innerHTML='<div class="empty">Nenhum usuário</div>';return;}
-  const TABS=[['exp','Cargas'],['est','Estoque'],['con','Agenda'],['dash','Painel'],['terc','Compras']];
+  const TABS=[['exp','Cargas'],['est','Estoque'],['con','Programação'],['comercial','Agenda'],['dash','Painel'],['terc','Compras']];
   let html='';
   users.forEach(u=>{
     const isA=u.role==='admin';
@@ -3271,7 +3504,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v75';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v78';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
