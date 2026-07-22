@@ -440,8 +440,55 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   </div>
   <button class="user-dd-item" onclick="abrirAlterarSenha()">🔑 Alterar minha senha</button>
   <button class="user-dd-item" id="dd-btn-admin" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar usuários</button>
+  <button class="user-dd-item" id="dd-btn-justif" onclick="abrirJustif()" style="display:none">🗂 Registro de motivos</button>
   <div class="user-dd-sep"></div>
   <button class="user-dd-item danger" onclick="fazerLogout()">↩ Sair da conta</button>
+</div>
+
+<!-- Drawer: Motivo (exclusão / alteração de data) -->
+<div class="drawer-overlay" id="dov-motivo" onclick="cancelarMotivo()"></div>
+<div class="drawer" id="drawer-motivo">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2 id="mt-titulo">📝 Informe o motivo</h2>
+    <button class="drawer-close" onclick="cancelarMotivo()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div id="mt-contexto" class="psub" style="background:var(--surface2);padding:10px;border-radius:var(--rmd);margin-bottom:14px;line-height:1.6"></div>
+    <div class="fg"><label>Motivo</label>
+      <select id="mt-lista" onchange="mtToggleOutro()"></select></div>
+    <div class="fg"><label id="mt-lbl-det">Detalhe (opcional)</label>
+      <textarea id="mt-detalhe" rows="3" placeholder="Explique brevemente..." style="width:100%"></textarea></div>
+    <div id="mt-err" style="color:var(--red);font-size:12px;font-weight:600;margin-bottom:10px"></div>
+    <button class="btn btn-primary btn-full" onclick="confirmarMotivo()">Confirmar</button>
+    <button class="btn btn-full" style="margin-top:8px" onclick="cancelarMotivo()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Drawer: Registro de motivos (admin) -->
+<div class="drawer-overlay" id="dov-justif" onclick="fecharDrawer('justif')"></div>
+<div class="drawer" id="drawer-justif">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2>🗂 Registro de motivos</h2>
+    <button class="drawer-close" onclick="fecharDrawer('justif')">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="frow">
+      <div class="fg" style="margin:0;flex:1;min-width:120px"><label>De</label><input type="date" id="jf-ini" onchange="renderJustif()"></div>
+      <div class="fg" style="margin:0;flex:1;min-width:120px"><label>Até</label><input type="date" id="jf-fim" onchange="renderJustif()"></div>
+    </div>
+    <div class="frow" style="margin-top:8px">
+      <div class="fg" style="margin:0;flex:1"><label>Tipo</label>
+        <select id="jf-tipo" onchange="renderJustif()">
+          <option value="">Todos</option>
+          <option value="exclusao">Exclusões</option>
+          <option value="data">Alterações de data</option>
+        </select></div>
+    </div>
+    <button class="btn btn-full" style="border-color:var(--blue);color:var(--blue);margin:12px 0" onclick="exportarJustifCSV()">⬇️ Baixar CSV</button>
+    <div id="jf-lista"><div class="empty">Carregando...</div></div>
+  </div>
 </div>
 
 <!-- Drawer: Alterar senha -->
@@ -637,7 +684,6 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 <!-- ESTOQUE -->
 <div class="screen" id="screen-est">
   <div class="ptitle">Estoque / Produção</div>
-  <div class="psub">Preencha a quantidade pronta. No grupo a granel, a quantidade é em kg.</div>
   <button class="btn btn-full admin-only" id="btn-confer" style="border-color:var(--blue);color:var(--blue);font-weight:700;margin-bottom:12px" onclick="abrirConferencia()">🔎 Conferência de terceirizados</button>
   <div class="card" id="card-contagem">
     <div class="ctitle">🏢 Empresa do estoque</div>
@@ -733,10 +779,6 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     </div>
     <div style="overflow:auto;border:1px solid var(--border);border-radius:var(--rlg);background:var(--surface)">
       <table class="ins-tbl"><thead id="ins-head"></thead><tbody id="ins-body"></tbody></table>
-    </div>
-    <div class="psub" style="margin-top:10px;line-height:1.5">
-      Valores em <b>kg de arroz</b>. Linhas <b style="color:#B8860B">Especial</b> = cargas marcadas como especiais.<br>
-      O <b>MIX</b> é dividido: metade Parbo + metade Polido (na mesma categoria da carga).
     </div>
   </div>
 </div>
@@ -1152,6 +1194,7 @@ function pushMeta(){
     dataEmp: dataEmp,
     atualizadoEmp: atualizadoEmp,
     audit: auditLog,
+    justif: justificativas,
     snapTerc: snapTerc,
     cargasDel: cargasDel,
     produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}
@@ -1197,6 +1240,7 @@ function pull(silencioso, forcar){
         if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
+        if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
         if(document.activeElement.id!=='e-data') aplicarDataNoCampo();
           // ✅ Merge inteligente: só aceita nuvem se for mais recente que local
@@ -1265,6 +1309,7 @@ function sincronizarInicial(){
           if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
+        if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
           aplicarDataNoCampo();
           if(servBase){ mergeBaseItensDaNuvem(d.meta.baseItens, d.meta.baseItensTs||0); }
@@ -1279,7 +1324,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1424,7 +1469,7 @@ function ordenarItensEmp(itens){
 // quantas empresas distintas há numa lista de itens
 function empresasDe(itens){ return [...new Set(itens.map(it=>it.empresa||'MATRIZ'))]; }
 
-function salvarCarga(){
+async function salvarCarga(){
   const num=document.getElementById('c-num').value.trim(), nome=document.getElementById('c-dest').value.trim(), data=document.getElementById('c-data').value, obs=document.getElementById('c-obs').value.trim();
   if(!num||!nome){ toast('Preencha número e destino'); return; }
   if(!data){ toast('Informe a data'); return; }
@@ -1435,6 +1480,12 @@ function salvarCarga(){
   const itensFinal = novosItens.map(x=>({...x}));
   if(editandoIdx!==null){
     const antes={...cargas[editandoIdx],itens:[...cargas[editandoIdx].itens]};
+    if(antes.data && antes.data!==data){
+      const ctx='<b>Carga '+esc(num)+'</b> · '+esc(nome)+'<br>📅 '+fmtData(antes.data)+' → <b>'+fmtData(data)+'</b>';
+      const just=await pedirMotivo('data', ctx);
+      if(!just) return;                   // cancelou: a edição NÃO é salva
+      registrarJustif('data', antes, just.motivo, just.detalhe, data);
+    }
     const nova={id:cargas[editandoIdx].id||novoId(),num,nome,data,obs,especial,itens:itensFinal,ed:Date.now()};
     cargas[editandoIdx]=nova; toast('Carga atualizada');
     notifSalvarLocal('editada',nova,antes);
@@ -1494,9 +1545,13 @@ function renderCargas(){
     <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(${i})">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(${i})">🗑 Excluir</button>${tot>0?`<span class="badge b-gray" style="align-self:center">${tot.toFixed(0)}kg</span>`:''}</div></div>`;
   }).join('');
 }
-function remCarga(i){
-  if(!confirm('Excluir esta carga?')) return;
+async function remCarga(i){
   const c=cargas[i];
+  if(!c) return;
+  const ctx='<b>Carga '+esc(c.num)+'</b> · '+esc(c.nome)+'<br>📅 '+fmtData(c.data);
+  const just=await pedirMotivo('exclusao', ctx);
+  if(!just) return;                       // cancelou: nada acontece
+  registrarJustif('exclusao', c, just.motivo, just.detalhe, '');
   if(editandoIdx===i) cancelEdit();
   cargas.splice(i,1);
   tombCarga(c.id);
@@ -2162,6 +2217,153 @@ function renderMaquinas(){
   document.getElementById('maq-30x1').innerHTML=gaugeHTML('Empacotadeiras 30X1', falta30, CAP_30X1, '2 conjuntos');
 }
 
+// ===== REGISTRO DE MOTIVOS (exclusão de carga / alteração de data) =====
+// Diferente do auditLog (que agrupa e guarda só 60), aqui cada evento é
+// individual e preservado — é o registro que o admin exporta depois.
+let justificativas = [];   // [{id,ts,user,tipo,num,dest,dataAntes,dataDepois,motivo,detalhe}]
+const JUSTIF_KEY='controle_justif_v1';
+const JUSTIF_MAX=1000;
+const MOTIVOS_EXCLUSAO=['Carga cancelada pelo cliente','Lançamento em duplicidade','Erro de digitação','Pedido remanejado para outra carga','Outro'];
+const MOTIVOS_DATA=['Cliente pediu adiamento','Falta de produto','Atraso na produção','Veículo não compareceu','Antecipação a pedido do cliente','Outro'];
+
+function loadJustif(){
+  try{ justificativas=JSON.parse(localStorage.getItem(JUSTIF_KEY)||'[]')||[]; }catch(e){ justificativas=[]; }
+}
+function saveJustif(){
+  try{ localStorage.setItem(JUSTIF_KEY,JSON.stringify(justificativas.slice(0,JUSTIF_MAX))); }catch(e){}
+}
+function mergeJustifDaNuvem(remoto){
+  if(!Array.isArray(remoto)) return;
+  const mapa={};
+  [...remoto, ...justificativas].forEach(e=>{ if(e&&e.id) mapa[e.id]=e; });
+  justificativas=Object.values(mapa).sort((a,b)=>b.ts-a.ts).slice(0,JUSTIF_MAX);
+  saveJustif();
+}
+function registrarJustif(tipo, c, motivo, detalhe, dataDepois){
+  const ent={
+    id: Date.now()+'_'+Math.random().toString(36).slice(2),
+    ts: Date.now(),
+    user: (usuarioAtual&&usuarioAtual.nome)||'—',
+    tipo, num: c.num||'', dest: c.nome||'',
+    dataAntes: c.data||'', dataDepois: dataDepois||'',
+    motivo: motivo||'', detalhe: detalhe||''
+  };
+  justificativas.unshift(ent);
+  justificativas=justificativas.slice(0,JUSTIF_MAX);
+  saveJustif();
+  if(API_URL) pushMeta();
+}
+
+// ---- Drawer que pergunta o motivo (devolve promessa) ----
+let _mtResolve=null;
+function pedirMotivo(tipo, contextoHTML){
+  return new Promise(resolve=>{
+    _mtResolve=resolve;
+    const lista=(tipo==='exclusao')?MOTIVOS_EXCLUSAO:MOTIVOS_DATA;
+    document.getElementById('mt-titulo').textContent =
+      (tipo==='exclusao') ? '🗑 Motivo da exclusão' : '📅 Motivo da mudança de data';
+    document.getElementById('mt-contexto').innerHTML=contextoHTML;
+    document.getElementById('mt-lista').innerHTML='<option value="">— escolha —</option>'+
+      lista.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    document.getElementById('mt-detalhe').value='';
+    document.getElementById('mt-err').textContent='';
+    mtToggleOutro();
+    abrirDrawer('motivo');
+  });
+}
+function mtToggleOutro(){
+  const outro = document.getElementById('mt-lista').value==='Outro';
+  document.getElementById('mt-lbl-det').textContent = outro ? 'Detalhe (obrigatório)' : 'Detalhe (opcional)';
+}
+function confirmarMotivo(){
+  const motivo=document.getElementById('mt-lista').value;
+  const detalhe=document.getElementById('mt-detalhe').value.trim();
+  const err=document.getElementById('mt-err');
+  if(!motivo){ err.textContent='Escolha um motivo.'; return; }
+  if(motivo==='Outro' && !detalhe){ err.textContent='Escolhendo "Outro", descreva o motivo no detalhe.'; return; }
+  fecharDrawer('motivo');
+  const r=_mtResolve; _mtResolve=null;
+  if(r) r({motivo,detalhe});
+}
+function cancelarMotivo(){
+  fecharDrawer('motivo');
+  const r=_mtResolve; _mtResolve=null;
+  if(r) r(null);   // null = desistiu, a ação NÃO acontece
+}
+
+// ---- Tela do admin ----
+function abrirJustif(){
+  const hoje=new Date();
+  const ini=new Date(hoje); ini.setDate(hoje.getDate()-30);
+  const ei=document.getElementById('jf-ini'), ef=document.getElementById('jf-fim');
+  if(!ei.value) ei.value=isoLocal(ini);
+  if(!ef.value) ef.value=isoLocal(hoje);
+  renderJustif();
+  abrirDrawer('justif');
+}
+function justifFiltradas(){
+  const ini=val('jf-ini'), fim=val('jf-fim'), tipo=val('jf-tipo');
+  return justificativas.filter(e=>{
+    const d=isoLocal(new Date(e.ts));
+    if(ini && d<ini) return false;
+    if(fim && d>fim) return false;
+    if(tipo && e.tipo!==tipo) return false;
+    return true;
+  });
+}
+function renderJustif(){
+  const el=document.getElementById('jf-lista');
+  const lista=justifFiltradas();
+  if(!lista.length){ el.innerHTML='<div class="empty">Nenhum registro no período</div>'; return; }
+  el.innerHTML=lista.map(e=>{
+    const dt=new Date(e.ts);
+    const pz=n=>String(n).padStart(2,'0');
+    const quando=pz(dt.getDate())+'/'+pz(dt.getMonth()+1)+'/'+dt.getFullYear()+' '+pz(dt.getHours())+':'+pz(dt.getMinutes());
+    const cab = e.tipo==='exclusao'
+      ? `<span style="color:var(--red);font-weight:700">🗑 Excluída</span>`
+      : `<span style="color:var(--amber);font-weight:700">📅 Data alterada</span>`;
+    const datas = e.tipo==='exclusao'
+      ? `<div style="font-size:12px;color:var(--text2)">Data da carga: ${fmtData(e.dataAntes)}</div>`
+      : `<div style="font-size:12px;color:var(--text2)">${fmtData(e.dataAntes)} → <b>${fmtData(e.dataDepois)}</b></div>`;
+    return `<div class="card" style="padding:10px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+        ${cab}<span style="font-size:11px;color:var(--text3)">${quando}</span></div>
+      <div style="font-size:13px;font-weight:700;margin-top:4px">Carga ${esc(e.num)} · ${esc(e.dest)}</div>
+      ${datas}
+      <div style="font-size:13px;margin-top:6px">📝 ${esc(e.motivo)}</div>
+      ${e.detalhe?`<div style="font-size:12px;color:var(--text2);margin-top:2px">${esc(e.detalhe)}</div>`:''}
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">por ${esc(e.user)}</div>
+    </div>`;
+  }).join('');
+}
+function exportarJustifCSV(){
+  const lista=justifFiltradas();
+  if(!lista.length){ toast('Nada para exportar no período'); return; }
+  const cel=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const pz=n=>String(n).padStart(2,'0');
+  const linhas=[['Data/hora','Usuario','Tipo','Carga','Destino','Data original','Nova data','Motivo','Detalhe'].map(cel).join(';')];
+  lista.forEach(e=>{
+    const d=new Date(e.ts);
+    linhas.push([
+      pz(d.getDate())+'/'+pz(d.getMonth()+1)+'/'+d.getFullYear()+' '+pz(d.getHours())+':'+pz(d.getMinutes()),
+      e.user,
+      e.tipo==='exclusao'?'Exclusao':'Alteracao de data',
+      e.num, e.dest,
+      e.dataAntes?fmtData(e.dataAntes):'',
+      e.dataDepois?fmtData(e.dataDepois):'',
+      e.motivo, e.detalhe
+    ].map(cel).join(';'));
+  });
+  // BOM para o Excel abrir os acentos corretamente
+  const blob=new Blob(['\ufeff'+linhas.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='motivos_'+isoLocal(new Date())+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast('CSV gerado ✓');
+}
+
 // ===== AGENDA COMERCIAL (calendário de brechas) =====
 const CM_TIPOS_ARROZ = ['PARBO','BRANCO','INTEGRAL','MIX','CÃO'];
 const CM_CAPS_PADRAO = {'6X5':CAP_6X5, '30X1':CAP_30X1, '10X1':3000, arroz:150000};
@@ -2629,6 +2831,7 @@ function aplicarPermissoes(){
   const isAdmin = usuarioAtual.role==='admin';
   document.getElementById('dd-role').textContent = isAdmin ? '👑 Administrador' : '👤 Usuário';
   document.getElementById('dd-btn-admin').style.display = isAdmin ? '' : 'none';
+  document.getElementById('dd-btn-justif').style.display = isAdmin ? '' : 'none';
   const permitidas = isAdmin ? TABS_ALL : ((me.tabs&&me.tabs.length)?me.tabs:TABS_PADRAO);
   TABS_ALL.forEach(t=>{ const el=document.getElementById('tab-'+t); if(el) el.classList.toggle('hidden-tab', !permitidas.includes(t)); });
   document.querySelectorAll('.admin-only').forEach(el=>{
@@ -3339,7 +3542,7 @@ function renderNotifList(){
   el.innerHTML = notificacoes.map(n=>{
     const detalheHtml = (n.detalhe||[]).map(l=>`<div class="notif-detalhe-linha">${l}</div>`).join('');
     const podeFiltrar = n.tipo !== 'excluida' && n.cargaData;
-    const dica = podeFiltrar ? '<div class="notif-dica">Toque para ver na Agenda →</div>' : '';
+    const dica = podeFiltrar ? '<div class="notif-dica">Toque para ver na Programação →</div>' : '';
     return `
     <div class="notif-item ${n.lida?'':'unread'}" onclick="notifClick('${n.id}')">
       <div class="notif-icon ${classes[n.tipo]||'ni-edit'}">${icones[n.tipo]||'🔔'}</div>
@@ -3485,7 +3688,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
-loadAudit();
+loadAudit(); loadJustif();
 loadSnapTerc();
 loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
@@ -3504,7 +3707,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v78';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v79';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
