@@ -1224,6 +1224,7 @@ function pushMeta(){
     dataEmp: dataEmp,
     atualizadoEmp: atualizadoEmp,
     concluidoEmp: concluidoEmp,
+    pendPubEmp: pendPubEmp,
     audit: auditLog,
     justif: justificativas,
     snapTerc: snapTerc,
@@ -1271,6 +1272,7 @@ function pull(silencioso, forcar){
         if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
+        if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1341,6 +1343,7 @@ function sincronizarInicial(){
           if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
+        if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1357,7 +1360,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -2268,6 +2271,34 @@ let pendenteEmp ={MATRIZ:false,CEARA:false,OSORIO:false};
 const EST_CONC_KEY='controle_est_conc_v1';
 const EST_PEND_KEY='controle_est_pend_v1';
 
+// pendPubEmp = aviso COMPARTILHADO de "contagem em andamento" (vai para a nuvem).
+// A trava continua valendo só no aparelho que está contando (pendenteEmp).
+let pendPubEmp={MATRIZ:null,CEARA:null,OSORIO:null};   // {ativo,user,ts}
+const PEND_PUB_KEY='controle_est_pendpub_v1';
+const PEND_VALIDADE = 12*60*60*1000;   // some sozinho após 12h sem conclusão
+function savePendPub(){ try{ localStorage.setItem(PEND_PUB_KEY,JSON.stringify(pendPubEmp)); }catch(e){} }
+function loadPendPub(){ try{ const d=JSON.parse(localStorage.getItem(PEND_PUB_KEY)||'null'); if(d) pendPubEmp=d; }catch(e){} }
+function adotarPendPub(obj){
+  if(!obj||typeof obj!=='object') return;
+  ['MATRIZ','CEARA','OSORIO'].forEach(e=>{
+    const meu=pendPubEmp[e], dele=obj[e];
+    if(!dele) return;
+    if(!meu || (dele.ts||0) > (meu.ts||0)) pendPubEmp[e]=dele;   // vale o aviso mais recente
+  });
+  savePendPub(); atualizarFaixaEst();
+}
+function publicarPend(emp, ativo){
+  pendPubEmp[emp]={ativo:!!ativo, user:(usuarioAtual&&usuarioAtual.nome)||'—', ts:Date.now()};
+  savePendPub();
+  if(API_URL) pushMeta();
+}
+// há aviso válido de contagem em andamento nesta empresa?
+function pendPubAtiva(emp){
+  const p=pendPubEmp[emp];
+  if(!p||!p.ativo) return null;
+  if(Date.now()-(p.ts||0) > PEND_VALIDADE) return null;   // aviso velho demais: ignora
+  return p;
+}
 function saveConcluido(){ try{ localStorage.setItem(EST_CONC_KEY,JSON.stringify(concluidoEmp)); }catch(e){} }
 function savePendente(){ try{ localStorage.setItem(EST_PEND_KEY,JSON.stringify(pendenteEmp)); }catch(e){} }
 function loadConcluido(){
@@ -2287,13 +2318,13 @@ function adotarConcluido(obj){
 }
 function marcarPendenteEst(emp){
   if(pendenteEmp[emp]) { atualizarFaixaEst(); return; }
-  pendenteEmp[emp]=true; savePendente(); atualizarFaixaEst();
+  pendenteEmp[emp]=true; savePendente(); publicarPend(emp,true); atualizarFaixaEst();
 }
 function concluirAtualizacao(){
   const emp=empresaLanc;
   if(!pendenteEmp[emp]){ toast('Não há alterações a concluir'); return; }
   concluidoEmp[emp]=Date.now(); saveConcluido();
-  pendenteEmp[emp]=false; savePendente();
+  pendenteEmp[emp]=false; savePendente(); publicarPend(emp,false);
   registrarAcao('concluiu a atualização do estoque da '+nomeEmpresa(emp).toUpperCase());
   atualizarFaixaEst();
   if(API_URL) pushMeta(); else saveAll();
@@ -2322,9 +2353,9 @@ function atualizarFaixaEst(){
     : 'Nenhuma alteração pendente.';
   const lbl=document.getElementById('vis-data-label');
   if(lbl){
-    const pv=pendenteEmp[empresaVis];
+    const pv = pendenteEmp[empresaVis] ? {user:(usuarioAtual&&usuarioAtual.nome)||''} : pendPubAtiva(empresaVis);
     lbl.innerHTML = pv
-      ? '<span style="color:var(--amber);font-weight:700">🕒 atualização em andamento</span>'
+      ? '<span style="color:var(--amber);font-weight:700">🕒 atualização em andamento'+(pv.user?' · '+esc(pv.user):'')+'</span>'
       : (concluidoEmp[empresaVis] ? '<span style="color:var(--text2)">🕒 '+textoConcluido(empresaVis).toLowerCase()+'</span>' : '');
   }
 }
@@ -3820,7 +3851,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
-loadAudit(); loadJustif(); loadConcluido();
+loadAudit(); loadJustif(); loadConcluido(); loadPendPub();
 loadSnapTerc();
 loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
@@ -3839,7 +3870,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v80';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v81';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
