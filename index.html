@@ -65,6 +65,17 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .tst-comprar{background:#FFE100;color:#5b4b00}
 .tst-urg{background:var(--red);color:#fff}
 .terc-del{border:none;background:none;cursor:pointer;color:var(--red);font-size:14px}
+.est-faixa{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--rmd);font-size:13px;font-weight:700;margin-bottom:12px}
+.ef-ok{background:#F1F8F1;color:var(--green);border:1px solid #CBE5CC}
+.ef-and{background:#FFF6E0;color:var(--amber);border:1px solid #F0DCA8}
+.ef-pisca{width:9px;height:9px;border-radius:50%;background:var(--amber);animation:efp 1.1s infinite;flex:0 0 auto}
+@keyframes efp{0%,100%{opacity:1}50%{opacity:.25}}
+.btn-concluir-est{background:var(--red);color:#fff;border-color:var(--red);font-size:15px;font-weight:700;padding:14px;max-width:340px;margin:0 auto;display:block;width:100%}
+.btn-concluir-est:disabled{background:#DCCFCF;border-color:#DCCFCF;color:#8C7A7A;cursor:not-allowed}
+.modal-pend{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(100% - 40px);max-width:380px;background:var(--surface);border-radius:16px;z-index:251;padding:20px;display:none;box-shadow:0 12px 40px rgba(0,0,0,.2)}
+.modal-pend.open{display:block}
+.ov-pend{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:250;display:none}
+.ov-pend.open{display:block}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .card.editing{border:2px solid var(--red);background:var(--redXL)}
 .ctitle{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
@@ -491,6 +502,18 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   </div>
 </div>
 
+<!-- Aviso: contagem de estoque não concluída (trava) -->
+<div class="ov-pend" id="ov-pend"></div>
+<div class="modal-pend" id="modal-pend">
+  <h3 style="margin:0 0 8px;font-size:16px">⚠️ Atualização não concluída</h3>
+  <p style="margin:0 0 16px;font-size:13.5px;color:var(--text2);line-height:1.55">
+    Você alterou o estoque da <b id="ap-emp">MATRIZ</b> e ainda não concluiu a atualização.<br><br>
+    Toque em <b>Concluir atualização</b> para registrar a data e a hora da contagem.
+  </p>
+  <button class="btn btn-concluir-est" style="max-width:none" onclick="concluirDoAviso()">✅ Concluir agora</button>
+  <button class="btn btn-full" style="margin-top:8px" onclick="fecharAvisoPend()">Voltar para a contagem</button>
+</div>
+
 <!-- Drawer: Alterar senha -->
 <div class="drawer-overlay" id="dov-senha" onclick="fecharDrawer('senha')"></div>
 <div class="drawer" id="drawer-senha">
@@ -687,6 +710,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <button class="btn btn-full admin-only" id="btn-confer" style="border-color:var(--blue);color:var(--blue);font-weight:700;margin-bottom:12px" onclick="abrirConferencia()">🔎 Conferência de terceirizados</button>
   <div class="card" id="card-contagem">
     <div class="ctitle">🏢 Empresa do estoque</div>
+    <div class="est-faixa ef-ok" id="est-faixa">✅ <span>—</span></div>
     <div class="fg" style="margin:0"><label>Selecione a empresa para lançar/ver o estoque</label>
       <select id="e-empresa" onchange="setEmpresaLanc(this.value)">
         <option value="MATRIZ">MATRIZ</option>
@@ -739,6 +763,10 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <div class="metric"><div class="metric-label">Peso contado</div><div class="metric-val" id="e-peso">0 kg</div></div>
     </div>
     <div id="grupos-est"></div>
+    <div style="margin-top:16px">
+      <button class="btn btn-concluir-est" id="btn-concluir-est" disabled onclick="concluirAtualizacao()">✅ Concluir atualização</button>
+      <div id="est-conc-nota" style="font-size:12px;color:var(--text2);text-align:center;margin-top:8px;line-height:1.5">Nenhuma alteração pendente.</div>
+    </div>
   </div>
 
   <!-- PAINEL VISUAL (novo) -->
@@ -1004,7 +1032,9 @@ function mergeEstEmpDaNuvem(ce, os, ts){
   const lanc=document.getElementById('est-lancamento');
   if(lanc && !lanc.classList.contains('hidden') && empresaLanc!=='MATRIZ') renderGrupos();
 }
-function setEmpresaLanc(emp){ empresaLanc=emp; aplicarDataNoCampo(); atualizarBtnLimpar(); renderGrupos(); }
+function setEmpresaLanc(emp){
+  if(emp!==empresaLanc && estPendenteAlguma()){ abrirAvisoPend(); const s=document.getElementById('e-empresa'); if(s) s.value=empresaLanc; return; }
+  empresaLanc=emp; aplicarDataNoCampo(); atualizarBtnLimpar(); renderGrupos(); atualizarFaixaEst(); }
 // ===== Conferência de estoque de terceirizados =====
 function menosUmDia(iso){ const [a,m,d]=iso.split('-').map(Number); const dt=new Date(a,m-1,d); dt.setDate(dt.getDate()-1); return isoLocal(dt); }
 function comprodoTerc(cod){
@@ -1193,6 +1223,7 @@ function pushMeta(){
     estEmpTs: getEstEmpTs(),
     dataEmp: dataEmp,
     atualizadoEmp: atualizadoEmp,
+    concluidoEmp: concluidoEmp,
     audit: auditLog,
     justif: justificativas,
     snapTerc: snapTerc,
@@ -1239,6 +1270,7 @@ function pull(silencioso, forcar){
         if(d.meta.contador!==undefined && document.activeElement.id!=='e-contador') document.getElementById('e-contador').value=d.meta.contador;
         if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
+        if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1308,6 +1340,7 @@ function sincronizarInicial(){
           if(d.meta.contador!==undefined) document.getElementById('e-contador').value=d.meta.contador;
           if(d.meta.dataEmp) adotarDataEmp(d.meta.dataEmp); else if(d.meta.dataContagem){ dataEmp.MATRIZ=dataEmp.MATRIZ||d.meta.dataContagem; saveDataEmpLocal(); }
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
+        if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1320,11 +1353,11 @@ function sincronizarInicial(){
         }
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         saveLocal();
-        renderCargas(); filtroDatas(); renderGrupos(); renderDash(); refreshEstSubview();
+        renderCargas(); filtroDatas(); renderGrupos(); renderDash(); atualizarFaixaEst(); refreshEstSubview();
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1596,6 +1629,7 @@ function setQtd(cod,val){
   const r=document.getElementById('er-'+cod); if(r){ est[cod]?r.classList.add('filled'):r.classList.remove('filled'); }
   resumoEst();
   carimbarAtualizacao(empresaLanc);
+  marcarPendenteEst(empresaLanc);
   registrarAcao('atualizou o estoque da '+nomeEmpresa(empresaLanc).toUpperCase());
   if(empresaLanc==='MATRIZ' && ehTerc(cod)) snapshotTerc();
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
@@ -1615,6 +1649,7 @@ function limparContagem(){
   if(!confirm('Zerar toda a contagem do estoque de '+nome+'?')) return;
   if(empresaLanc==='CEARA') estoqueCeara={}; else if(empresaLanc==='OSORIO') estoqueOsorio={}; else estoqueQtd={};
   carimbarAtualizacao(empresaLanc);
+  marcarPendenteEst(empresaLanc);
   registrarAcao('limpou a contagem do estoque da '+nomeEmpresa(empresaLanc).toUpperCase());
   renderGrupos();
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
@@ -1734,12 +1769,17 @@ function refreshEstSubview(){
   if(ins && ins.classList.contains('active')) renderInsumos();
 }
 function toggleEstView(modo){
+  const podeLanc = podeEditarEstoque();
+  const bLanc=document.getElementById('btn-est-lanc');
+  if(bLanc) bLanc.style.display = podeLanc ? '' : 'none';
+  if(!podeLanc && modo==='lancamento') modo='visual';
   const lanc = document.getElementById('est-lancamento');
   const vis  = document.getElementById('est-visual');
   const ins  = document.getElementById('est-insumos');
   const bL=document.getElementById('btn-est-lanc'), bV=document.getElementById('btn-est-vis'), bI=document.getElementById('btn-est-ins');
   lanc.classList.toggle('hidden', modo!=='lancamento');
   const cc=document.getElementById('card-contagem'); if(cc) cc.style.display = (modo==='lancamento')?'':'none';
+  const ff=document.getElementById('est-faixa'); if(ff) ff.style.display = (modo==='lancamento')?'':'none';
   vis.classList.toggle('active', modo==='visual');
   ins.classList.toggle('active', modo==='insumos');
   bL.classList.toggle('active', modo==='lancamento');
@@ -1747,6 +1787,7 @@ function toggleEstView(modo){
   bI.classList.toggle('active', modo==='insumos');
   if(modo==='lancamento') renderGrupos();
   if(modo==='visual') renderEstVisual();
+  atualizarFaixaEst();
   if(modo==='insumos') renderInsumos();
 }
 
@@ -1845,6 +1886,7 @@ function setEmpresaVis(emp){
 }
 function nomeEmpresa(emp){ return emp==='CEARA'?'CEARÁ':emp==='OSORIO'?'OSÓRIO':'Matriz'; }
 function renderEstVisual(){
+  if(typeof atualizarFaixaEst==='function') setTimeout(atualizarFaixaEst,0);
   const est=estoqueDe(empresaVis);
   const nome=nomeEmpresa(empresaVis);
   const mostraFat = empresaVis!=='OSORIO';   // OSÓRIO mostra só kg
@@ -2217,6 +2259,95 @@ function renderMaquinas(){
   document.getElementById('maq-30x1').innerHTML=gaugeHTML('Empacotadeiras 30X1', falta30, CAP_30X1, '2 conjuntos');
 }
 
+// ===== CONCLUSÃO DA ATUALIZAÇÃO DE ESTOQUE =====
+// concluidoEmp = carimbo OFICIAL (só muda ao tocar em "Concluir"); é sincronizado.
+// pendenteEmp  = há alterações não concluídas; fica SÓ neste aparelho, mas sobrevive
+//                ao fechar o app (por isso vai para o localStorage).
+let concluidoEmp={MATRIZ:0,CEARA:0,OSORIO:0};
+let pendenteEmp ={MATRIZ:false,CEARA:false,OSORIO:false};
+const EST_CONC_KEY='controle_est_conc_v1';
+const EST_PEND_KEY='controle_est_pend_v1';
+
+function saveConcluido(){ try{ localStorage.setItem(EST_CONC_KEY,JSON.stringify(concluidoEmp)); }catch(e){} }
+function savePendente(){ try{ localStorage.setItem(EST_PEND_KEY,JSON.stringify(pendenteEmp)); }catch(e){} }
+function loadConcluido(){
+  try{ const d=JSON.parse(localStorage.getItem(EST_CONC_KEY)||'null');
+       if(d) concluidoEmp={MATRIZ:d.MATRIZ||0,CEARA:d.CEARA||0,OSORIO:d.OSORIO||0}; }catch(e){}
+  try{ const p=JSON.parse(localStorage.getItem(EST_PEND_KEY)||'null');
+       if(p) pendenteEmp={MATRIZ:!!p.MATRIZ,CEARA:!!p.CEARA,OSORIO:!!p.OSORIO}; }catch(e){}
+  // estreia: sem conclusão registrada, adota o último carimbo automático que já existia
+  ['MATRIZ','CEARA','OSORIO'].forEach(e=>{ if(!concluidoEmp[e] && atualizadoEmp[e]) concluidoEmp[e]=atualizadoEmp[e]; });
+  saveConcluido();
+}
+function adotarConcluido(obj){
+  if(obj&&typeof obj==='object'){
+    ['MATRIZ','CEARA','OSORIO'].forEach(e=>{ concluidoEmp[e]=Math.max(concluidoEmp[e]||0, obj[e]||0); });
+    saveConcluido(); atualizarFaixaEst();
+  }
+}
+function marcarPendenteEst(emp){
+  if(pendenteEmp[emp]) { atualizarFaixaEst(); return; }
+  pendenteEmp[emp]=true; savePendente(); atualizarFaixaEst();
+}
+function concluirAtualizacao(){
+  const emp=empresaLanc;
+  if(!pendenteEmp[emp]){ toast('Não há alterações a concluir'); return; }
+  concluidoEmp[emp]=Date.now(); saveConcluido();
+  pendenteEmp[emp]=false; savePendente();
+  registrarAcao('concluiu a atualização do estoque da '+nomeEmpresa(emp).toUpperCase());
+  atualizarFaixaEst();
+  if(API_URL) pushMeta(); else saveAll();
+  fecharAvisoPend();
+  toast('Atualização concluída ✓');
+}
+function textoConcluido(emp){
+  const t=concluidoEmp[emp]||0;
+  return t ? 'Atualizado em '+fmtDataHora(t) : 'Nunca concluído';
+}
+// atualiza a faixa da tela de lançamento e o rótulo do Resumo Visual
+function atualizarFaixaEst(){
+  const f=document.getElementById('est-faixa');
+  if(f){
+    const pend=pendenteEmp[empresaLanc];
+    f.className='est-faixa '+(pend?'ef-and':'ef-ok');
+    f.innerHTML = pend
+      ? '<span class="ef-pisca"></span><span>Atualização em andamento — '+nomeEmpresa(empresaLanc).toUpperCase()+'</span>'
+      : '✅ <span>'+textoConcluido(empresaLanc)+'</span>';
+  }
+  const b=document.getElementById('btn-concluir-est');
+  if(b) b.disabled = !pendenteEmp[empresaLanc];
+  const n=document.getElementById('est-conc-nota');
+  if(n) n.innerHTML = pendenteEmp[empresaLanc]
+    ? '<b style="color:var(--amber)">Há alterações não concluídas.</b> A data e a hora só são registradas ao concluir.'
+    : 'Nenhuma alteração pendente.';
+  const lbl=document.getElementById('vis-data-label');
+  if(lbl){
+    const pv=pendenteEmp[empresaVis];
+    lbl.innerHTML = pv
+      ? '<span style="color:var(--amber);font-weight:700">🕒 atualização em andamento</span>'
+      : (concluidoEmp[empresaVis] ? '<span style="color:var(--text2)">🕒 '+textoConcluido(empresaVis).toLowerCase()+'</span>' : '');
+  }
+}
+// ---- trava: não deixa sair com contagem pendente ----
+function estPendenteAlguma(){ return ['MATRIZ','CEARA','OSORIO'].some(e=>pendenteEmp[e]); }
+function empPendente(){ return ['MATRIZ','CEARA','OSORIO'].find(e=>pendenteEmp[e]); }
+function abrirAvisoPend(){
+  const emp=empPendente()||empresaLanc;
+  document.getElementById('ap-emp').textContent=nomeEmpresa(emp).toUpperCase();
+  document.getElementById('ov-pend').classList.add('open');
+  document.getElementById('modal-pend').classList.add('open');
+}
+function fecharAvisoPend(){
+  document.getElementById('ov-pend').classList.remove('open');
+  document.getElementById('modal-pend').classList.remove('open');
+}
+// concluir a partir do aviso (conclui a empresa que está pendente)
+function concluirDoAviso(){
+  const emp=empPendente();
+  if(emp && emp!==empresaLanc){ empresaLanc=emp; }
+  concluirAtualizacao();
+}
+
 // ===== REGISTRO DE MOTIVOS (exclusão de carga / alteração de data) =====
 // Diferente do auditLog (que agrupa e guarda só 60), aqui cada evento é
 // individual e preservado — é o registro que o admin exporta depois.
@@ -2563,6 +2694,7 @@ function gaugeHTML(titulo, falta, cap, sub){
     <div class="maq-info">falta produzir<br><b>${fmtFardos(falta)}</b> de ${cap.toLocaleString('pt-BR')} fardos</div>${aviso}`;
 }
 function sw(tab){
+  if(tab!=='est' && estPendenteAlguma()){ abrirAvisoPend(); return; }
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+tab).classList.add('active');
@@ -3688,7 +3820,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
-loadAudit(); loadJustif();
+loadAudit(); loadJustif(); loadConcluido();
 loadSnapTerc();
 loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
@@ -3707,7 +3839,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v79';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v80';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
