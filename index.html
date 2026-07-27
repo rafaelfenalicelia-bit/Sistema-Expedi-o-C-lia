@@ -2332,12 +2332,15 @@ function adotarLotes(obj){
   }
 }
 function lotesDoItem(emp,cod){ return (lotesEst[emp]&&lotesEst[emp][cod])||[]; }
+// SOMA (vira o estoque total): conta TUDO que tem quantidade, mesmo lote ainda sem código.
 function somaLotes(emp,cod){
-  const m={};
-  lotesDoItem(emp,cod).forEach(x=>{ const k=normLote(x.c); if(!k)return; m[k]=(m[k]||0)+(+x.q||0); });
-  return Object.values(m).reduce((a,b)=>a+b,0);
+  return lotesDoItem(emp,cod).reduce((a,x)=>a+(+x.q||0),0);
 }
-// agrupa por código normalizado e ordena por quantidade desc
+// há quantidade lançada em lote(s) ainda sem código? (usado para avisar)
+function temLoteSemCodigo(emp,cod){
+  return lotesDoItem(emp,cod).some(x=>!normLote(x.c) && (+x.q||0)>0);
+}
+// AGRUPAMENTO p/ faturamento: só lotes COM código (um lote sem etiqueta não vai à nota).
 function lotesAgrupados(emp,cod){
   const m={};
   lotesDoItem(emp,cod).forEach(x=>{ const k=normLote(x.c); if(!k)return; m[k]=(m[k]||0)+(+x.q||0); });
@@ -2375,7 +2378,18 @@ function loteSetQ(cod,i,v){
 // HTML dos lotes de um item (usado dentro de renderGrupos)
 function loteLinhasHTML(cod, ed){
   const emp=empresaLanc;
-  const arr=lotesDoItem(emp,cod);
+  let arr=lotesDoItem(emp,cod);
+  // ESTREIA: item de arroz sem lotes, mas com quantidade já contada,
+  // ganha um 1º lote em branco trazendo essa quantidade (grava na hora p/ virar a soma).
+  if(!arr.length){
+    const qAtual=estoqueDe(emp)[cod]||0;
+    if(qAtual>0){
+      lotesEst[emp]=lotesEst[emp]||{};
+      lotesEst[emp][cod]=[{c:'',q:qAtual}];
+      saveLotes();
+      arr=lotesEst[emp][cod];
+    }
+  }
   const s=somaLotes(emp,cod);
   if(!ed){
     // sem permissão de editar: mostra só a soma
@@ -2406,17 +2420,24 @@ function renderLotes(){
   if(!itens.length){ alvo.innerHTML='<div class="empty">Nenhum item com lote lançado nesta empresa.</div>'; return; }
   alvo.innerHTML=itens.map(p=>{
     const g=lotesAgrupados(emp,p.cod);
-    if(!g.length) return '';
+    const semCod = temLoteSemCodigo(emp,p.cod);
+    const qSemCod = lotesDoItem(emp,p.cod).filter(x=>!normLote(x.c)).reduce((a,x)=>a+(+x.q||0),0);
+    // item cuja quantidade ainda está toda num lote sem etiqueta
+    if(!g.length){
+      if(qSemCod>0) return `<div class="card" style="padding:12px;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
+        <div class="lote-warn">⚠️ ${qSemCod} em estoque sem número de lote informado. Preencha o lote na aba Estoque.</div>
+      </div>`;
+      return '';
+    }
     const [mc,mq]=g[0], outros=g.slice(1);
     const empate=g.length>1 && g[1][1]===mq;
-    const soma=g.reduce((a,b)=>a+b[1],0);
-    const estNorm=estoqueDe(emp)[p.cod]||0;
     return `<div class="card" style="padding:12px;margin-bottom:8px">
       <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
       <div class="lote-maior"><span>🏷️ Lote ${esc(mc)}</span><span>${mq}</span></div>
       ${empate?'<div class="lote-warn">⚠️ Empate na maior quantidade — confira qual lote usar.</div>':''}
       ${outros.length?`<div class="lote-outros">outros: ${outros.map(([c,q])=>esc(c)+' ('+q+')').join(' · ')}</div>`:''}
-      ${soma!==estNorm?`<div class="lote-warn">Soma dos lotes (${soma}) ≠ estoque contado (${estNorm}).</div>`:''}
+      ${semCod?`<div class="lote-warn">⚠️ ${qSemCod} ainda sem número de lote.</div>`:''}
     </div>`;
   }).join('') || '<div class="empty">Nenhum item com lote lançado.</div>';
 }
@@ -4050,7 +4071,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v83';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v84';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
