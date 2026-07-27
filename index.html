@@ -76,6 +76,19 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .modal-pend.open{display:block}
 .ov-pend{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:250;display:none}
 .ov-pend.open{display:block}
+.est-row-lote{align-items:flex-start}
+.est-row-lote > span:nth-child(2){padding-top:2px}
+.lote-wrap{min-width:190px;max-width:230px}
+.lote-line{display:flex;gap:5px;margin-bottom:5px;align-items:center}
+.lote-cod{flex:1;min-width:0;padding:7px;border:1px solid var(--border);border-radius:var(--rmd);font-size:12.5px;font-family:inherit;text-transform:uppercase}
+.lote-q{width:62px;padding:7px;border:1px solid var(--border);border-radius:var(--rmd);font-size:12.5px;text-align:right;font-family:inherit}
+.lote-x{border:0;background:none;color:var(--text3);font-size:15px;cursor:pointer;padding:0 2px;flex:0 0 auto}
+.lote-addbtn{border:1px dashed var(--blue,#1F4FB0);background:none;color:var(--blue,#1F4FB0);padding:6px;border-radius:var(--rmd);font-size:11.5px;font-weight:700;cursor:pointer;width:100%;font-family:inherit}
+.lote-soma{font-size:11px;color:var(--text2);text-align:right;margin-top:4px}
+.lote-soma-ro{padding:8px;border:1px solid #CBE0F5;border-radius:var(--rmd);background:#F2F8FF;font-weight:700;color:var(--blue,#1F4FB0);text-align:center;font-size:14px}
+.lote-maior{background:#E4F3E5;color:var(--green);border:1px solid #BFE0C0;border-radius:var(--rmd);padding:6px 10px;font-size:13px;font-weight:700;margin-top:6px;display:flex;justify-content:space-between}
+.lote-outros{font-size:11.5px;color:var(--text3);margin-top:5px;line-height:1.6}
+.lote-warn{font-size:11.5px;color:var(--red);margin-top:5px;font-weight:600}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .card.editing{border:2px solid var(--red);background:var(--redXL)}
 .ctitle{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
@@ -651,6 +664,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 <div class="tabbar">
   <button class="tab active" id="tab-exp"  data-tab="exp"  onclick="sw('exp')"><i class="icon">🚚</i>Cargas</button>
   <button class="tab"        id="tab-est"  data-tab="est"  onclick="sw('est')"><i class="icon">📦</i>Estoque</button>
+  <button class="tab hidden-tab" id="tab-lotes" data-tab="lotes" onclick="sw('lotes')"><i class="icon">🏷️</i>Lotes</button>
   <button class="tab"        id="tab-con"  data-tab="con"  onclick="sw('con')"><i class="icon">📅</i>Programação</button>
   <button class="tab hidden-tab" id="tab-comercial" data-tab="comercial" onclick="sw('comercial')"><i class="icon">📆</i>Agenda</button>
   <button class="tab"        id="tab-dash" data-tab="dash" onclick="sw('dash')"><i class="icon">📊</i>Painel</button>
@@ -812,6 +826,22 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 </div>
 
 <!-- CONCILIAÇÃO -->
+<!-- LOTES (controle de lote de arroz - MATRIZ e CEARÁ) -->
+<div class="screen" id="screen-lotes">
+  <div class="ptitle">Lotes de arroz</div>
+  <div class="psub">Maior lote de cada item — é o que vai para a nota. Os lotes são lançados na aba Estoque; aqui é só consulta.</div>
+  <div class="card" style="padding:12px">
+    <div class="frow" style="align-items:flex-end">
+      <div class="fg" style="margin:0;flex:1;min-width:120px"><label>Empresa</label>
+        <select id="lote-emp" onchange="renderLotes()"><option value="MATRIZ">MATRIZ</option><option value="CEARA">CEARÁ</option></select></div>
+      <div class="fg" style="margin:0;flex:2;min-width:150px"><label>Buscar item</label>
+        <input id="lote-busca" placeholder="nome ou código..." oninput="renderLotes()"></div>
+    </div>
+    <button class="btn btn-full" style="border-color:var(--blue);color:var(--blue);margin-top:10px" onclick="exportarLotesCSV()">⬇️ Baixar CSV</button>
+  </div>
+  <div id="lote-lista"></div>
+</div>
+
 <div class="screen" id="screen-con">
   <div class="ptitle">Agenda de Carregamentos</div>
   <div class="psub">Programado vs. disponível no estoque</div>
@@ -1225,6 +1255,7 @@ function pushMeta(){
     atualizadoEmp: atualizadoEmp,
     concluidoEmp: concluidoEmp,
     pendPubEmp: pendPubEmp,
+    lotesEst: lotesEst,
     audit: auditLog,
     justif: justificativas,
     snapTerc: snapTerc,
@@ -1273,6 +1304,7 @@ function pull(silencioso, forcar){
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
         if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
+        if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1344,6 +1376,7 @@ function sincronizarInicial(){
         if(d.meta.atualizadoEmp) adotarAtualizado(d.meta.atualizadoEmp);
         if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
         if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
+        if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1360,7 +1393,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1962,7 +1995,13 @@ function renderGrupos(){
     <div class="grupo-body ${ab?'open':''}" id="gb-${tp}"><div class="est-row est-headrow"><span>Cód</span><span>Descrição</span><span style="text-align:center">${granel?'Qtd kg':'Qtd'}</span></div>`;
     itens.forEach(p=>{ const v=est[p.cod]||''; const h=p.granel?'<span class="est-peso">granel · kg</span>':(p.peso>0?`<span class="est-peso">${p.peso}kg/un</span>`:'');
       const lapisBtn = (usuarioAtual&&usuarioAtual.role==='admin') ? `<button class="lapis" onclick="editarItem(${p.cod})" title="Editar item">✏️</button>` : '';
-      html+=`<div class="est-row ${v?'filled':''}" id="er-${p.cod}"><span class="prod-cod">${p.cod}</span><span><span class="est-nome">${p.nome}</span> ${lapisBtn}<br>${h}</span><input type="number" inputmode="numeric" min="0" placeholder="0" value="${v}" ${ed?'':'readonly style="background:var(--surface2);color:var(--text3)"'} oninput="setQtd(${p.cod},this.value)"></div>`;
+      const usaLote = ehItemLote(p.cod) && empUsaLote(empresaLanc);
+      if(usaLote){
+        const filled = somaLotes(empresaLanc,p.cod)>0;
+        html+=`<div class="est-row est-row-lote ${filled?'filled':''}" id="er-${p.cod}"><span class="prod-cod">${p.cod}</span><span><span class="est-nome">${p.nome}</span> ${lapisBtn}<br>${h}</span>${loteLinhasHTML(p.cod, ed)}</div>`;
+      } else {
+        html+=`<div class="est-row ${v?'filled':''}" id="er-${p.cod}"><span class="prod-cod">${p.cod}</span><span><span class="est-nome">${p.nome}</span> ${lapisBtn}<br>${h}</span><input type="number" inputmode="numeric" min="0" placeholder="0" value="${v}" ${ed?'':'readonly style="background:var(--surface2);color:var(--text3)"'} oninput="setQtd(${p.cod},this.value)"></div>`;
+      }
     });
     html+='</div></div>';
   });
@@ -2260,6 +2299,141 @@ function renderMaquinas(){
   });
   document.getElementById('maq-6x5').innerHTML=gaugeHTML('Empacotadeira 6X5', falta6, CAP_6X5, '1 conjunto');
   document.getElementById('maq-30x1').innerHTML=gaugeHTML('Empacotadeiras 30X1', falta30, CAP_30X1, '2 conjuntos');
+}
+
+// ===== CONTROLE DE LOTES DE ARROZ (MATRIZ e CEARÁ) =====
+// Estrutura: lotesEst[emp][cod] = [ {c:'110/26', q:700}, ... ]
+// A quantidade do item (estoque normal) passa a ser a SOMA dos lotes p/ itens de arroz.
+const LOTE_GRUPOS=['PARBO','BRANCO','INTEGRAL','MIX','CÃO'];
+const LOTE_EMPRESAS=['MATRIZ','CEARA'];
+let lotesEst={MATRIZ:{},CEARA:{}};
+const LOTES_KEY='controle_lotes_v1';
+
+function ehItemLote(cod){ const p=PMAP[cod]; return !!p && LOTE_GRUPOS.includes(p.tp) && !p.granel; }
+function empUsaLote(emp){ return LOTE_EMPRESAS.includes(emp); }
+function normLote(s){ return (s||'').trim().toUpperCase().replace(/\s+/g,''); }
+
+function saveLotes(){ try{ localStorage.setItem(LOTES_KEY,JSON.stringify(lotesEst)); }catch(e){} }
+function loadLotes(){
+  try{ const d=JSON.parse(localStorage.getItem(LOTES_KEY)||'null');
+    if(d){ lotesEst={MATRIZ:d.MATRIZ||{},CEARA:d.CEARA||{}}; } }catch(e){}
+}
+function adotarLotes(obj){
+  // last-write-wins por aparelho: adota o objeto vindo da nuvem inteiro se existir
+  if(obj&&typeof obj==='object'){
+    lotesEst={MATRIZ:obj.MATRIZ||{},CEARA:obj.CEARA||{}};
+    saveLotes();
+  }
+}
+function lotesDoItem(emp,cod){ return (lotesEst[emp]&&lotesEst[emp][cod])||[]; }
+function somaLotes(emp,cod){
+  const m={};
+  lotesDoItem(emp,cod).forEach(x=>{ const k=normLote(x.c); if(!k)return; m[k]=(m[k]||0)+(+x.q||0); });
+  return Object.values(m).reduce((a,b)=>a+b,0);
+}
+// agrupa por código normalizado e ordena por quantidade desc
+function lotesAgrupados(emp,cod){
+  const m={};
+  lotesDoItem(emp,cod).forEach(x=>{ const k=normLote(x.c); if(!k)return; m[k]=(m[k]||0)+(+x.q||0); });
+  return Object.entries(m).filter(([,q])=>q>0).sort((a,b)=>b[1]-a[1]);
+}
+
+// ---- edição dos lotes na linha do lançamento ----
+function loteAdd(cod){
+  const emp=empresaLanc;
+  lotesEst[emp]=lotesEst[emp]||{};
+  lotesEst[emp][cod]=lotesEst[emp][cod]||[];
+  lotesEst[emp][cod].push({c:'',q:''});
+  saveLotes(); renderGrupos();
+}
+function loteDel(cod,i){
+  const emp=empresaLanc, arr=lotesDoItem(emp,cod);
+  arr.splice(i,1);
+  if(!arr.length && lotesEst[emp]) delete lotesEst[emp][cod];
+  saveLotes(); renderGrupos();
+}
+function loteSetC(cod,i,v){
+  const emp=empresaLanc, arr=lotesDoItem(emp,cod);
+  if(arr[i]){ arr[i].c=v; saveLotes(); }   // código não re-renderiza (não perde foco)
+}
+function loteSetQ(cod,i,v){
+  const emp=empresaLanc, arr=lotesDoItem(emp,cod);
+  if(arr[i]){ arr[i].q=v; saveLotes(); }
+  // reflete a soma no estoque normal do item + atualiza a caixa da soma
+  const s=somaLotes(emp,cod);
+  const est=estoqueDe(emp); if(s>0) est[cod]=s; else delete est[cod];
+  const box=document.getElementById('lsoma-'+cod); if(box) box.textContent=s;
+  carimbarAtualizacao(emp); marcarPendenteEst(emp);
+  resumoEst();
+}
+// HTML dos lotes de um item (usado dentro de renderGrupos)
+function loteLinhasHTML(cod, ed){
+  const emp=empresaLanc;
+  const arr=lotesDoItem(emp,cod);
+  const s=somaLotes(emp,cod);
+  if(!ed){
+    // sem permissão de editar: mostra só a soma
+    return `<div class="lote-wrap"><div class="lote-soma-ro">${s||0}</div></div>`;
+  }
+  let linhas = arr.map((x,i)=>`
+    <div class="lote-line">
+      <input class="lote-cod" placeholder="110/26" value="${esc(x.c)}" oninput="loteSetC(${cod},${i},this.value)">
+      <input class="lote-q" type="number" inputmode="numeric" min="0" placeholder="qtd" value="${x.q}" oninput="loteSetQ(${cod},${i},this.value)">
+      <button class="lote-x" onclick="loteDel(${cod},${i})" title="remover lote">✕</button>
+    </div>`).join('');
+  return `<div class="lote-wrap">
+    ${linhas}
+    <button class="lote-addbtn" onclick="loteAdd(${cod})">＋ lote</button>
+    <div class="lote-soma">soma: <b id="lsoma-${cod}">${s}</b></div>
+  </div>`;
+}
+
+// ---- tela LOTES (consulta/faturamento) ----
+function renderLotes(){
+  const emp=val('lote-emp')||'MATRIZ';
+  const busca=(val('lote-busca')||'').toLowerCase();
+  const alvo=document.getElementById('lote-lista');
+  const itens=PRODUTOS.filter(p=>ehItemLote(p.cod) && (p.empresas||['MATRIZ']).includes(emp)
+      && (!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)))
+    .filter(p=>lotesDoItem(emp,p.cod).length>0)
+    .sort((a,b)=>a.nome.localeCompare(b.nome));
+  if(!itens.length){ alvo.innerHTML='<div class="empty">Nenhum item com lote lançado nesta empresa.</div>'; return; }
+  alvo.innerHTML=itens.map(p=>{
+    const g=lotesAgrupados(emp,p.cod);
+    if(!g.length) return '';
+    const [mc,mq]=g[0], outros=g.slice(1);
+    const empate=g.length>1 && g[1][1]===mq;
+    const soma=g.reduce((a,b)=>a+b[1],0);
+    const estNorm=estoqueDe(emp)[p.cod]||0;
+    return `<div class="card" style="padding:12px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
+      <div class="lote-maior"><span>🏷️ Lote ${esc(mc)}</span><span>${mq}</span></div>
+      ${empate?'<div class="lote-warn">⚠️ Empate na maior quantidade — confira qual lote usar.</div>':''}
+      ${outros.length?`<div class="lote-outros">outros: ${outros.map(([c,q])=>esc(c)+' ('+q+')').join(' · ')}</div>`:''}
+      ${soma!==estNorm?`<div class="lote-warn">Soma dos lotes (${soma}) ≠ estoque contado (${estNorm}).</div>`:''}
+    </div>`;
+  }).join('') || '<div class="empty">Nenhum item com lote lançado.</div>';
+}
+function exportarLotesCSV(){
+  const emp=val('lote-emp')||'MATRIZ';
+  const itens=PRODUTOS.filter(p=>ehItemLote(p.cod)&&lotesDoItem(emp,p.cod).length>0).sort((a,b)=>a.nome.localeCompare(b.nome));
+  if(!itens.length){ toast('Nada para exportar'); return; }
+  const cel=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const linhas=[['Codigo','Item','Maior lote','Qtd maior lote','Demais lotes','Soma dos lotes'].map(cel).join(';')];
+  itens.forEach(p=>{
+    const g=lotesAgrupados(emp,p.cod); if(!g.length)return;
+    const [mc,mq]=g[0];
+    const outros=g.slice(1).map(([c,q])=>c+' ('+q+')').join(' | ');
+    const soma=g.reduce((a,b)=>a+b[1],0);
+    linhas.push([p.cod,p.nome,mc,mq,outros,soma].map(cel).join(';'));
+  });
+  const blob=new Blob(['\ufeff'+linhas.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='lotes_'+emp+'_'+isoLocal(new Date())+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast('CSV gerado ✓');
 }
 
 // ===== CONCLUSÃO DA ATUALIZAÇÃO DE ESTOQUE =====
@@ -2730,7 +2904,7 @@ function sw(tab){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+tab).classList.add('active');
   window.scrollTo(0,0);
-  if(tab==='con')renderCon(); if(tab==='comercial')renderComercial(); if(tab==='dash')renderDash(); if(tab==='est')toggleEstView('visual'); if(tab==='terc')renderTerc();
+  if(tab==='con')renderCon(); if(tab==='lotes')renderLotes(); if(tab==='comercial')renderComercial(); if(tab==='dash')renderDash(); if(tab==='est')toggleEstView('visual'); if(tab==='terc')renderTerc();
 }
 function hoje(){ return new Date().toISOString().slice(0,10); }
 
@@ -2977,7 +3151,7 @@ function abrirApp(){
   aplicarPermissoes();
 }
 
-const TABS_ALL=['exp','est','con','comercial','dash','terc'];
+const TABS_ALL=['exp','est','lotes','con','comercial','dash','terc'];
 const TABS_PADRAO=['est','con'];   // telas padrão de um usuário comum
 function aplicarPermissoes(){
   if(!usuarioAtual) return;
@@ -3064,7 +3238,7 @@ function renderAdminUsers(){
   const users=loadUsers();
   const el=document.getElementById('admin-users-list');
   if(!users.length){el.innerHTML='<div class="empty">Nenhum usuário</div>';return;}
-  const TABS=[['exp','Cargas'],['est','Estoque'],['con','Programação'],['comercial','Agenda'],['dash','Painel'],['terc','Compras']];
+  const TABS=[['exp','Cargas'],['est','Estoque'],['lotes','Lotes'],['con','Programação'],['comercial','Agenda'],['dash','Painel'],['terc','Compras']];
   let html='';
   users.forEach(u=>{
     const isA=u.role==='admin';
@@ -3851,7 +4025,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
-loadAudit(); loadJustif(); loadConcluido(); loadPendPub();
+loadAudit(); loadJustif(); loadConcluido(); loadPendPub(); loadLotes();
 loadSnapTerc();
 loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
@@ -3870,7 +4044,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v81';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v82';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
