@@ -86,7 +86,16 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .lote-addbtn{border:1px dashed var(--blue,#1F4FB0);background:none;color:var(--blue,#1F4FB0);padding:6px;border-radius:var(--rmd);font-size:11.5px;font-weight:700;cursor:pointer;width:100%;font-family:inherit}
 .lote-soma{font-size:11px;color:var(--text2);text-align:right;margin-top:4px}
 .lote-soma-ro{padding:8px;border:1px solid #CBE0F5;border-radius:var(--rmd);background:#F2F8FF;font-weight:700;color:var(--blue,#1F4FB0);text-align:center;font-size:14px}
-.lote-bloco{margin-bottom:18px}
+.lote-bloco{margin-bottom:14px}
+.lote-bloco-tit{cursor:pointer;user-select:none}
+.lote-bloco-tit .chev{display:inline-block;transition:transform .15s;font-size:11px;color:var(--text3)}
+.lote-bloco-tit .chev.open{transform:rotate(90deg)}
+.lote-bloco-body{display:none}
+.lote-bloco-body.open{display:block}
+.lote-rec{margin-top:8px;padding:8px 10px;border-radius:var(--rmd);font-size:12.5px;line-height:1.5}
+.lote-rec.ok{background:#EEF7EE;border:1px solid #CBE5CC;color:var(--greenD,#1B5E20)}
+.lote-rec.falta{background:#FDECEC;border:1px solid #F3C6C6;color:var(--red)}
+.lote-rec.none{background:var(--surface2);color:var(--text3)}
 .lote-bloco-tit{position:sticky;top:0;background:var(--bg);padding:6px 0 8px;z-index:1;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
 .lote-maior{background:#E4F3E5;color:var(--green);border:1px solid #BFE0C0;border-radius:var(--rmd);padding:6px 10px;font-size:13px;font-weight:700;margin-top:6px;display:flex;justify-content:space-between}
 .lote-outros{font-size:11.5px;color:var(--text3);margin-top:5px;line-height:1.6}
@@ -845,6 +854,15 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <div class="fg" style="margin:0;flex:2;min-width:150px"><label>Buscar item</label>
         <input id="lote-busca" placeholder="nome ou código..." oninput="renderLotes()"></div>
     </div>
+    <div class="frow" style="align-items:flex-end;margin-top:8px">
+      <div class="fg" style="margin:0;flex:1;min-width:110px"><label>📅 Cargas de</label><input type="date" id="lote-ini" onchange="renderLotes()"></div>
+      <div class="fg" style="margin:0;flex:1;min-width:110px"><label>📅 até</label><input type="date" id="lote-fim" onchange="renderLotes()"></div>
+    </div>
+    <div class="frow" style="margin-top:8px">
+      <button class="btn btn-sm btn-primary" onclick="loteEstaSemana()">📆 Esta semana</button>
+      <button class="btn btn-sm" onclick="loteLimparPeriodo()">Sem período</button>
+    </div>
+    <div class="psub" style="margin:8px 0 0">Com um período escolhido, o app recomenda qual lote usar para cobrir a demanda das cargas daquele item.</div>
     <button class="btn btn-full" style="border-color:var(--blue);color:var(--blue);margin-top:10px" onclick="exportarLotesCSV()">⬇️ Baixar CSV</button>
   </div>
   <div id="lote-lista"></div>
@@ -2414,7 +2432,48 @@ function loteLinhasHTML(cod, ed){
 // valor usado para ordenar os itens dentro do bloco: quantidade do MAIOR lote
 function maiorLoteQtd(emp,cod){ const g=lotesAgrupados(emp,cod); return g.length?g[0][1]:0; }
 
-function cardLoteItem(emp,p){
+let lotesAbertos={};   // {PARBO:true,...} estado de colapso dos blocos
+function loteToggleBloco(tp){ lotesAbertos[tp]=!lotesAbertos[tp]; renderLotes(); }
+
+function loteEstaSemana(){
+  const d=new Date(), dow=d.getDay(), diff=(dow===0?-6:1-dow);
+  const seg=new Date(d); seg.setDate(d.getDate()+diff);
+  const sex=new Date(seg); sex.setDate(seg.getDate()+4);
+  const ei=document.getElementById('lote-ini'), ef=document.getElementById('lote-fim');
+  if(ei) ei.value=isoLocal(seg); if(ef) ef.value=isoLocal(sex);
+  renderLotes();
+}
+function loteLimparPeriodo(){
+  const ei=document.getElementById('lote-ini'), ef=document.getElementById('lote-fim');
+  if(ei) ei.value=''; if(ef) ef.value=''; renderLotes();
+}
+// demanda (fardos) de um item nas cargas do período — resolve aliases
+function demandaItem(cod, ini, fim){
+  let total=0; const detalhe=[];
+  cargas.forEach(c=>{
+    const d=c.data||''; if(!d) return;
+    if(ini && d<ini) return;
+    if(fim && d>fim) return;
+    (c.itens||[]).forEach(it=>{
+      const codEst=ALIAS_MAP[it.cod]||it.cod;
+      if(codEst===cod){ total+=(it.qtd||0); detalhe.push({num:c.num||'',data:d,qtd:it.qtd||0}); }
+    });
+  });
+  return {total, detalhe};
+}
+// recomenda quais lotes cobrem a demanda, começando do maior
+function recomendarLotes(g, demanda){
+  const plano=[]; let resta=demanda;
+  for(const [c,q] of g){
+    if(resta<=0) break;
+    const usa=Math.min(q, resta);
+    plano.push({lote:c, usa, disp:q});
+    resta-=usa;
+  }
+  return {plano, falta: Math.max(0,resta)};
+}
+
+function cardLoteItem(emp,p,ini,fim){
   const g=lotesAgrupados(emp,p.cod);
   const semCod = temLoteSemCodigo(emp,p.cod);
   const qSemCod = lotesDoItem(emp,p.cod).filter(x=>!normLote(x.c)).reduce((a,x)=>a+(+x.q||0),0);
@@ -2427,34 +2486,60 @@ function cardLoteItem(emp,p){
   }
   const [mc,mq]=g[0], outros=g.slice(1);
   const empate=g.length>1 && g[1][1]===mq;
+  const temPeriodo = !!(ini||fim);
+  let recHTML='';
+  if(temPeriodo){
+    const {total} = demandaItem(p.cod, ini, fim);
+    if(total>0){
+      const {plano,falta}=recomendarLotes(g,total);
+      if(plano.length===1 && !falta){
+        recHTML=`<div class="lote-rec ok">✅ Demanda de <b>${total}</b> nas cargas → usar <b>lote ${esc(plano[0].lote)}</b> (tem ${plano[0].disp}).</div>`;
+      } else if(!falta){
+        const seq=plano.map(x=>`${esc(x.lote)} (${x.usa})`).join(' + ');
+        recHTML=`<div class="lote-rec ok">✅ Demanda de <b>${total}</b> → usar ${seq}.</div>`;
+      } else {
+        const seq=plano.map(x=>`${esc(x.lote)} (${x.usa})`).join(' + ');
+        recHTML=`<div class="lote-rec falta">⚠️ Demanda de <b>${total}</b>. Lotes cobrem ${seq}. <b>Faltam ${falta}</b> — estoque insuficiente.</div>`;
+      }
+    } else {
+      recHTML=`<div class="lote-rec none">Sem cargas deste item no período.</div>`;
+    }
+  }
   return `<div class="card" style="padding:12px;margin-bottom:8px">
     <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
     <div class="lote-maior"><span>🏷️ Lote ${esc(mc)}</span><span>${mq}</span></div>
     ${empate?'<div class="lote-warn">⚠️ Empate na maior quantidade — confira qual lote usar.</div>':''}
     ${outros.length?`<div class="lote-outros">outros: ${outros.map(([c,q])=>esc(c)+' ('+q+')').join(' · ')}</div>`:''}
     ${semCod?`<div class="lote-warn">⚠️ ${qSemCod} ainda sem número de lote.</div>`:''}
+    ${recHTML}
   </div>`;
 }
 
 function renderLotes(){
   const emp=val('lote-emp')||'MATRIZ';
   const busca=(val('lote-busca')||'').toLowerCase();
+  const ini=val('lote-ini'), fim=val('lote-fim');
   const alvo=document.getElementById('lote-lista');
   const itens=PRODUTOS.filter(p=>ehItemLote(p.cod) && (p.empresas||['MATRIZ']).includes(emp)
       && (!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)))
     .filter(p=>lotesDoItem(emp,p.cod).length>0);
   if(!itens.length){ alvo.innerHTML='<div class="empty">Nenhum item com lote lançado nesta empresa.</div>'; return; }
-  // um bloco por grupo, na ordem definida; dentro do bloco, itens por maior lote (desc)
+  // um bloco (colapsável) por grupo; dentro do bloco, itens por maior lote (desc)
   let html='';
   LOTE_GRUPOS.forEach(tp=>{
     const doGrupo=itens.filter(p=>PMAP[p.cod] && PMAP[p.cod].tp===tp)
       .sort((a,b)=> maiorLoteQtd(emp,b.cod) - maiorLoteQtd(emp,a.cod) || a.nome.localeCompare(b.nome));
     if(!doGrupo.length) return;
-    const cards=doGrupo.map(p=>cardLoteItem(emp,p)).filter(Boolean).join('');
+    const cards=doGrupo.map(p=>cardLoteItem(emp,p,ini,fim)).filter(Boolean).join('');
     if(!cards) return;
+    const aberto = lotesAbertos[tp] || !!busca;   // busca força abrir
     html+=`<div class="lote-bloco">
-      <div class="lote-bloco-tit"><span class="badge ${TP_BADGE[tp]||''}">${tp}</span> <span style="color:var(--text3);font-size:12px;font-weight:400">${doGrupo.length} ${doGrupo.length===1?'item':'itens'}</span></div>
-      ${cards}
+      <div class="lote-bloco-tit" onclick="loteToggleBloco('${tp}')">
+        <span class="chev ${aberto?'open':''}">▶</span>
+        <span class="badge ${TP_BADGE[tp]||''}">${tp}</span>
+        <span style="color:var(--text3);font-size:12px;font-weight:400">${doGrupo.length} ${doGrupo.length===1?'item':'itens'}</span>
+      </div>
+      <div class="lote-bloco-body ${aberto?'open':''}">${cards}</div>
     </div>`;
   });
   alvo.innerHTML = html || '<div class="empty">Nenhum item com lote lançado.</div>';
@@ -4094,7 +4179,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v85';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v86';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
