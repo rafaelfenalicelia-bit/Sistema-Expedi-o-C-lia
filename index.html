@@ -78,7 +78,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .ov-pend.open{display:block}
 .est-row-lote{align-items:flex-start}
 .est-row-lote > span:nth-child(2){padding-top:2px}
-.lote-wrap{min-width:190px;max-width:230px}
+.lote-wrap{width:100%;max-width:250px}
 .lote-line{display:flex;gap:5px;margin-bottom:5px;align-items:center}
 .lote-cod{flex:1;min-width:0;padding:7px;border:1px solid var(--border);border-radius:var(--rmd);font-size:12.5px;font-family:inherit;text-transform:uppercase}
 .lote-q{width:62px;padding:7px;border:1px solid var(--border);border-radius:var(--rmd);font-size:12.5px;text-align:right;font-family:inherit}
@@ -142,6 +142,8 @@ input[readonly]{background:var(--surface2);color:var(--text2)}
 .grupo-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);cursor:pointer;gap:8px}
 .grupo-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
 .grupo-body{display:none}.grupo-body.open{display:block}
+.est-row.est-row-lote{grid-template-columns:46px 1fr;gap:8px 10px}
+.est-row.est-row-lote .lote-wrap{grid-column:1 / -1;max-width:none;margin-top:2px}
 .est-row{display:grid;grid-template-columns:54px 1fr 92px;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--border)}
 .est-row.filled{background:#FFF5F6}
 .est-row input{height:40px;text-align:center;padding:0 6px;font-size:16px}
@@ -165,6 +167,10 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .con-fardos b{font-size:17px;color:var(--text)}
 .legenda b{font-weight:700}
 .prog-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--rlg)}
+@media (min-width:760px){
+  .est-row.est-row-lote{grid-template-columns:46px minmax(120px,1fr) 260px}
+  .est-row.est-row-lote .lote-wrap{grid-column:auto;margin-top:0}
+}
 @media (min-width:760px){
   #screen-con .prog-wrap{ width:min(1120px,94vw); margin-left:50%; transform:translateX(-50%); }
 }
@@ -4044,7 +4050,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v82';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v83';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
