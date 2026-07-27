@@ -95,8 +95,11 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .lote-rec{margin-top:8px;padding:8px 10px;border-radius:var(--rmd);font-size:12.5px;line-height:1.5}
 .lote-rec.ok{background:#EEF7EE;border:1px solid #CBE5CC;color:var(--greenD,#1B5E20)}
 .lote-rec.falta{background:#FDECEC;border:1px solid #F3C6C6;color:var(--red)}
-.lote-cargas{margin-top:6px;font-size:12px;color:var(--text2);line-height:1.8}
-.lote-carga-chip{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:2px 9px;margin:1px 2px;white-space:nowrap}
+.lote-cargas{margin-top:8px;font-size:12.5px}
+.lote-cargas-tit{display:block;color:var(--text3);font-size:11px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:.02em}
+.lote-carga-linha{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--rmd);background:var(--surface);margin-bottom:4px}
+.lote-carga-nome{color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lote-carga-qtd{color:var(--text2);font-weight:700;flex:0 0 auto}
 .lote-rec.none{background:var(--surface2);color:var(--text3)}
 .lote-bloco-tit{position:sticky;top:0;background:var(--bg);padding:6px 0 8px;z-index:1;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
 .lote-maior{background:#E4F3E5;color:var(--green);border:1px solid #BFE0C0;border-radius:var(--rmd);padding:6px 10px;font-size:13px;font-weight:700;margin-top:6px;display:flex;justify-content:space-between}
@@ -2458,7 +2461,7 @@ function demandaItem(cod, ini, fim){
     if(fim && d>fim) return;
     (c.itens||[]).forEach(it=>{
       const codEst=ALIAS_MAP[it.cod]||it.cod;
-      if(codEst===cod){ total+=(it.qtd||0); detalhe.push({num:c.num||'',data:d,qtd:it.qtd||0}); }
+      if(codEst===cod){ total+=(it.qtd||0); detalhe.push({num:c.num||'',dest:c.nome||'',data:d,qtd:it.qtd||0}); }
     });
   });
   return {total, detalhe};
@@ -2492,12 +2495,15 @@ function cardLoteItem(emp,p,ini,fim){
   let recHTML='';
   if(temPeriodo){
     const {total, detalhe} = demandaItem(p.cod, ini, fim);
-    // consolida por carga (mesma carga pode ter o item em linhas repetidas)
+    // consolida por carga usando o DESTINO (nome); soma se o item repete na mesma carga
     const porCarga={};
-    detalhe.forEach(d=>{ const k=d.num||'(sem número)'; porCarga[k]=(porCarga[k]||0)+d.qtd; });
+    detalhe.forEach(d=>{
+      const nome=(d.dest&&d.dest.trim())||d.num||'(sem destino)';
+      porCarga[nome]=(porCarga[nome]||0)+d.qtd;
+    });
     const listaCargas=Object.entries(porCarga).sort((a,b)=>b[1]-a[1]);
     const cargasHTML = listaCargas.length
-      ? `<div class="lote-cargas">Cargas: ${listaCargas.map(([n,q])=>`<span class="lote-carga-chip">${esc(n)} <b>(${q})</b></span>`).join(' ')}</div>`
+      ? `<div class="lote-cargas"><span class="lote-cargas-tit">Cargas:</span>${listaCargas.map(([n,q])=>`<div class="lote-carga-linha"><span class="lote-carga-nome">${esc(n)}</span><span class="lote-carga-qtd">${q}</span></div>`).join('')}</div>`
       : '';
     if(total>0){
       const {plano,falta}=recomendarLotes(g,total);
@@ -4188,7 +4194,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v87';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v88';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
