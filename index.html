@@ -86,6 +86,8 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .lote-addbtn{border:1px dashed var(--blue,#1F4FB0);background:none;color:var(--blue,#1F4FB0);padding:6px;border-radius:var(--rmd);font-size:11.5px;font-weight:700;cursor:pointer;width:100%;font-family:inherit}
 .lote-soma{font-size:11px;color:var(--text2);text-align:right;margin-top:4px}
 .lote-soma-ro{padding:8px;border:1px solid #CBE0F5;border-radius:var(--rmd);background:#F2F8FF;font-weight:700;color:var(--blue,#1F4FB0);text-align:center;font-size:14px}
+.lote-bloco{margin-bottom:18px}
+.lote-bloco-tit{position:sticky;top:0;background:var(--bg);padding:6px 0 8px;z-index:1;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
 .lote-maior{background:#E4F3E5;color:var(--green);border:1px solid #BFE0C0;border-radius:var(--rmd);padding:6px 10px;font-size:13px;font-weight:700;margin-top:6px;display:flex;justify-content:space-between}
 .lote-outros{font-size:11.5px;color:var(--text3);margin-top:5px;line-height:1.6}
 .lote-warn{font-size:11.5px;color:var(--red);margin-top:5px;font-weight:600}
@@ -2409,50 +2411,71 @@ function loteLinhasHTML(cod, ed){
 }
 
 // ---- tela LOTES (consulta/faturamento) ----
+// valor usado para ordenar os itens dentro do bloco: quantidade do MAIOR lote
+function maiorLoteQtd(emp,cod){ const g=lotesAgrupados(emp,cod); return g.length?g[0][1]:0; }
+
+function cardLoteItem(emp,p){
+  const g=lotesAgrupados(emp,p.cod);
+  const semCod = temLoteSemCodigo(emp,p.cod);
+  const qSemCod = lotesDoItem(emp,p.cod).filter(x=>!normLote(x.c)).reduce((a,x)=>a+(+x.q||0),0);
+  if(!g.length){
+    if(qSemCod>0) return `<div class="card" style="padding:12px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
+      <div class="lote-warn">⚠️ ${qSemCod} em estoque sem número de lote informado. Preencha o lote na aba Estoque.</div>
+    </div>`;
+    return '';
+  }
+  const [mc,mq]=g[0], outros=g.slice(1);
+  const empate=g.length>1 && g[1][1]===mq;
+  return `<div class="card" style="padding:12px;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
+    <div class="lote-maior"><span>🏷️ Lote ${esc(mc)}</span><span>${mq}</span></div>
+    ${empate?'<div class="lote-warn">⚠️ Empate na maior quantidade — confira qual lote usar.</div>':''}
+    ${outros.length?`<div class="lote-outros">outros: ${outros.map(([c,q])=>esc(c)+' ('+q+')').join(' · ')}</div>`:''}
+    ${semCod?`<div class="lote-warn">⚠️ ${qSemCod} ainda sem número de lote.</div>`:''}
+  </div>`;
+}
+
 function renderLotes(){
   const emp=val('lote-emp')||'MATRIZ';
   const busca=(val('lote-busca')||'').toLowerCase();
   const alvo=document.getElementById('lote-lista');
   const itens=PRODUTOS.filter(p=>ehItemLote(p.cod) && (p.empresas||['MATRIZ']).includes(emp)
       && (!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)))
-    .filter(p=>lotesDoItem(emp,p.cod).length>0)
-    .sort((a,b)=>a.nome.localeCompare(b.nome));
+    .filter(p=>lotesDoItem(emp,p.cod).length>0);
   if(!itens.length){ alvo.innerHTML='<div class="empty">Nenhum item com lote lançado nesta empresa.</div>'; return; }
-  alvo.innerHTML=itens.map(p=>{
-    const g=lotesAgrupados(emp,p.cod);
-    const semCod = temLoteSemCodigo(emp,p.cod);
-    const qSemCod = lotesDoItem(emp,p.cod).filter(x=>!normLote(x.c)).reduce((a,x)=>a+(+x.q||0),0);
-    // item cuja quantidade ainda está toda num lote sem etiqueta
-    if(!g.length){
-      if(qSemCod>0) return `<div class="card" style="padding:12px;margin-bottom:8px">
-        <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
-        <div class="lote-warn">⚠️ ${qSemCod} em estoque sem número de lote informado. Preencha o lote na aba Estoque.</div>
-      </div>`;
-      return '';
-    }
-    const [mc,mq]=g[0], outros=g.slice(1);
-    const empate=g.length>1 && g[1][1]===mq;
-    return `<div class="card" style="padding:12px;margin-bottom:8px">
-      <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
-      <div class="lote-maior"><span>🏷️ Lote ${esc(mc)}</span><span>${mq}</span></div>
-      ${empate?'<div class="lote-warn">⚠️ Empate na maior quantidade — confira qual lote usar.</div>':''}
-      ${outros.length?`<div class="lote-outros">outros: ${outros.map(([c,q])=>esc(c)+' ('+q+')').join(' · ')}</div>`:''}
-      ${semCod?`<div class="lote-warn">⚠️ ${qSemCod} ainda sem número de lote.</div>`:''}
+  // um bloco por grupo, na ordem definida; dentro do bloco, itens por maior lote (desc)
+  let html='';
+  LOTE_GRUPOS.forEach(tp=>{
+    const doGrupo=itens.filter(p=>PMAP[p.cod] && PMAP[p.cod].tp===tp)
+      .sort((a,b)=> maiorLoteQtd(emp,b.cod) - maiorLoteQtd(emp,a.cod) || a.nome.localeCompare(b.nome));
+    if(!doGrupo.length) return;
+    const cards=doGrupo.map(p=>cardLoteItem(emp,p)).filter(Boolean).join('');
+    if(!cards) return;
+    html+=`<div class="lote-bloco">
+      <div class="lote-bloco-tit"><span class="badge ${TP_BADGE[tp]||''}">${tp}</span> <span style="color:var(--text3);font-size:12px;font-weight:400">${doGrupo.length} ${doGrupo.length===1?'item':'itens'}</span></div>
+      ${cards}
     </div>`;
-  }).join('') || '<div class="empty">Nenhum item com lote lançado.</div>';
+  });
+  alvo.innerHTML = html || '<div class="empty">Nenhum item com lote lançado.</div>';
 }
 function exportarLotesCSV(){
   const emp=val('lote-emp')||'MATRIZ';
-  const itens=PRODUTOS.filter(p=>ehItemLote(p.cod)&&lotesDoItem(emp,p.cod).length>0).sort((a,b)=>a.nome.localeCompare(b.nome));
-  if(!itens.length){ toast('Nada para exportar'); return; }
+  const base=PRODUTOS.filter(p=>ehItemLote(p.cod)&&lotesDoItem(emp,p.cod).length>0);
+  if(!base.length){ toast('Nada para exportar'); return; }
   const cel=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const linhas=[['Codigo','Item','Maior lote','Qtd maior lote','Demais lotes','Soma dos lotes'].map(cel).join(';')];
-  itens.forEach(p=>{
-    const g=lotesAgrupados(emp,p.cod); if(!g.length)return;
-    const [mc,mq]=g[0];
-    const outros=g.slice(1).map(([c,q])=>c+' ('+q+')').join(' | ');
-    const soma=g.reduce((a,b)=>a+b[1],0);
-    linhas.push([p.cod,p.nome,mc,mq,outros,soma].map(cel).join(';'));
+  const linhas=[['Grupo','Codigo','Item','Maior lote','Qtd maior lote','Demais lotes','Soma dos lotes'].map(cel).join(';')];
+  // mesma organização da tela: bloco por grupo, itens por maior lote (desc)
+  LOTE_GRUPOS.forEach(tp=>{
+    base.filter(p=>PMAP[p.cod]&&PMAP[p.cod].tp===tp)
+      .sort((a,b)=> maiorLoteQtd(emp,b.cod)-maiorLoteQtd(emp,a.cod) || a.nome.localeCompare(b.nome))
+      .forEach(p=>{
+        const g=lotesAgrupados(emp,p.cod); if(!g.length)return;
+        const [mc,mq]=g[0];
+        const outros=g.slice(1).map(([c,q])=>c+' ('+q+')').join(' | ');
+        const soma=g.reduce((a,b)=>a+b[1],0);
+        linhas.push([tp,p.cod,p.nome,mc,mq,outros,soma].map(cel).join(';'));
+      });
   });
   const blob=new Blob(['\ufeff'+linhas.join('\r\n')],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
@@ -4071,7 +4094,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v84';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v85';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
