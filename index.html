@@ -95,6 +95,8 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .lote-rec{margin-top:8px;padding:8px 10px;border-radius:var(--rmd);font-size:12.5px;line-height:1.5}
 .lote-rec.ok{background:#EEF7EE;border:1px solid #CBE5CC;color:var(--greenD,#1B5E20)}
 .lote-rec.falta{background:#FDECEC;border:1px solid #F3C6C6;color:var(--red)}
+.lote-cargas{margin-top:6px;font-size:12px;color:var(--text2);line-height:1.8}
+.lote-carga-chip{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:2px 9px;margin:1px 2px;white-space:nowrap}
 .lote-rec.none{background:var(--surface2);color:var(--text3)}
 .lote-bloco-tit{position:sticky;top:0;background:var(--bg);padding:6px 0 8px;z-index:1;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
 .lote-maior{background:#E4F3E5;color:var(--green);border:1px solid #BFE0C0;border-radius:var(--rmd);padding:6px 10px;font-size:13px;font-weight:700;margin-top:6px;display:flex;justify-content:space-between}
@@ -2489,17 +2491,24 @@ function cardLoteItem(emp,p,ini,fim){
   const temPeriodo = !!(ini||fim);
   let recHTML='';
   if(temPeriodo){
-    const {total} = demandaItem(p.cod, ini, fim);
+    const {total, detalhe} = demandaItem(p.cod, ini, fim);
+    // consolida por carga (mesma carga pode ter o item em linhas repetidas)
+    const porCarga={};
+    detalhe.forEach(d=>{ const k=d.num||'(sem número)'; porCarga[k]=(porCarga[k]||0)+d.qtd; });
+    const listaCargas=Object.entries(porCarga).sort((a,b)=>b[1]-a[1]);
+    const cargasHTML = listaCargas.length
+      ? `<div class="lote-cargas">Cargas: ${listaCargas.map(([n,q])=>`<span class="lote-carga-chip">${esc(n)} <b>(${q})</b></span>`).join(' ')}</div>`
+      : '';
     if(total>0){
       const {plano,falta}=recomendarLotes(g,total);
       if(plano.length===1 && !falta){
-        recHTML=`<div class="lote-rec ok">✅ Demanda de <b>${total}</b> nas cargas → usar <b>lote ${esc(plano[0].lote)}</b> (tem ${plano[0].disp}).</div>`;
+        recHTML=`<div class="lote-rec ok">✅ Demanda de <b>${total}</b> nas cargas → usar <b>lote ${esc(plano[0].lote)}</b> (tem ${plano[0].disp}).</div>${cargasHTML}`;
       } else if(!falta){
         const seq=plano.map(x=>`${esc(x.lote)} (${x.usa})`).join(' + ');
-        recHTML=`<div class="lote-rec ok">✅ Demanda de <b>${total}</b> → usar ${seq}.</div>`;
+        recHTML=`<div class="lote-rec ok">✅ Demanda de <b>${total}</b> → usar ${seq}.</div>${cargasHTML}`;
       } else {
         const seq=plano.map(x=>`${esc(x.lote)} (${x.usa})`).join(' + ');
-        recHTML=`<div class="lote-rec falta">⚠️ Demanda de <b>${total}</b>. Lotes cobrem ${seq}. <b>Faltam ${falta}</b> — estoque insuficiente.</div>`;
+        recHTML=`<div class="lote-rec falta">⚠️ Demanda de <b>${total}</b>. Lotes cobrem ${seq}. <b>Faltam ${falta}</b> — estoque insuficiente.</div>${cargasHTML}`;
       }
     } else {
       recHTML=`<div class="lote-rec none">Sem cargas deste item no período.</div>`;
@@ -4179,7 +4188,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v86';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v87';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
