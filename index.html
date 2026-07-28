@@ -2381,24 +2381,41 @@ function loteAdd(cod){
   saveLotes(); renderGrupos();
 }
 function loteDel(cod,i){
+  if(!podeEditarEstoque()){ toast('Você não tem permissão para editar o estoque'); return; }
   const emp=empresaLanc, arr=lotesDoItem(emp,cod);
   arr.splice(i,1);
   if(!arr.length && lotesEst[emp]) delete lotesEst[emp][cod];
-  saveLotes(); renderGrupos();
+  saveLotes();
+  // a remoção muda a soma: atualiza o estoque do item e envia
+  const s=somaLotes(emp,cod);
+  const est=estoqueDe(emp); if(s>0) est[cod]=s; else delete est[cod];
+  carimbarAtualizacao(emp); marcarPendenteEst(emp); resumoEst();
+  if(emp==='MATRIZ') saveAll(); else salvarEstEmp();
+  renderGrupos();
 }
+let _loteCTimer=null;
 function loteSetC(cod,i,v){
   const emp=empresaLanc, arr=lotesDoItem(emp,cod);
   if(arr[i]){ arr[i].c=v; saveLotes(); }   // código não re-renderiza (não perde foco)
+  marcarPendenteEst(emp);
+  // trava o pull JÁ (não só quando o envio sai), senão um pull nesta janela reverte o lote
+  if(API_URL){ pushPendente=true; pushPendenteDesde=Date.now();
+    clearTimeout(_loteCTimer); _loteCTimer=setTimeout(()=>pushMeta(),700); }
 }
 function loteSetQ(cod,i,v){
+  if(!podeEditarEstoque()){ toast('Você não tem permissão para editar o estoque'); return; }
   const emp=empresaLanc, arr=lotesDoItem(emp,cod);
   if(arr[i]){ arr[i].q=v; saveLotes(); }
-  // reflete a soma no estoque normal do item + atualiza a caixa da soma
+  // a quantidade do item de arroz É a soma dos lotes: reflete no estoque
   const s=somaLotes(emp,cod);
   const est=estoqueDe(emp); if(s>0) est[cod]=s; else delete est[cod];
   const box=document.getElementById('lsoma-'+cod); if(box) box.textContent=s;
+  ultimaEdicao=Date.now();
   carimbarAtualizacao(emp); marcarPendenteEst(emp);
+  registrarAcao('atualizou o estoque da '+nomeEmpresa(emp).toUpperCase());
   resumoEst();
+  // PERSISTE E ENVIA (igual ao setQtd normal) — sem isto, a contagem se perde no próximo pull
+  if(emp==='MATRIZ') saveAll(); else salvarEstEmp();
 }
 // HTML dos lotes de um item (usado dentro de renderGrupos)
 function loteLinhasHTML(cod, ed){
@@ -4194,7 +4211,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v88';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v89';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
