@@ -86,6 +86,29 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .lote-addbtn{border:1px dashed var(--blue,#1F4FB0);background:none;color:var(--blue,#1F4FB0);padding:6px;border-radius:var(--rmd);font-size:11.5px;font-weight:700;cursor:pointer;width:100%;font-family:inherit}
 .lote-soma{font-size:11px;color:var(--text2);text-align:right;margin-top:4px}
 .lote-soma-ro{padding:8px;border:1px solid #CBE0F5;border-radius:var(--rmd);background:#F2F8FF;font-weight:700;color:var(--blue,#1F4FB0);text-align:center;font-size:14px}
+.baixa-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.baixa-h b{font-size:14px}
+.baixa-reset{font-size:11px;color:var(--blue,#1F4FB0);background:none;border:0;cursor:pointer;font-family:inherit;text-decoration:underline}
+.baixa-resumo{font-size:12px;color:var(--text2);margin-top:8px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between}
+.baixa-resumo b{color:var(--red)}
+.cg-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:var(--rmd);margin-bottom:6px;cursor:pointer}
+.cg-item.on{background:#EEF7EE;border-color:#BFE0C0}
+.cg-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--text3);flex:0 0 auto;display:grid;place-items:center;font-size:13px;color:#fff}
+.cg-item.on .cg-check{background:var(--green);border-color:var(--green)}
+.cg-dest{flex:1;font-size:13px;font-weight:600}
+.cg-dest small{display:block;color:var(--text3);font-weight:400;font-size:11px}
+.proj-wrap{margin-top:9px;padding:10px;background:var(--surface2);border-radius:var(--rmd)}
+.proj-tit{font-size:11px;font-weight:700;color:var(--red);margin-bottom:7px}
+.proj-linha{display:flex;align-items:center;gap:9px;padding:3px 0}
+.proj-cod{font-size:11.5px;font-weight:600;width:60px}
+.proj-barra{flex:1;height:7px;background:#DDD3D3;border-radius:99px;overflow:hidden}
+.proj-barra i{display:block;height:100%;background:var(--green);border-radius:99px}
+.proj-nums{font-size:11px;font-variant-numeric:tabular-nums;width:110px;text-align:right;color:var(--text2)}
+.proj-nums b{color:var(--text)}
+.proj-baix{color:var(--red)}
+.proj-tot{display:flex;justify-content:space-between;font-size:12px;margin-top:7px;padding-top:7px;border-top:1px solid var(--border);font-weight:700}
+.proj-zero{color:var(--red)}
+.proj-falta{font-size:10px;background:var(--redXL,#FDF0F2);color:var(--red);padding:2px 6px;border-radius:5px}
 .lote-bloco{margin-bottom:14px}
 .lote-bloco-tit{cursor:pointer;user-select:none}
 .lote-bloco-tit .chev{display:inline-block;transition:transform .15s;font-size:11px;color:var(--text3)}
@@ -1287,6 +1310,7 @@ function pushMeta(){
     concluidoEmp: concluidoEmp,
     pendPubEmp: pendPubEmp,
     lotesEst: lotesEst,
+    baixaCargas: baixaCargas,
     audit: auditLog,
     justif: justificativas,
     snapTerc: snapTerc,
@@ -1336,6 +1360,7 @@ function pull(silencioso, forcar){
         if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
         if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
         if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
+        if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1408,6 +1433,7 @@ function sincronizarInicial(){
         if(d.meta.concluidoEmp) adotarConcluido(d.meta.concluidoEmp);
         if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
         if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
+        if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1424,7 +1450,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -2537,13 +2563,123 @@ function cardLoteItem(emp,p,ini,fim){
       recHTML=`<div class="lote-rec none">Sem cargas deste item no período.</div>`;
     }
   }
+  // saldo projetado: se há cargas marcadas como saídas hoje, mostra o que sobra
+  const baix=baixadoDoItem(emp,p.cod);
+  let projHTML='';
+  if(baix>0){
+    const {out,falta}=projetarLotes(emp,p.cod);
+    const totResta=out.reduce((a,l)=>a+l.resta,0);
+    const totOrig=out.reduce((a,l)=>a+l.orig,0);
+    const linhas=out.map(l=>{
+      const pct=l.orig?l.resta/l.orig*100:0;
+      return `<div class="proj-linha">
+        <span class="proj-cod">${esc(l.c)}</span>
+        <span class="proj-barra"><i style="width:${pct}%"></i></span>
+        <span class="proj-nums">${l.baixado>0?`<span class="proj-baix">−${l.baixado}</span> · `:''}<b>${l.resta}</b>/${l.orig}</span>
+      </div>`;
+    }).join('');
+    projHTML=`<div class="proj-wrap">
+      <div class="proj-tit">📉 Saldo após ${baix} já baixado hoje</div>
+      ${linhas}
+      <div class="proj-tot"><span>Sobra p/ próximas cargas</span><span class="${totResta===0?'proj-zero':''}"><b>${totResta}</b>/${totOrig}${falta>0?` <span class="proj-falta">faltam ${falta}</span>`:''}</span></div>
+    </div>`;
+  }
   return `<div class="card" style="padding:12px;margin-bottom:8px">
     <div style="font-size:13px;font-weight:700">${p.cod} · ${esc(p.nome)}</div>
     <div class="lote-maior"><span>🏷️ Lote ${esc(mc)}</span><span>${mq}</span></div>
     ${empate?'<div class="lote-warn">⚠️ Empate na maior quantidade — confira qual lote usar.</div>':''}
     ${outros.length?`<div class="lote-outros">outros: ${outros.map(([c,q])=>esc(c)+' ('+q+')').join(' · ')}</div>`:''}
     ${semCod?`<div class="lote-warn">⚠️ ${qSemCod} ainda sem número de lote.</div>`:''}
+    ${projHTML}
     ${recHTML}
+  </div>`;
+}
+
+// ===== BAIXA DE CARGAS (saldo projetado na aba Lotes) =====
+// ISOLADO do estoque real: marcar carga NÃO altera estoqueQtd nem lotesEst.
+// Guarda { data:'YYYY-MM-DD', ids:{idCarga:true} } — vale só para o dia; vira o dia, recomeça.
+let baixaCargas={data:'', ids:{}};
+const BAIXA_KEY='controle_baixa_v1';
+
+function saveBaixa(){ try{ localStorage.setItem(BAIXA_KEY,JSON.stringify(baixaCargas)); }catch(e){} }
+function loadBaixa(){
+  try{ const d=JSON.parse(localStorage.getItem(BAIXA_KEY)||'null'); if(d&&d.ids) baixaCargas=d; }catch(e){}
+  garantirDiaBaixa();
+}
+// se a data guardada não é hoje, zera (recomeça a cada dia)
+function garantirDiaBaixa(){
+  const hoje=isoLocal(new Date());
+  if(baixaCargas.data!==hoje){ baixaCargas={data:hoje, ids:{}}; saveBaixa(); }
+}
+function adotarBaixa(obj){
+  if(!obj||typeof obj!=='object') return;
+  const hoje=isoLocal(new Date());
+  // só adota se for do dia de hoje; baixa de ontem é ignorada
+  if(obj.data===hoje){
+    baixaCargas={data:hoje, ids:Object.assign({}, obj.ids||{}, baixaCargas.data===hoje?baixaCargas.ids:{})};
+    saveBaixa();
+  }
+}
+// cargas de HOJE que contêm algum item de lote da empresa
+function cargasDoDiaLote(emp){
+  const hoje=isoLocal(new Date());
+  return cargas.filter(c=>{
+    if((c.data||'')!==hoje) return false;
+    return (c.itens||[]).some(it=>{ const cod=ALIAS_MAP[it.cod]||it.cod; return ehItemLote(cod) && (PMAP[cod]&&(PMAP[cod].empresas||['MATRIZ']).includes(emp)); });
+  });
+}
+// total já baixado de um item (soma das cargas marcadas como saíram)
+function baixadoDoItem(emp,cod){
+  const hoje=isoLocal(new Date());
+  let t=0;
+  cargas.forEach(c=>{
+    if((c.data||'')!==hoje) return;
+    if(!baixaCargas.ids[c.id]) return;
+    (c.itens||[]).forEach(it=>{ const codEst=ALIAS_MAP[it.cod]||it.cod; if(codEst===cod) t+=(it.qtd||0); });
+  });
+  return t;
+}
+// projeta os lotes após a baixa: esvazia o MAIOR lote primeiro
+function projetarLotes(emp,cod){
+  const base=lotesAgrupados(emp,cod).map(([c,q])=>({c,q}));  // já vem ordenado desc
+  let baixa=baixadoDoItem(emp,cod);
+  const out=base.map(l=>{ const tira=Math.min(l.q,baixa); baixa-=tira; return {c:l.c,orig:l.q,baixado:tira,resta:l.q-tira}; });
+  return {out, falta:Math.max(0,baixa)};
+}
+function toggleBaixa(id){
+  garantirDiaBaixa();
+  if(baixaCargas.ids[id]) delete baixaCargas.ids[id]; else baixaCargas.ids[id]=true;
+  saveBaixa();
+  if(API_URL) pushMeta();
+  renderLotes();
+}
+function limparBaixa(){
+  garantirDiaBaixa();
+  baixaCargas.ids={}; saveBaixa();
+  if(API_URL) pushMeta();
+  renderLotes();
+}
+// painel de cargas do dia (HTML)
+function painelBaixaHTML(emp){
+  const lista=cargasDoDiaLote(emp);
+  if(!lista.length) return '<div class="empty" style="padding:14px">Nenhuma carga de hoje com itens de lote.</div>';
+  const marcadas=lista.filter(c=>baixaCargas.ids[c.id]).length;
+  let totB=0;
+  lista.forEach(c=>{ if(baixaCargas.ids[c.id]) (c.itens||[]).forEach(it=>{ const cod=ALIAS_MAP[it.cod]||it.cod; if(ehItemLote(cod)) totB+=(it.qtd||0); }); });
+  const linhas=lista.map(c=>{
+    const on=!!baixaCargas.ids[c.id];
+    const itensTxt=(c.itens||[]).filter(it=>ehItemLote(ALIAS_MAP[it.cod]||it.cod))
+      .map(it=>{ const cod=ALIAS_MAP[it.cod]||it.cod; const p=PMAP[cod]; return (p?p.nome.replace(/^CELIA /,''):cod)+' '+(it.qtd||0); }).join(' · ');
+    return `<div class="cg-item ${on?'on':''}" onclick="toggleBaixa('${c.id}')">
+      <div class="cg-check">${on?'✓':''}</div>
+      <div class="cg-dest">${esc(c.nome||'(sem destino)')}<small>${esc(itensTxt)}</small></div>
+    </div>`;
+  }).join('');
+  return `<div class="card" style="padding:13px;margin-bottom:14px">
+    <div class="baixa-h"><b>🚚 Cargas de hoje</b>
+      <span style="font-size:11px;color:var(--text3)">${marcadas} de ${lista.length} já saíram · <button class="baixa-reset" onclick="limparBaixa()">limpar</button></span></div>
+    ${linhas}
+    <div class="baixa-resumo"><span>Total já baixado hoje</span><b>${totB.toLocaleString('pt-BR')} fardos</b></div>
   </div>`;
 }
 
@@ -2555,9 +2691,9 @@ function renderLotes(){
   const itens=PRODUTOS.filter(p=>ehItemLote(p.cod) && (p.empresas||['MATRIZ']).includes(emp)
       && (!busca||p.nome.toLowerCase().includes(busca)||String(p.cod).includes(busca)))
     .filter(p=>lotesDoItem(emp,p.cod).length>0);
-  if(!itens.length){ alvo.innerHTML='<div class="empty">Nenhum item com lote lançado nesta empresa.</div>'; return; }
+  if(!itens.length){ alvo.innerHTML=painelBaixaHTML(emp)+'<div class="empty">Nenhum item com lote lançado nesta empresa.</div>'; return; }
   // um bloco (colapsável) por grupo; dentro do bloco, itens por maior lote (desc)
-  let html='';
+  let html=painelBaixaHTML(emp);
   LOTE_GRUPOS.forEach(tp=>{
     const doGrupo=itens.filter(p=>PMAP[p.cod] && PMAP[p.cod].tp===tp)
       .sort((a,b)=> maiorLoteQtd(emp,b.cod) - maiorLoteQtd(emp,a.cod) || a.nome.localeCompare(b.nome));
@@ -4192,7 +4328,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
-loadAudit(); loadJustif(); loadConcluido(); loadPendPub(); loadLotes();
+loadAudit(); loadJustif(); loadConcluido(); loadPendPub(); loadLotes(); loadBaixa();
 loadSnapTerc();
 loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
@@ -4211,7 +4347,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v89';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v90';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
