@@ -867,6 +867,20 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div style="overflow:auto;border:1px solid var(--border);border-radius:var(--rlg);background:var(--surface)">
       <table class="ins-tbl"><thead id="ins-head"></thead><tbody id="ins-body"></tbody></table>
     </div>
+    <div class="card" id="ins-obs-card" style="margin-top:14px;padding:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+        <span style="font-size:13px;font-weight:700">📝 Observações do período</span>
+        <span id="ins-obs-per" style="font-size:11px;color:var(--text3)"></span>
+      </div>
+      <div id="ins-obs-edit" style="display:none">
+        <textarea id="ins-obs-txt" style="width:100%;min-height:90px;padding:11px;border:1px solid var(--border);border-radius:var(--rmd);font-size:13px;font-family:inherit;line-height:1.5;resize:vertical" placeholder="Anote a programação do período, prioridades, avisos para a produção..." oninput="insObsDigitou()"></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+          <span id="ins-obs-status" style="font-size:11px;color:var(--text3)"></span>
+          <button class="btn btn-sm btn-primary" onclick="salvarInsObs()">Salvar observação</button>
+        </div>
+      </div>
+      <div id="ins-obs-view" style="white-space:pre-wrap;font-size:13px;line-height:1.55;padding:11px;background:var(--surface2);border-radius:var(--rmd);min-height:44px"></div>
+    </div>
   </div>
 </div>
 
@@ -1311,6 +1325,7 @@ function pushMeta(){
     pendPubEmp: pendPubEmp,
     lotesEst: lotesEst,
     baixaCargas: baixaCargas,
+    insObs: insObs,
     audit: auditLog,
     justif: justificativas,
     snapTerc: snapTerc,
@@ -1361,6 +1376,7 @@ function pull(silencioso, forcar){
         if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
         if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
         if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
+        if(d.meta.insObs) adotarInsObs(d.meta.insObs);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1434,6 +1450,7 @@ function sincronizarInicial(){
         if(d.meta.pendPubEmp) adotarPendPub(d.meta.pendPubEmp);
         if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
         if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
+        if(d.meta.insObs) adotarInsObs(d.meta.insObs);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1450,7 +1467,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,insObs:insObs,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -1884,6 +1901,67 @@ function toggleEstView(modo){
   if(modo==='insumos') renderInsumos();
 }
 
+// ===== OBSERVAÇÕES DO RESUMO DE INSUMOS (por período, compartilhada, só admin edita) =====
+let insObs={};   // { "ini__fim": "texto" }
+const INS_OBS_KEY='controle_ins_obs_v1';
+function saveInsObs(){ try{ localStorage.setItem(INS_OBS_KEY,JSON.stringify(insObs)); }catch(e){} }
+function loadInsObs(){ try{ const d=JSON.parse(localStorage.getItem(INS_OBS_KEY)||'null'); if(d) insObs=d; }catch(e){} }
+function adotarInsObs(obj){
+  if(!obj||typeof obj!=='object') return;
+  // merge: mantém as chaves locais e adota as da nuvem (nuvem vence em conflito de chave)
+  insObs=Object.assign({}, insObs, obj);
+  saveInsObs();
+}
+function insObsChave(){ return (val('ins-ini')||'')+'__'+(val('ins-fim')||''); }
+function insObsPeriodoTxt(){
+  const i=(val('ins-ini')||'').split('-'), f=(val('ins-fim')||'').split('-');
+  if(i.length<3&&f.length<3) return 'todos os períodos';
+  const a=i.length===3?`${i[2]}/${i[1]}`:'início';
+  const b=f.length===3?`${f[2]}/${f[1]}`:'fim';
+  return `${a} a ${b}`;
+}
+let _insObsDirty=false;
+function renderInsObs(){
+  const ehAdmin = usuarioAtual && usuarioAtual.role==='admin';
+  const chave=insObsChave();
+  const txt=insObs[chave]||'';
+  const per=document.getElementById('ins-obs-per'); if(per) per.textContent=insObsPeriodoTxt();
+  const edit=document.getElementById('ins-obs-edit');
+  const view=document.getElementById('ins-obs-view');
+  if(!edit||!view) return;
+  if(ehAdmin){
+    edit.style.display='';
+    view.style.display='none';
+    const ta=document.getElementById('ins-obs-txt');
+    if(ta && document.activeElement!==ta){ ta.value=txt; }
+    _insObsDirty=false;
+    const st=document.getElementById('ins-obs-status');
+    if(st){ st.textContent = txt?'Salvo':'Sem observação para este período'; st.style.color = txt?'var(--green)':'var(--text3)'; }
+  } else {
+    edit.style.display='none';
+    view.style.display='';
+    if(txt){ view.textContent=txt; view.style.color='var(--text)'; view.style.fontStyle='normal'; }
+    else { view.textContent='Nenhuma observação para este período.'; view.style.color='var(--text3)'; view.style.fontStyle='italic'; }
+  }
+}
+function insObsDigitou(){
+  _insObsDirty=true;
+  const st=document.getElementById('ins-obs-status');
+  if(st){ st.textContent='Não salvo — toque em Salvar'; st.style.color='var(--text3)'; }
+}
+function salvarInsObs(){
+  if(!(usuarioAtual && usuarioAtual.role==='admin')) return;
+  const chave=insObsChave();
+  const t=(val('ins-obs-txt')||'').trim();
+  if(t) insObs[chave]=t; else delete insObs[chave];
+  saveInsObs();
+  if(API_URL) pushMeta();
+  _insObsDirty=false;
+  const st=document.getElementById('ins-obs-status');
+  if(st){ st.textContent='Salvo ✓'; st.style.color='var(--green)'; }
+  toast('Observação salva ✓');
+}
+
 // ===== Resumo de Insumos (parbo/polido/integral, normal x especial, MIX dividido) =====
 function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function insumosEstaSemana(){
@@ -1956,6 +2034,7 @@ function renderInsumos(){
     });
   });
   document.getElementById('ins-body').innerHTML=body;
+  renderInsObs();
 }
 
 // Grupos que aparecem no painel visual e suas cores/títulos
@@ -4328,7 +4407,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
-loadAudit(); loadJustif(); loadConcluido(); loadPendPub(); loadLotes(); loadBaixa();
+loadAudit(); loadJustif(); loadConcluido(); loadPendPub(); loadLotes(); loadBaixa(); loadInsObs();
 loadSnapTerc();
 loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
@@ -4347,7 +4426,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v90';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v91';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
