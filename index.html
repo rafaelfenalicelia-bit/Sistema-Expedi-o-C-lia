@@ -243,6 +243,17 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .fardos-badge{background:var(--redXL);color:var(--red);font-weight:700;padding:4px 12px;border-radius:999px;font-size:13px;white-space:nowrap;border:1px solid var(--redL)}
 .resumo-tot{display:flex;justify-content:space-between;align-items:center;padding:12px 0 2px;font-weight:700;font-size:15px;border-top:2px solid var(--border2);margin-top:6px}
 .maq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.maq-grid-3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:640px){.maq-grid-3{grid-template-columns:1fr}}
+.maq-cap-edit{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2,rgba(0,0,0,.06))}
+.maq-cap-edit label{display:block;font-size:10px;color:var(--text3);margin-bottom:3px}
+.maq-cap-edit input{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;text-align:center;font-family:inherit;font-variant-numeric:tabular-nums}
+.maq-resumo{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.maq-resumo-tit{font-size:12px;font-weight:700;margin-bottom:9px}
+.maq-resumo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.maq-rz{background:var(--surface2);border-radius:var(--rmd);padding:9px;text-align:center}
+.mz-l{display:block;font-size:11px;color:var(--text2);font-weight:700;margin-bottom:3px}
+.mz-v{display:block;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
 .maq-box{text-align:center;border:1px solid var(--border);border-radius:var(--rlg);padding:12px 8px}
 .maq-titulo{font-size:13px;font-weight:700;margin-bottom:2px}
 .maq-sub{font-size:10px;color:var(--text2);margin-bottom:10px;line-height:1.3}
@@ -999,10 +1010,12 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <div class="card" id="maq-card" style="display:none">
     <div class="ctitle">🏭 Ocupação das máquinas (falta produzir)</div>
     <div class="psub" style="margin-bottom:12px">Quanto ainda falta empacotar hoje (programado − pronto no estoque) frente à capacidade de cada conjunto.</div>
-    <div class="maq-grid">
+    <div class="maq-grid maq-grid-3">
       <div class="maq-box" id="maq-6x5"></div>
       <div class="maq-box" id="maq-30x1"></div>
+      <div class="maq-box" id="maq-10x1"></div>
     </div>
+    <div class="maq-resumo" id="maq-resumo"></div>
   </div>
   <div class="card">
     <div class="ctitle">📊 Estoque × A carregar</div>
@@ -1325,6 +1338,7 @@ function pushMeta(){
     lotesEst: lotesEst,
     baixaCargas: baixaCargas,
     insObs: insObsTexto,
+    capMaq: capMaq,
     audit: auditLog,
     justif: justificativas,
     snapTerc: snapTerc,
@@ -1376,6 +1390,7 @@ function pull(silencioso, forcar){
         if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
         if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
         if(d.meta.insObs) adotarInsObs(d.meta.insObs);
+        if(d.meta.capMaq) adotarCapMaq(d.meta.capMaq);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1450,6 +1465,7 @@ function sincronizarInicial(){
         if(d.meta.lotesEst) adotarLotes(d.meta.lotesEst);
         if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
         if(d.meta.insObs) adotarInsObs(d.meta.insObs);
+        if(d.meta.capMaq) adotarCapMaq(d.meta.capMaq);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1466,7 +1482,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,insObs:insObsTexto,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,insObs:insObsTexto,capMaq:capMaq,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -2398,8 +2414,28 @@ function renderDash(){
 
 // ===== Ocupação de máquinas =====
 // Capacidades (fardos/dia) — ajuste aqui se mudar:
-const CAP_6X5 = 3800;   // 1 conjunto empacotando fardos 6X5
-const CAP_30X1 = 4000;  // 2 conjuntos juntos empacotando fardos 30X1
+// Capacidade das máquinas: FONTE ÚNICA, salva e sincronizada.
+// (a aba Agenda/comercial passa a ler daqui via capMaquinas())
+const CAP_PADRAO = {'6X5':3800, '30X1':4000, '10X1':3000};
+let capMaq = {...CAP_PADRAO};
+const CAP_KEY='controle_cap_maq_v1';
+function saveCapMaq(){ try{ localStorage.setItem(CAP_KEY,JSON.stringify(capMaq)); }catch(e){} }
+function loadCapMaq(){
+  try{ const d=JSON.parse(localStorage.getItem(CAP_KEY)||'null'); if(d) capMaq={'6X5':+d['6X5']||CAP_PADRAO['6X5'],'30X1':+d['30X1']||CAP_PADRAO['30X1'],'10X1':+d['10X1']||CAP_PADRAO['10X1']}; }catch(e){}
+}
+function adotarCapMaq(obj){ if(obj&&typeof obj==='object'){ capMaq={'6X5':+obj['6X5']||CAP_PADRAO['6X5'],'30X1':+obj['30X1']||CAP_PADRAO['30X1'],'10X1':+obj['10X1']||CAP_PADRAO['10X1']}; saveCapMaq(); } }
+// compat: código antigo que usava CAP_6X5/CAP_30X1
+function CAP_6X5_(){ return capMaq['6X5']; }
+function CAP_30X1_(){ return capMaq['30X1']; }
+function setCapMaq(maq,v){
+  capMaq[maq]=+v||0; saveCapMaq();
+  if(API_URL) pushMeta();
+  renderMaquinas();
+  // reflete na aba comercial se estiver aberta
+  const c6=document.getElementById('cm-cap6'); if(c6&&document.activeElement!==c6) c6.value=capMaq['6X5'];
+  const c30=document.getElementById('cm-cap30'); if(c30&&document.activeElement!==c30) c30.value=capMaq['30X1'];
+  const c10=document.getElementById('cm-cap10'); if(c10&&document.activeElement!==c10) c10.value=capMaq['10X1'];
+}
 let maqVisivel = false;
 function toggleMaq(){
   maqVisivel=!maqVisivel;
@@ -2407,23 +2443,44 @@ function toggleMaq(){
   document.getElementById('btn-maq').textContent=maqVisivel?'🏭 Ocultar ocupação de máquinas':'🏭 Ocupação de máquinas';
   if(maqVisivel) renderMaquinas();
 }
+// qual máquina empacota o produto
+function maqDoProduto(p){
+  if(!p||!p.nome) return null;
+  if(/10X1/i.test(p.nome)) return '10X1';
+  if(/6X5/i.test(p.nome))  return '6X5';
+  if(/30X1/i.test(p.nome)) return '30X1';
+  return null;
+}
 function renderMaquinas(){
   if(!maqVisivel) return;
   const ini=val('d-ini'), fim=val('d-fim');
   const cf=cargas.filter(c=>{ const d=c.data||''; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
   const prog={};
   cf.forEach(c=>c.itens.forEach(it=>{ prog[it.cod]=(prog[it.cod]||0)+it.qtd; }));
-  let falta6=0, falta30=0;
+  // FALTA PRODUZIR (medidores): programado − estoque
+  let falta={'6X5':0,'30X1':0,'10X1':0};
+  // TOTAL PROGRAMADO (resumo): sem descontar estoque
+  let progM={'6X5':0,'30X1':0,'10X1':0};
   Object.keys(prog).forEach(cod=>{
     const p=PMAP[cod]; if(!p) return;
+    const m=maqDoProduto(p); if(!m) return;
+    progM[m]+=prog[cod];
     const est=estoqueQtd[cod]||0;
-    const falta=Math.max(0, prog[cod]-est);
-    if(falta<=0) return;
-    if(/6X5/i.test(p.nome)) falta6+=falta;
-    else if(/30X1/i.test(p.nome)) falta30+=falta;
+    const f=Math.max(0, prog[cod]-est);
+    if(f>0) falta[m]+=f;
   });
-  document.getElementById('maq-6x5').innerHTML=gaugeHTML('Empacotadeira 6X5', falta6, CAP_6X5, '1 conjunto');
-  document.getElementById('maq-30x1').innerHTML=gaugeHTML('Empacotadeiras 30X1', falta30, CAP_30X1, '2 conjuntos');
+  document.getElementById('maq-6x5').innerHTML=gaugeHTML('Empacotadeira 6X5', falta['6X5'], capMaq['6X5'], '1 conjunto', '6X5');
+  document.getElementById('maq-30x1').innerHTML=gaugeHTML('Empacotadeiras 30X1', falta['30X1'], capMaq['30X1'], '2 conjuntos', '30X1');
+  document.getElementById('maq-10x1').innerHTML=gaugeHTML('Empacotadeira 10X1', falta['10X1'], capMaq['10X1'], '1 conjunto', '10X1');
+  // resumo por data: total PROGRAMADO de cada máquina
+  const periodo = (ini||fim) ? ((ini||'…')+' a '+(fim||'…')) : 'todo o período';
+  document.getElementById('maq-resumo').innerHTML=`
+    <div class="maq-resumo-tit">📋 Fardos programados no período <span style="color:var(--text3);font-weight:400">(${periodo})</span></div>
+    <div class="maq-resumo-grid">
+      <div class="maq-rz"><span class="mz-l">6X5</span><span class="mz-v">${fmtFardos(progM['6X5'])}</span></div>
+      <div class="maq-rz"><span class="mz-l">30X1</span><span class="mz-v">${fmtFardos(progM['30X1'])}</span></div>
+      <div class="maq-rz"><span class="mz-l">10X1</span><span class="mz-v">${fmtFardos(progM['10X1'])}</span></div>
+    </div>`;
 }
 
 // ===== CONTROLE DE LOTES DE ARROZ (MATRIZ e CEARÁ) =====
@@ -3073,7 +3130,9 @@ function exportarJustifCSV(){
 
 // ===== AGENDA COMERCIAL (calendário de brechas) =====
 const CM_TIPOS_ARROZ = ['PARBO','BRANCO','INTEGRAL','MIX','CÃO'];
-const CM_CAPS_PADRAO = {'6X5':CAP_6X5, '30X1':CAP_30X1, '10X1':3000, arroz:150000};
+const CM_CAPS_PADRAO = {'6X5':3800, '30X1':4000, '10X1':3000, arroz:150000};
+// as capacidades de máquina vêm da FONTE ÚNICA (capMaq); só arroz é próprio da aba
+function cmCapMaqBase(m){ return (typeof capMaq!=='undefined' && capMaq[m]) ? capMaq[m] : CM_CAPS_PADRAO[m]; }
 let cmView='mes';
 let cmRef=new Date();
 
@@ -3081,15 +3140,22 @@ function cmCaps(){
   let s={};
   try{ s=JSON.parse(localStorage.getItem('cm_caps')||'{}')||{}; }catch(e){ s={}; }
   return {
-    '6X5':  +(s['6X5']  ?? CM_CAPS_PADRAO['6X5']),
-    '30X1': +(s['30X1'] ?? CM_CAPS_PADRAO['30X1']),
-    '10X1': +(s['10X1'] ?? CM_CAPS_PADRAO['10X1']),
+    '6X5':  cmCapMaqBase('6X5'),
+    '30X1': cmCapMaqBase('30X1'),
+    '10X1': cmCapMaqBase('10X1'),
     arroz:  +(s.arroz   ?? CM_CAPS_PADRAO.arroz)
   };
 }
 function cmSalvarCaps(){
-  const c={'6X5':+val('cm-cap6')||0,'30X1':+val('cm-cap30')||0,'10X1':+val('cm-cap10')||0,arroz:+val('cm-caparroz')||0};
-  try{ localStorage.setItem('cm_caps', JSON.stringify(c)); }catch(e){}
+  // máquinas vão para a fonte única; arroz fica local na aba
+  if(typeof setCapMaq==='function'){
+    setCapMaq('6X5', +val('cm-cap6')||0);
+    setCapMaq('30X1', +val('cm-cap30')||0);
+    setCapMaq('10X1', +val('cm-cap10')||0);
+  }
+  let s={}; try{ s=JSON.parse(localStorage.getItem('cm_caps')||'{}')||{}; }catch(e){}
+  s.arroz=+val('cm-caparroz')||0;
+  try{ localStorage.setItem('cm_caps', JSON.stringify(s)); }catch(e){}
   renderComercial();
 }
 // qual máquina empacota o produto (mesma dedução do Painel, + 10X1)
@@ -3258,16 +3324,19 @@ function renderComercial(){
   }
 }
 
-function gaugeHTML(titulo, falta, cap, sub){
+function gaugeHTML(titulo, falta, cap, sub, maqKey){
   const pct = cap>0 ? (falta/cap*100) : 0;
   const ring = Math.min(100, pct);
   let cor='var(--green)';
   if(pct>100) cor='var(--red)'; else if(pct>=80) cor='#C77700';
   const aviso = pct>100 ? '<div style="font-size:11px;color:var(--red);font-weight:700;margin-top:4px">⚠ acima da capacidade</div>'
             : (falta===0 ? '<div style="font-size:11px;color:var(--green);font-weight:700;margin-top:4px">✓ nada pendente</div>' : '');
-  return `<div class="maq-titulo">${titulo}</div><div class="maq-sub">${sub} · cap. ${cap.toLocaleString('pt-BR')} fardos/dia</div>
+  const campoCap = maqKey ? `<div class="maq-cap-edit"><label>capacidade (fardos/dia)</label>
+    <input type="number" min="0" value="${cap}" onchange="setCapMaq('${maqKey}',this.value)" onclick="event.stopPropagation()"></div>` : '';
+  return `<div class="maq-titulo">${titulo}</div><div class="maq-sub">${sub}</div>
     <div class="gauge" style="--p:${ring};--c:${cor}"><span class="g-val">${Math.round(pct)}%</span></div>
-    <div class="maq-info">falta produzir<br><b>${fmtFardos(falta)}</b> de ${cap.toLocaleString('pt-BR')} fardos</div>${aviso}`;
+    <div class="maq-info">falta produzir<br><b>${fmtFardos(falta)}</b> de ${cap.toLocaleString('pt-BR')} fardos</div>${aviso}
+    ${campoCap}`;
 }
 function sw(tab){
   if(tab!=='est' && estPendenteAlguma()){ abrirAvisoPend(); return; }
@@ -4396,7 +4465,7 @@ loadTerc();
 loadEstEmp();
 loadDataEmp();
 loadAtualizado();
-loadAudit(); loadJustif(); loadConcluido(); loadPendPub(); loadLotes(); loadBaixa(); loadInsObs();
+loadAudit(); loadJustif(); loadConcluido(); loadPendPub(); loadLotes(); loadBaixa(); loadInsObs(); loadCapMaq();
 loadSnapTerc();
 loadCargasDel();
 // migra a data única (se existir) para a MATRIZ e reflete no campo
@@ -4415,7 +4484,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v92';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v93';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
