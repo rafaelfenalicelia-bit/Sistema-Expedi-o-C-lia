@@ -329,6 +329,16 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .est-vis-tbl td.td-nome{font-size:12px;font-weight:500;white-space:nowrap}
 .est-vis-tbl td.td-fat{text-align:right;font-weight:700;color:#9B0B22}
 .df-tbl{border-collapse:collapse;width:100%;min-width:520px}
+.df-chk{width:36px;text-align:center!important}
+.df-tbl td.df-chk input{width:17px;height:17px;accent-color:var(--red);cursor:pointer}
+.df-tbl tbody tr.df-selrow{background:#FDECEF!important}
+.df-selbar{position:sticky;top:0;z-index:6;background:var(--redD,#9B0B22);color:#fff;padding:9px 12px;border-radius:var(--rmd);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.df-selcnt{font-size:12px;font-weight:600}
+.df-selmini{background:rgba(255,255,255,.16);border:0;color:#fff;padding:4px 9px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-left:6px}
+.df-seltot{display:flex;gap:18px}
+.df-seltot>div{text-align:right}
+.df-sl{display:block;font-size:9px;opacity:.85;text-transform:uppercase;letter-spacing:.03em}
+.df-sv{display:block;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
 .df-tbl thead th{background:#141414;color:#fff;font-size:10px;text-transform:uppercase;padding:8px 6px;text-align:center;white-space:nowrap;border-right:1px solid #333}
 .df-tbl th.df-desc{text-align:left}
 .df-tbl td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -2266,20 +2276,27 @@ function buildFardosTable(cargasPeriodo){
   linhas.sort((a,b)=>{ const ra=ORD_GRUPO[a.tp]!=null?ORD_GRUPO[a.tp]:50, rb=ORD_GRUPO[b.tp]!=null?ORD_GRUPO[b.tp]:50; if(ra!==rb)return ra-rb; return (a.nome||'').localeCompare(b.nome||''); });
   const un=(v,g)=> (Math.round(v)).toLocaleString('pt-BR')+(g?' kg':'');
   let tCar=0,tEst=0,tFalta=0,tKg=0, corpo='';
+  let idx=0;
   linhas.forEach(l=>{
     tCar+=l.aCar; tEst+=l.est; tFalta+=l.falta; tKg+=l.faltaKg;
+    const podeSel = l.falta>0;
+    const chkCell = podeSel
+      ? `<td class="df-chk"><input type="checkbox" class="df-sel" data-fardos="${l.falta}" data-kg="${l.faltaKg}" onchange="somarFardSel()"></td>`
+      : '<td class="df-chk"></td>';
     corpo+=`<tr>
+      ${chkCell}
       <td class="df-desc">${esc(l.nome)}</td>
       <td>${un(l.aCar,l.granel)}</td>
       <td>${un(l.est,l.granel)}</td>
       <td class="${l.falta>0?'df-falta':'df-ok'}">${l.falta>0?un(l.falta,l.granel):'—'}</td>
       <td class="df-kg">${l.faltaKg>0?fmtKg(l.faltaKg):'—'}</td>
     </tr>`;
+    idx++;
   });
   return linhas.length
-    ? `<table class="df-tbl"><thead><tr><th class="df-desc">Descrição</th><th>A carregar</th><th>Em estoque</th><th>Falta produzir</th><th>Falta (kg)</th></tr></thead>
+    ? `<table class="df-tbl"><thead><tr><th class="df-chk">✓</th><th class="df-desc">Descrição</th><th>A carregar</th><th>Em estoque</th><th>Falta produzir</th><th>Falta (kg)</th></tr></thead>
        <tbody>${corpo}</tbody>
-       <tfoot><tr><td class="df-desc">TOTAL</td><td>${un(tCar)}</td><td>${un(tEst)}</td><td class="df-falta">${un(tFalta)}</td><td class="df-kg">${fmtKg(tKg)}</td></tr></tfoot></table>`
+       <tfoot><tr><td class="df-chk"></td><td class="df-desc">TOTAL</td><td>${un(tCar)}</td><td>${un(tEst)}</td><td class="df-falta">${un(tFalta)}</td><td class="df-kg">${fmtKg(tKg)}</td></tr></tfoot></table>`
     : '<div class="empty">Nada programado no período</div>';
 }
 // abre a tabela de fardos num modal, usando o período filtrado da Agenda
@@ -2300,11 +2317,34 @@ function abrirFardosAgenda(){
         <button class="btn btn-sm" onclick="fecharFardosAgenda()">Fechar</button>
       </div>
     </div>
+    <div class="df-selbar" id="df-selbar">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="df-selcnt"><b id="df-nsel">0</b> selecionados</span>
+        <button class="df-selmini" onclick="fardSelTodos()">marcar todos</button>
+        <button class="df-selmini" onclick="fardSelLimpar()">limpar</button>
+      </div>
+      <div class="df-seltot">
+        <div><span class="df-sl">Fardos (falta)</span><span class="df-sv" id="df-tfardos">0</span></div>
+        <div><span class="df-sl">Total kg</span><span class="df-sv" id="df-tkg">0 kg</span></div>
+      </div>
+    </div>
     <div style="overflow:auto" id="fard-print">${html}</div>
-    <div class="psub" style="margin-top:8px">Estoque considerado: MATRIZ. Falta (kg) = falta × peso do fardo (granel já em kg).</div>
+    <div class="psub" style="margin-top:8px">Estoque considerado: MATRIZ. Falta (kg) = falta × peso do fardo (granel já em kg). Marque linhas para somar um subtotal.</div>
   </div>`;
   ov.style.display='flex';
+  somarFardSel();
 }
+function somarFardSel(){
+  const chks=document.querySelectorAll('.df-sel');
+  let f=0,k=0,n=0;
+  chks.forEach(ch=>{ if(ch.checked){ f+=+ch.dataset.fardos||0; k+=+ch.dataset.kg||0; n++; }
+    const tr=ch.closest('tr'); if(tr) tr.classList.toggle('df-selrow', ch.checked); });
+  const nf=document.getElementById('df-nsel'); if(nf) nf.textContent=n;
+  const tf=document.getElementById('df-tfardos'); if(tf) tf.textContent=Math.round(f).toLocaleString('pt-BR');
+  const tk=document.getElementById('df-tkg'); if(tk) tk.textContent=fmtKg(k);
+}
+function fardSelTodos(){ document.querySelectorAll('.df-sel').forEach(ch=>ch.checked=true); somarFardSel(); }
+function fardSelLimpar(){ document.querySelectorAll('.df-sel').forEach(ch=>ch.checked=false); somarFardSel(); }
 function imprimirFardos(){
   const tbl=document.getElementById('fard-print'); if(!tbl) return;
   const ini=val('con-ini'), fim=val('con-fim');
@@ -2321,6 +2361,8 @@ function imprimirFardos(){
       th{background:#eee}
       th:first-child,td:first-child{text-align:left}
       tfoot td{font-weight:bold;background:#f2f2f2}
+      .df-chk{display:none}
+      th.df-chk,td.df-chk{display:none}
       @media print{ @page{ margin:14mm } }
     </style></head><body>
     <h1>Estoque × A carregar (fardos)</h1>
@@ -4484,7 +4526,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v93';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v94';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
