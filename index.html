@@ -2057,7 +2057,7 @@ const VIS_GRUPOS = [
   {tp:'PARBO',   label:'PARBOILIZADO MARCA PRÓPRIA', cls:'g-parbo'},
   {tp:'BRANCO',  label:'POLIDO MARCA PRÓPRIA',       cls:'g-branco'},
   {tp:'GRANEL',  label:'ARROZ A GRANEL',             cls:'g-granel'},
-  {tp:'CÃO',     label:'MARCA TERCEIROS',            cls:'g-cao'},
+  {tp:'CÃO',     label:'ARROZ CÃO',                  cls:'g-cao'},
   {tp:'INTEGRAL',label:'INTEGRAL',                   cls:'g-integral'},
   {tp:'FARINHA', label:'FARINHAS E TAPIOCA',         cls:'g-farinha'},
   {tp:'TAPIOCA', label:'FARINHAS E TAPIOCA',         cls:'g-farinha'},
@@ -4526,7 +4526,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v94';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v95';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
