@@ -161,6 +161,11 @@ input[readonly]{background:var(--surface2);color:var(--text2)}
 .prod-cod{font-size:11px;color:var(--text3)}
 .peso-prev{font-size:12px;color:var(--text2);margin-top:8px;min-height:16px}
 .nome-found{color:var(--red);font-weight:600}.nome-err{color:#C62828}
+.carga-card.arrastavel{cursor:default}
+.carga-card.arrastando{opacity:.5;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.carga-card.drop-alvo{border-top:3px solid var(--red)}
+.drag-alca{cursor:grab;color:var(--text3);font-size:16px;margin-right:6px;user-select:none;letter-spacing:-2px}
+.drag-alca:active{cursor:grabbing}
 .carga-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .carga-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px}
 .carga-num{font-size:15px;font-weight:700;color:var(--red)}
@@ -415,7 +420,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .bi-add-float{position:sticky;bottom:0;background:var(--surface);padding:12px 0 4px;margin-top:8px}
 .user-menu-overlay{position:fixed;inset:0;z-index:149;display:none}
 .user-menu-overlay.open{display:block}
-.user-dropdown{position:absolute;top:52px;right:12px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:150;min-width:200px;overflow:hidden;display:none;flex-direction:column}
+.user-dropdown{position:fixed;top:52px;right:12px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:150;min-width:200px;overflow:hidden;display:none;flex-direction:column}
 .user-dropdown.open{display:flex}
 .user-dd-header{padding:12px 14px;background:var(--surface2);border-bottom:1px solid var(--border)}
 .user-dd-name{font-size:14px;font-weight:700}
@@ -763,8 +768,8 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     </label>
     <div class="ctitle" style="margin-top:6px">Adicionar item por código</div>
     <div class="item-add">
-      <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="c-cod" placeholder="ex: 5" oninput="lookupCarga()"></div>
-      <div class="fg"><label>Qtd</label><input type="number" inputmode="numeric" id="c-qtd" placeholder="0" oninput="calcPesoPrev()"></div>
+      <div class="fg"><label>Código</label><input type="number" inputmode="numeric" id="c-cod" placeholder="ex: 5" oninput="lookupCarga()" onkeydown="codEnter(event)"></div>
+      <div class="fg"><label>Qtd</label><input type="number" inputmode="numeric" id="c-qtd" placeholder="0" oninput="calcPesoPrev()" onkeydown="qtdEnter(event)"></div>
       <div class="fg full"><label>Produto</label><input id="c-prod" readonly placeholder="— digite o código —"></div>
     </div>
     <div class="peso-prev" id="peso-prev"></div>
@@ -1525,6 +1530,15 @@ function calcPesoPrev(){
   else if(p&&p.peso>0&&q>0){ const t=(p.peso*q).toFixed(2).replace(/\.00$/,''); el.innerHTML=`<span class="badge ${TP_BADGE[p.tp]}">${p.tp}</span> ${q} × ${p.peso}kg = <b>${t}kg</b>`; }
   else { el.textContent=''; }
 }
+// Enter no campo Código pula para Qtd; Enter na Qtd adiciona o item.
+function codEnter(ev){
+  if(ev.key==='Enter'){ ev.preventDefault();
+    const qtd=document.getElementById('c-qtd'); if(qtd) qtd.focus();
+  }
+}
+function qtdEnter(ev){
+  if(ev.key==='Enter'){ ev.preventDefault(); addItem(); }  // não deixa o Enter salvar a carga
+}
 function addItem(){
   const cod=document.getElementById('c-cod').value, q=parseFloat(document.getElementById('c-qtd').value);
   if(!cod){ toast('Digite o código'); return; }
@@ -1602,16 +1616,41 @@ function consolidarItens(itens){
   const mapa = {};
   itens.forEach(it => {
     const emp = it.empresa||'MATRIZ';
-    const key = emp+'|'+it.cod;
+    // resolve alias: um produto lançado por códigos diferentes (real + alias) é o MESMO item
+    const codReal = ALIAS_MAP[it.cod] || it.cod;
+    const key = emp+'|'+codReal;
     if(mapa[key]){
-      mapa[key].qtd  += it.qtd;
-      mapa[key].peso += it.peso;
+      mapa[key].qtd  += (it.qtd||0);
+      mapa[key].peso += (it.peso||0);
     } else {
-      mapa[key] = {...it, empresa:emp};
+      // guarda com o código REAL e o nome do produto real (não o do alias, se houver)
+      const nomeReal = (typeof PMAP!=='undefined' && PMAP[codReal] && PMAP[codReal].nome) ? PMAP[codReal].nome : it.nome;
+      mapa[key] = {...it, cod:codReal, nome:nomeReal, empresa:emp};
     }
   });
   return Object.values(mapa);
 }
+
+// Consolidação para o RESUMO DA PROGRAMAÇÃO: junta itens iguais mesmo de empresas
+// diferentes (para a expedição não importa a empresa; importa o total do produto).
+function consolidarItensSemEmpresa(itens){
+  const mapa = {};
+  itens.forEach(it => {
+    const codReal = ALIAS_MAP[it.cod] || it.cod;   // resolve alias
+    const key = String(codReal);                     // agrupa SÓ por produto, ignora empresa
+    if(mapa[key]){
+      mapa[key].qtd  += (it.qtd||0);
+      mapa[key].peso += (it.peso||0);
+    } else {
+      const p = (typeof PMAP!=='undefined') ? PMAP[codReal] : null;
+      const nomeReal = (p && p.nome) ? p.nome : it.nome;
+      const tpReal = (p && p.tp) ? p.tp : it.tp;   // tp da fonte (itens da nuvem vêm sem tp)
+      mapa[key] = {...it, cod:codReal, nome:nomeReal, tp:tpReal};
+    }
+  });
+  return Object.values(mapa);
+}
+
 // Ordena com os arrozes primeiro (parbo, branco, integral, mix, granel) e o resto depois
 const ORD_GRUPO = {PARBO:1, BRANCO:2, INTEGRAL:3, MIX:4, GRANEL:5};
 function ordenarItens(itens){
@@ -1624,12 +1663,17 @@ function ordenarItens(itens){
 }
 function rankEmp(e){ const i=EMPRESAS.indexOf(e||'MATRIZ'); return i<0?99:i; }
 // ordena por empresa e, dentro dela, arroz primeiro
+// Ordem do RESUMO DA PROGRAMAÇÃO: arrozes primeiro, terceirizados por último.
+const ORD_PROG = {PARBO:1, BRANCO:2, INTEGRAL:3, MIX:4, 'CÃO':5, CAO:5, GRANEL:6,
+                  BATATA:20, FARINHA:21, TAPIOCA:22, FECULA:23};
+function rankProg(tp){
+  if(ORD_PROG[tp]!=null) return ORD_PROG[tp];
+  // qualquer terceirizado não listado ainda vai para o fim
+  return (typeof GRUPOS_TERC!=='undefined' && GRUPOS_TERC.includes(tp)) ? 30 : 10;
+}
 function ordenarItensEmp(itens){
   return itens.slice().sort((a,b)=>{
-    const ea=rankEmp(a.empresa), eb=rankEmp(b.empresa);
-    if(ea!==eb) return ea-eb;
-    const ra=ORD_GRUPO[a.tp]!=null?ORD_GRUPO[a.tp]:50;
-    const rb=ORD_GRUPO[b.tp]!=null?ORD_GRUPO[b.tp]:50;
+    const ra=rankProg(a.tp), rb=rankProg(b.tp);
     if(ra!==rb) return ra-rb;
     return (a.nome||'').localeCompare(b.nome||'');
   });
@@ -1673,8 +1717,21 @@ function renderCargas(){
   if(!cargas.length){ el.innerHTML='<div class="empty">Nenhuma carga lançada</div>'; return; }
   const fData=(document.getElementById('cl-data')||{}).value||'';
   const fBusca=((document.getElementById('cl-busca')||{}).value||'').trim().toLowerCase();
-  // mais recém lançadas primeiro (última adicionada no topo)
-  let ord=cargas.map((c,i)=>({c,i})).sort((a,b)=>b.i-a.i);
+  // ordem: se a carga tem 'ordem' manual, usa; senão mais recém lançada primeiro.
+  // Dentro da mesma data, respeita a ordem manual definida por arrastar.
+  const ehAdmin = usuarioAtual && usuarioAtual.role==='admin';
+  let ord=cargas.map((c,i)=>({c,i})).sort((a,b)=>{
+    // agrupa por data desc (mais recente primeiro), como antes
+    const da=a.c.data||'', db=b.c.data||'';
+    if(da!==db) return db.localeCompare(da);
+    // dentro da mesma data: ordem manual, senão índice desc
+    const oa=(typeof a.c.ordem==='number')?a.c.ordem:null;
+    const ob=(typeof b.c.ordem==='number')?b.c.ordem:null;
+    if(oa!=null && ob!=null) return oa-ob;
+    if(oa!=null) return -1;
+    if(ob!=null) return 1;
+    return b.i-a.i;
+  });
   if(fData) ord=ord.filter(({c})=>c.data===fData);
   if(fBusca){
     const termos=fBusca.split(/\s+/).filter(Boolean);
@@ -1707,11 +1764,55 @@ function renderCargas(){
     } else {
       corpo=ordenarItens(cons).map(x=>`<tr><td class="prod-cod">${x.cod}</td><td>${x.nome}</td><td>${x.granel?x.qtd+'kg':x.qtd}</td></tr>`).join('');
     }
-    return `<div class="carga-card"><div class="carga-head"><span class="carga-num">${c.num}</span><span class="carga-dest">${c.nome}</span>${c.especial?'<span class="esp-badge">🌟 ESPECIAL</span>':''}<span class="date-badge">${fmtData(c.data)}</span></div>
+    const dragAttrs = ehAdmin ? `draggable="true" ondragstart="cargaDragStart(event,${i})" ondragover="cargaDragOver(event,${i})" ondrop="cargaDrop(event,${i})" ondragend="cargaDragEnd(event)" data-cidx="${i}" data-cdata="${c.data||''}"` : '';
+    const alca = ehAdmin ? '<span class="drag-alca" title="Arraste para reordenar">⠿</span>' : '';
+    return `<div class="carga-card${ehAdmin?' arrastavel':''}" ${dragAttrs}><div class="carga-head">${alca}<span class="carga-num">${c.num}</span><span class="carga-dest">${c.nome}</span>${c.especial?'<span class="esp-badge">🌟 ESPECIAL</span>':''}<span class="date-badge">${fmtData(c.data)}</span></div>
     <table class="tbl"><thead><tr><th>Cód</th><th>Produto</th><th>Qtd</th></tr></thead><tbody>${corpo}</tbody></table>
     ${c.obs?`<div style="font-size:12px;color:#C0392B;font-weight:600;margin-top:8px">📝 ${esc(c.obs)}</div>`:''}
     <div class="btn-row"><button class="btn btn-edit btn-sm" style="flex:1" onclick="entrarEdicao(${i})">✏️ Editar</button><button class="btn btn-danger btn-sm" style="flex:1" onclick="remCarga(${i})">🗑 Excluir</button>${tot>0?`<span class="badge b-gray" style="align-self:center">${tot.toFixed(0)}kg</span>`:''}</div></div>`;
   }).join('');
+}
+// ---- arrastar e soltar cards de carga (admin, mesma data) ----
+let _dragCargaIdx=null;
+function cargaDragStart(ev,i){
+  _dragCargaIdx=i;
+  ev.dataTransfer.effectAllowed='move';
+  try{ ev.dataTransfer.setData('text/plain',String(i)); }catch(e){}
+  const card=ev.target.closest('.carga-card'); if(card) card.classList.add('arrastando');
+}
+function cargaDragOver(ev,i){
+  if(_dragCargaIdx===null) return;
+  // só permite soltar entre cargas da MESMA data
+  if((cargas[_dragCargaIdx]||{}).data !== (cargas[i]||{}).data) return;
+  ev.preventDefault(); ev.dataTransfer.dropEffect='move';
+  const card=ev.target.closest('.carga-card');
+  document.querySelectorAll('.carga-card.drop-alvo').forEach(el=>el.classList.remove('drop-alvo'));
+  if(card && i!==_dragCargaIdx) card.classList.add('drop-alvo');
+}
+function cargaDragEnd(ev){
+  document.querySelectorAll('.carga-card.arrastando,.carga-card.drop-alvo').forEach(el=>el.classList.remove('arrastando','drop-alvo'));
+}
+function cargaDrop(ev,destIdx){
+  ev.preventDefault();
+  const origIdx=_dragCargaIdx; _dragCargaIdx=null;
+  cargaDragEnd(ev);
+  if(origIdx===null || origIdx===destIdx) return;
+  const dataAlvo=(cargas[origIdx]||{}).data;
+  if(dataAlvo !== (cargas[destIdx]||{}).data) return;   // segurança: só mesma data
+  // pega os índices das cargas dessa data, NA ORDEM ATUAL DE EXIBIÇÃO
+  const exib=[...document.querySelectorAll('.carga-card')]
+    .map(el=>+el.getAttribute('data-cidx'))
+    .filter(idx=>!isNaN(idx) && (cargas[idx]||{}).data===dataAlvo);
+  const from=exib.indexOf(origIdx), to=exib.indexOf(destIdx);
+  if(from<0||to<0) return;
+  exib.splice(to,0, exib.splice(from,1)[0]);   // move na lista de exibição
+  // grava 'ordem' sequencial em cada carga dessa data
+  exib.forEach((idx,pos)=>{ if(cargas[idx]) cargas[idx].ordem=pos; });
+  ultimaEdicao=Date.now();
+  cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
+  saveAll();
+  renderCargas();
+  toast('Ordem atualizada ✓');
 }
 async function remCarga(i){
   const c=cargas[i];
@@ -2203,7 +2304,7 @@ function renderCon(){
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   let rows='', gi=0;
   ord.forEach(c=>{
-    const cons=consolidarItens(c.itens);
+    const cons=consolidarItensSemEmpresa(c.itens);
     const itensDisp=ordenarItensEmp(cons);
     const n=itensDisp.length||1;
     const alt=gi%2===1?' pg-alt':'';
@@ -2234,7 +2335,8 @@ function renderCon(){
         rows+=`<td rowspan="${n}" class="pg-merge">${diaSemana(c.data)}</td>`;
         rows+=`<td rowspan="${n}" class="pg-dest">${esc(c.nome)}</td>`;
       }
-      rows+=`<td class="pg-desc">${esc(it.nome)}${aliasLabel}</td>`;
+      const nomeReal = (PMAP[codEst] && PMAP[codEst].nome) ? PMAP[codEst].nome : it.nome;
+      rows+=`<td class="pg-desc">${esc(nomeReal)}${aliasLabel}</td>`;
       rows+=`<td class="pg-qtd ${cobre?'pg-ok':'pg-falta'}">${it.qtd}${it.granel?' kg':''}</td>`;
       if(i===0){ rows+=`<td rowspan="${n}" class="pg-obs">${obsCell}</td>`; }
       rows+='</tr>';
@@ -4526,7 +4628,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v95';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v99';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');

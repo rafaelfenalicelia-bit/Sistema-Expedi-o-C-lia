@@ -2,7 +2,7 @@
    Atualização automática + funcionamento offline (reserva).
    O número da VERSAO é trocado a cada atualização do app — é isso
    que faz os aparelhos perceberem que saiu versão nova. */
-const VERSAO = 'v95';
+const VERSAO = 'v99';
 const CACHE = 'expedicao-' + VERSAO;
 const ESSENCIAIS = ['./', 'index.html', 'manifest.json', 'icone.png'];
 
