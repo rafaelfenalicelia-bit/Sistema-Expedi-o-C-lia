@@ -1564,7 +1564,7 @@ function renderNovos(){  const el=document.getElementById('itens-prev');
   let body='';
   ordemEmps.forEach(emp=>{
     const arr=byEmp[emp]; if(!arr||!arr.length) return;
-    arr.sort((a,b)=>{const ra=ORD_GRUPO[a.it.tp]!=null?ORD_GRUPO[a.it.tp]:50;const rb=ORD_GRUPO[b.it.tp]!=null?ORD_GRUPO[b.it.tp]:50;if(ra!==rb)return ra-rb;return (a.it.nome||'').localeCompare(b.it.nome||'');});
+    arr.sort((a,b)=>{const ca=parseInt(a.it.cod,10),cb=parseInt(b.it.cod,10);if(!isNaN(ca)&&!isNaN(cb)&&ca!==cb)return ca-cb;return String(a.it.cod).localeCompare(String(b.it.cod),'pt',{numeric:true});});
     if(mostrarEmp){ const pesoEmp=arr.reduce((s,x)=>s+(x.it.peso||0),0); body+=`<tr class="emp-row"><td colspan="2">🏢 ${emp}</td><td style="text-align:right">${pesoEmp.toFixed(0)}kg</td><td></td></tr>`; }
     body+=arr.map(linha).join('');
   });
@@ -1654,11 +1654,11 @@ function consolidarItensSemEmpresa(itens){
 // Ordena com os arrozes primeiro (parbo, branco, integral, mix, granel) e o resto depois
 const ORD_GRUPO = {PARBO:1, BRANCO:2, INTEGRAL:3, MIX:4, GRANEL:5};
 function ordenarItens(itens){
+  // ordem numérica de código (menor primeiro); já é chamada por empresa
   return itens.slice().sort((a,b)=>{
-    const ra=ORD_GRUPO[a.tp]!=null?ORD_GRUPO[a.tp]:50;
-    const rb=ORD_GRUPO[b.tp]!=null?ORD_GRUPO[b.tp]:50;
-    if(ra!==rb) return ra-rb;
-    return (a.nome||'').localeCompare(b.nome||'');
+    const ca=parseInt(a.cod,10), cb=parseInt(b.cod,10);
+    if(!isNaN(ca)&&!isNaN(cb)&&ca!==cb) return ca-cb;
+    return String(a.cod).localeCompare(String(b.cod),'pt',{numeric:true});
   });
 }
 function rankEmp(e){ const i=EMPRESAS.indexOf(e||'MATRIZ'); return i<0?99:i; }
@@ -4628,7 +4628,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v99';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v100';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
