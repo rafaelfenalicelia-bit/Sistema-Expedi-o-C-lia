@@ -2029,6 +2029,7 @@ function toggleEstView(modo){
 
 // ===== OBSERVAÇÕES DA PROGRAMAÇÃO (única, sempre visível, compartilhada, só admin edita) =====
 let insObsTexto='';
+let _insObsSalvoEm=0;  // quando a obs foi salva localmente pela última vez (trava anti-corrida)
 const INS_OBS_KEY='controle_ins_obs_v2';
 function saveInsObs(){ try{ localStorage.setItem(INS_OBS_KEY,JSON.stringify({t:insObsTexto})); }catch(e){} }
 function loadInsObs(){
@@ -2039,9 +2040,32 @@ function loadInsObs(){
   }catch(e){}
 }
 function adotarInsObs(obj){
-  // aceita tanto o formato novo {t:'...'} quanto texto puro; nuvem vence
-  if(typeof obj==='string'){ insObsTexto=obj; saveInsObs(); }
-  else if(obj && typeof obj.t==='string'){ insObsTexto=obj.t; saveInsObs(); }
+  // trava anti-corrida: se salvei localmente há pouco, não deixo a nuvem trazer o valor antigo de volta
+  if(_insObsSalvoEm && (Date.now()-_insObsSalvoEm < 25000)) return;
+  // extrai o texto da nuvem (aceita formato novo {t:'...'} ou texto puro)
+  let vindo=null;
+  if(typeof obj==='string') vindo=obj;
+  else if(obj && typeof obj.t==='string') vindo=obj.t;
+  if(vindo===null) return;
+  // se é igual ao que já tenho, não faz nada (evita re-render à toa)
+  if(vindo===insObsTexto) return;
+  insObsTexto=vindo; saveInsObs();
+  // reflete na tela se o campo não estiver sendo editado agora
+  const ta=document.getElementById('ins-obs-txt');
+  if(ta && document.activeElement!==ta) ta.value=insObsTexto;
+  if(typeof renderInsObs==='function') renderInsObs();
+}
+function salvarInsObs(){
+  if(!(usuarioAtual && usuarioAtual.role==='admin')) return;
+  insObsTexto=(val('ins-obs-txt')||'').trim();
+  saveInsObs();
+  ultimaEdicao=Date.now();          // protege contra o pull sobrescrever logo após salvar
+  _insObsSalvoEm=Date.now();
+  if(API_URL){ pushPendente=true; pushPendenteDesde=Date.now(); pushMeta(); }  // trava a leitura até confirmar
+  _insObsDirty=false;
+  const st=document.getElementById('ins-obs-status');
+  if(st){ st.textContent='Salvo ✓'; st.style.color='var(--green)'; }
+  toast('Observação salva ✓');
 }
 let _insObsDirty=false;
 function renderInsObs(){
@@ -2067,16 +2091,7 @@ function insObsDigitou(){
   const st=document.getElementById('ins-obs-status');
   if(st){ st.textContent='Não salvo — toque em Salvar'; st.style.color='var(--text3)'; }
 }
-function salvarInsObs(){
-  if(!(usuarioAtual && usuarioAtual.role==='admin')) return;
-  insObsTexto=(val('ins-obs-txt')||'').trim();
-  saveInsObs();
-  if(API_URL) pushMeta();
-  _insObsDirty=false;
-  const st=document.getElementById('ins-obs-status');
-  if(st){ st.textContent='Salvo ✓'; st.style.color='var(--green)'; }
-  toast('Observação salva ✓');
-}
+
 
 // ===== Resumo de Insumos (parbo/polido/integral, normal x especial, MIX dividido) =====
 function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -4628,7 +4643,7 @@ setInterval(()=>pull(true),15000);
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v100';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v101';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
