@@ -4644,12 +4644,45 @@ let _primeSyncTimer=setInterval(()=>{
   if(metaPronta || !API_URL){ clearInterval(_primeSyncTimer); return; }
   pull(true, true);
 }, 3000);
-setInterval(()=>pull(true),15000);
+// ===== Sincronização por atividade (economia de dados) =====
+// - Enquanto o usuário mexe (mouse/toque/teclado), sincroniza a cada 25s.
+// - Após 2 min SEM nenhuma atividade, pausa (aparelho parado não gasta dados).
+// - Ao voltar a mexer, sincroniza na hora e retoma o ritmo.
+let _ultAtividade = Date.now();
+const SYNC_ATIVO_MS = 25000;      // ritmo quando o usuário está ativo
+const INATIVIDADE_MS = 120000;    // 2 min sem mexer -> pausa
+let _sincPausada = false;
+
+function marcarAtividade(){
+  const agora = Date.now();
+  const estavaParado = (agora - _ultAtividade) > INATIVIDADE_MS;
+  _ultAtividade = agora;
+  // se estava pausado e a pessoa voltou a mexer, sincroniza JÁ e religa
+  if(_sincPausada && estavaParado){
+    _sincPausada = false;
+    if(API_URL) pull(true);   // sync imediato ao retornar
+  }
+}
+// eventos que contam como "usuário presente" (passivos, não atrapalham digitação)
+['mousemove','mousedown','keydown','touchstart','scroll','wheel','focus'].forEach(ev=>{
+  window.addEventListener(ev, marcarAtividade, {passive:true});
+});
+// se a aba voltar a ficar visível, também conta como atividade
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) marcarAtividade(); });
+
+// loop de sincronização: só puxa se houve atividade recente
+setInterval(()=>{
+  if(!API_URL) return;
+  const inativo = (Date.now() - _ultAtividade) > INATIVIDADE_MS;
+  if(inativo){ _sincPausada = true; return; }   // parado: não gasta dados
+  _sincPausada = false;
+  pull(true);
+}, SYNC_ATIVO_MS);
 // inicia autenticação (deve ser o último passo)
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v102';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v103';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
