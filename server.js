@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 });
 
 // O app envia o corpo como texto contendo JSON -> parseia qualquer tipo como JSON.
-app.use(express.json({ type: () => true }));
+app.use(express.json({ type: () => true, limit: '10mb' }));
 
 async function getValor(chave) {
   const r = await pool.query('select valor from app_state where chave=$1', [chave]);
