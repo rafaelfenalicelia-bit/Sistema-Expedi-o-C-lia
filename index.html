@@ -536,6 +536,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <button class="user-dd-item" onclick="abrirAlterarSenha()">🔑 Alterar minha senha</button>
   <button class="user-dd-item" id="dd-btn-admin" onclick="abrirGerenciarUsuarios()" style="display:none">👥 Gerenciar usuários</button>
   <button class="user-dd-item" id="dd-btn-justif" onclick="abrirJustif()" style="display:none">🗂 Registro de motivos</button>
+  <button class="user-dd-item" id="dd-btn-backup" onclick="baixarBackupCompleto()" style="display:none">💾 Backup completo</button>
   <div class="user-dd-sep"></div>
   <button class="user-dd-item danger" onclick="fazerLogout()">↩ Sair da conta</button>
 </div>
@@ -3774,6 +3775,7 @@ function aplicarPermissoes(){
   document.getElementById('dd-role').textContent = isAdmin ? '👑 Administrador' : '👤 Usuário';
   document.getElementById('dd-btn-admin').style.display = isAdmin ? '' : 'none';
   document.getElementById('dd-btn-justif').style.display = isAdmin ? '' : 'none';
+  document.getElementById('dd-btn-backup').style.display = isAdmin ? '' : 'none';
   const permitidas = isAdmin ? TABS_ALL : ((me.tabs&&me.tabs.length)?me.tabs:TABS_PADRAO);
   TABS_ALL.forEach(t=>{ const el=document.getElementById('tab-'+t); if(el) el.classList.toggle('hidden-tab', !permitidas.includes(t)); });
   document.querySelectorAll('.admin-only').forEach(el=>{
@@ -3931,6 +3933,39 @@ function confirmarResetSenha(){
 }
 
 // ---- Logout ----
+// Backup completo: baixa TODAS as cargas e dados num arquivo, para histórico/relatórios.
+// Não altera nem apaga nada — só exporta uma cópia de segurança.
+function baixarBackupCompleto(){
+  if(!(usuarioAtual && usuarioAtual.role==='admin')){ toast('Apenas administrador'); return; }
+  try{
+    const backup = {
+      _tipo: 'backup-controle-expedicao',
+      _versao: APP_VERSAO,
+      _geradoEm: new Date().toISOString(),
+      _totalCargas: (cargas||[]).length,
+      cargas: cargas||[],
+      estoqueQtd: estoqueQtd||{},
+      lotesEst: (typeof lotesEst!=='undefined')?lotesEst:{},
+      baseItens: (typeof baseItens!=='undefined')?baseItens:[],
+      terc: (typeof terc!=='undefined')?terc:{},
+      snapTerc: (typeof snapTerc!=='undefined')?snapTerc:{},
+      justificativas: (typeof justificativas!=='undefined')?justificativas:[]
+    };
+    const txt = JSON.stringify(backup, null, 2);
+    const blob = new Blob([txt], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const hoje = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `backup-expedicao-${hoje}.json`;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    const kb = Math.round(txt.length/1024);
+    toast(`Backup gerado: ${backup._totalCargas} cargas (${kb} KB) ✓`);
+  }catch(e){
+    toast('Erro ao gerar backup');
+  }
+}
 function fazerLogout(){
   fecharUserMenu();
   if(!confirm('Sair da conta de '+usuarioAtual.nome+'?')) return;
@@ -4682,7 +4717,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v103';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v104';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
