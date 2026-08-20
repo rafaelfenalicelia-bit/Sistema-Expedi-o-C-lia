@@ -1314,7 +1314,7 @@ function val(id){ return document.getElementById(id).value; }
 function status(estado){
   const el=document.getElementById('sync-ind');
   if(!API_URL){ el.textContent='⚙ configurar'; el.style.color='#FFE08A'; return; }
-  if(estado==='online'){ el.textContent='● na nuvem'; el.style.color='#BFE9AD'; }
+  if(estado==='online'){ el.textContent='● Conectado'; el.style.color='#BFE9AD'; }
   else if(estado==='enviando'){ el.textContent='↑ enviando...'; el.style.color='#fff'; }
   else if(estado==='offline'){ el.textContent='● sem conexão'; el.style.color='#F3B6B6'; }
 }
@@ -4741,7 +4741,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v106';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v107';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
