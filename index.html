@@ -451,6 +451,40 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .urb-admin{background:#FDE8EC;color:var(--red)}
 .urb-user{background:#E8F5E9;color:#2E7D32}
 .btn-pin-reset{font-size:12px;padding:5px 10px;min-height:32px}
+/* ===== Porta-Paletes ===== */
+.pp-resumo{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px}
+.pp-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.pp-box.pp-alerta{border-color:#F0C270;background:#FFFaf0}
+.pp-num{font-size:20px;font-weight:800}
+.pp-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.02em;margin-top:2px}
+.pp-filtro-tit{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:7px;font-weight:700}
+.pp-filtros{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.pp-fbtn{padding:7px 13px;border:2px solid var(--border);border-radius:99px;background:var(--surface);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2);display:flex;align-items:center;gap:6px}
+.pp-fbtn .pp-dot{width:12px;height:12px;border-radius:3px}
+.pp-fbtn.on{border-color:var(--text);background:var(--surface2)}
+.pp-mapa-scroll{overflow-x:auto;padding-bottom:6px;margin-top:4px}
+.pp-rua{margin-bottom:16px;min-width:min-content}
+.pp-rua-nome{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
+.pp-rua-ocup{font-size:10px;color:var(--text3);font-weight:500;margin-left:6px}
+.pp-niveis{display:flex;flex-direction:column;gap:5px}
+.pp-nivel{display:flex;align-items:center;gap:6px}
+.pp-nivel-lbl{width:48px;font-size:10px;color:var(--text3);flex-shrink:0}
+.pp-posicoes{display:grid;gap:5px}
+.pp-pos{aspect-ratio:1.35/1;min-height:46px;min-width:52px;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;cursor:pointer;padding:3px 2px;user-select:none;text-align:center;line-height:1.15;position:relative;overflow:hidden;transition:opacity .15s}
+.pp-pos:active{transform:scale(.92)}
+.pp-pos.vazio{background:#EDE8E8;color:var(--text3);border:1px dashed #CDbdbd;font-weight:600}
+.pp-pos .pp-det{font-size:8px;opacity:.92;font-weight:500;margin-top:1px}
+.pp-pos.apagado{opacity:.18}
+.pp-b-batata{background:#2E7D32}.pp-b-farinha{background:#5D4037}.pp-b-tapioca{background:#00695C}.pp-b-fecula{background:#455A64}
+.pp-pos.venc-alerta{box-shadow:inset 0 0 0 3px #E8A200}
+.pp-pos.venc-vencido{box-shadow:inset 0 0 0 3px #D32F2F;animation:ppPisca 1.3s infinite}
+@keyframes ppPisca{0%,100%{box-shadow:inset 0 0 0 3px #D32F2F}50%{box-shadow:inset 0 0 0 3px rgba(211,47,47,.35)}}
+.pp-venc-badge{position:absolute;top:2px;right:3px;font-size:9px}
+.pp-legenda{display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:11px;flex-wrap:wrap}
+.pp-legenda span{display:flex;align-items:center;gap:5px;color:var(--text2)}
+.pp-mini{width:14px;height:14px;border-radius:3px;display:inline-block}
+.pp-nota{font-size:11.5px;color:var(--text3);text-align:center;margin-top:8px;line-height:1.5}
+
 </style>
 </head>
 <body>
@@ -741,6 +775,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   <button class="tab hidden-tab" id="tab-comercial" data-tab="comercial" onclick="sw('comercial')"><i class="icon">📆</i>Agenda</button>
   <button class="tab"        id="tab-dash" data-tab="dash" onclick="sw('dash')"><i class="icon">📊</i>Painel</button>
   <button class="tab"        id="tab-terc" data-tab="terc" onclick="sw('terc')"><i class="icon">🛒</i>Compras</button>
+  <button class="tab hidden-tab" id="tab-palete" data-tab="palete" onclick="sw('palete')"><i class="icon">🗄️</i>Paletes</button>
 </div>
 
 <div class="wrap">
@@ -1069,7 +1104,54 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
   </div>
 </div>
 
+<div class="screen" id="screen-palete">
+  <div class="ptitle" style="text-align:center">Porta-Paletes</div>
+  <div class="psub" style="text-align:center">Terceirizados — ocupação, filtro e validade</div>
+
+  <div class="pp-resumo">
+    <div class="pp-box"><div class="pp-num" id="pp-ocup">0</div><div class="pp-lbl">Ocupadas</div></div>
+    <div class="pp-box"><div class="pp-num" style="color:#2E7D32" id="pp-livre">0</div><div class="pp-lbl">Livres</div></div>
+    <div class="pp-box pp-alerta"><div class="pp-num" style="color:#E8A200" id="pp-vencendo">0</div><div class="pp-lbl">Vencendo</div></div>
+    <div class="pp-box pp-alerta"><div class="pp-num" style="color:#D32F2F" id="pp-vencido">0</div><div class="pp-lbl">Vencidos</div></div>
+  </div>
+
+  <div class="pp-filtro-tit">🔍 Filtrar — toque para destacar só um produto</div>
+  <div class="pp-filtros" id="pp-filtros">
+    <button class="pp-fbtn on" data-f="TODOS" onclick="ppFiltrar('TODOS')">Todos</button>
+    <button class="pp-fbtn" data-f="BATATA" onclick="ppFiltrar('BATATA')"><span class="pp-dot" style="background:#2E7D32"></span>Batata</button>
+    <button class="pp-fbtn" data-f="FARINHA" onclick="ppFiltrar('FARINHA')"><span class="pp-dot" style="background:#5D4037"></span>Farinha</button>
+    <button class="pp-fbtn" data-f="TAPIOCA" onclick="ppFiltrar('TAPIOCA')"><span class="pp-dot" style="background:#00695C"></span>Tapioca</button>
+    <button class="pp-fbtn" data-f="FECULA" onclick="ppFiltrar('FECULA')"><span class="pp-dot" style="background:#455A64"></span>Fécula</button>
+  </div>
+
+  <div class="pp-mapa-scroll" id="pp-mapa"></div>
+
+  <div class="pp-legenda">
+    <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #E8A200;background:#ddd"></span>Vencendo (≤30 dias)</span>
+    <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #D32F2F;background:#ddd"></span>Vencido</span>
+  </div>
+  <div class="pp-nota">Versão visual — o preenchimento funciona na tela mas ainda não é salvo. Toque numa posição para preencher item, quantidade e validade.</div>
+</div>
+
 <div class="app-footer">Controle de Expedição <span class="ver-tag" id="ver-tag"></span></div>
+
+<div class="modal-bg" id="pp-modal-bg" style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:200">
+  <div style="background:var(--surface);border-radius:14px;padding:18px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(0,0,0,.3)">
+    <h3 id="pp-m-titulo" style="font-size:15px;margin-bottom:2px">Posição</h3>
+    <div class="pp-m-posid" id="pp-m-posid" style="font-size:12px;color:var(--text3);margin-bottom:14px"></div>
+    <label style="display:block;font-size:11px;font-weight:700;color:var(--text2);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.03em">Item terceirizado</label>
+    <select id="pp-m-item" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--surface2)"></select>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label style="display:block;font-size:11px;font-weight:700;color:var(--text2);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.03em">Quantidade</label><input type="number" id="pp-m-qtd" inputmode="numeric" placeholder="ex: 20" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--surface2)"></div>
+      <div style="flex:1"><label style="display:block;font-size:11px;font-weight:700;color:var(--text2);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.03em">Validade</label><input type="date" id="pp-m-val" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--surface2)"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="ppFechar()" style="flex:1;padding:11px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--text3);border:1px solid var(--border)">Cancelar</button>
+      <button id="pp-btn-liberar" onclick="ppLiberar()" style="flex:1;padding:11px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:#f0e8e8;color:var(--text2);border:none;display:none">Liberar</button>
+      <button onclick="ppSalvar()" style="flex:1;padding:11px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--red);color:#fff;border:none">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -1887,7 +1969,7 @@ function setQtd(cod,val){
   resumoEst();
   carimbarAtualizacao(empresaLanc);
   marcarPendenteEst(empresaLanc);
-  registrarAcao('atualizou o estoque da '+nomeEmpresa(empresaLanc).toUpperCase());
+  registrarAcao('iniciou a atualização do estoque da '+nomeEmpresa(empresaLanc).toUpperCase());
   if(empresaLanc==='MATRIZ' && ehTerc(cod)) snapshotTerc();
   if(empresaLanc==='MATRIZ') saveAll(); else salvarEstEmp();
 }
@@ -2749,7 +2831,7 @@ function loteSetQ(cod,i,v){
   const box=document.getElementById('lsoma-'+cod); if(box) box.textContent=s;
   ultimaEdicao=Date.now();
   carimbarAtualizacao(emp); marcarPendenteEst(emp);
-  registrarAcao('atualizou o estoque da '+nomeEmpresa(emp).toUpperCase());
+  registrarAcao('iniciou a atualização do estoque da '+nomeEmpresa(emp).toUpperCase());
   resumoEst();
   // PERSISTE E ENVIA (igual ao setQtd normal) — sem isto, a contagem se perde no próximo pull
   if(emp==='MATRIZ') saveAll(); else salvarEstEmp();
@@ -3530,7 +3612,7 @@ function sw(tab){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+tab).classList.add('active');
   window.scrollTo(0,0);
-  if(tab==='con')renderCon(); if(tab==='lotes')renderLotes(); if(tab==='comercial')renderComercial(); if(tab==='dash')renderDash(); if(tab==='est')toggleEstView('visual'); if(tab==='terc')renderTerc();
+  if(tab==='con')renderCon(); if(tab==='lotes')renderLotes(); if(tab==='comercial')renderComercial(); if(tab==='dash')renderDash(); if(tab==='est')toggleEstView('visual'); if(tab==='terc')renderTerc(); if(tab==='palete')ppInit();
 }
 function hoje(){ return new Date().toISOString().slice(0,10); }
 
@@ -3777,7 +3859,7 @@ function abrirApp(){
   aplicarPermissoes();
 }
 
-const TABS_ALL=['exp','est','lotes','con','comercial','dash','terc'];
+const TABS_ALL=['exp','est','lotes','con','comercial','dash','terc','palete'];
 const TABS_PADRAO=['est','con'];   // telas padrão de um usuário comum
 function aplicarPermissoes(){
   if(!usuarioAtual) return;
@@ -4693,6 +4775,99 @@ if(!dataEmp.MATRIZ){ dataEmp.MATRIZ = document.getElementById('e-data').value ||
 aplicarDataNoCampo();
 renderCargas(); filtroDatas(); renderGrupos(); renderDash();
 status(API_URL?'online':'');
+// ===== Porta-Paletes (versão visual — ainda não persiste) =====
+const PP_ITENS=[{"cod":1419,"nome":"FARINHA BRANCA","grupo":"FARINHA"},{"cod":1421,"nome":"FARINHA AMARELA","grupo":"FARINHA"},{"cod":1425,"nome":"TAPIOCA 20X500 (CX)","grupo":"TAPIOCA"},{"cod":1426,"nome":"TAPIOCA 10X1 (CX)","grupo":"TAPIOCA"},{"cod":1461,"nome":"FARINHA TORRADA","grupo":"FARINHA"},{"cod":1649,"nome":"TAPIOCA 20X500 (FD)","grupo":"TAPIOCA"},{"cod":1650,"nome":"TAPIOCA 10X1 (FD)","grupo":"TAPIOCA"},{"cod":1657,"nome":"FECULA 10X1","grupo":"FECULA"},{"cod":1811,"nome":"BATATA TRADI CX 100G","grupo":"BATATA"},{"cod":1813,"nome":"BATATA EXTRA FINA CX 100G","grupo":"BATATA"},{"cod":1859,"nome":"FECULA 20X1","grupo":"FECULA"},{"cod":1930,"nome":"BATATA TRADI FD 400G","grupo":"BATATA"},{"cod":1931,"nome":"BATATA TRADI FD 800G","grupo":"BATATA"},{"cod":2081,"nome":"BATATA TRADI CX 400G","grupo":"BATATA"},{"cod":2082,"nome":"BATATA TRADI CX 800G","grupo":"BATATA"},{"cod":2137,"nome":"BATATA CHIPS ORIGINAL","grupo":"BATATA"},{"cod":2138,"nome":"BATATA CHIPS CEBOLA E SALSA","grupo":"BATATA"},{"cod":2139,"nome":"BATATA CHIPS CHURRASCO","grupo":"BATATA"}];
+const PP_CORES={BATATA:'pp-b-batata',FARINHA:'pp-b-farinha',TAPIOCA:'pp-b-tapioca',FECULA:'pp-b-fecula'};
+const PP_RUAS=[['A',7],['B',4],['C',9],['D',8]];
+const PP_NIVEIS=[['Nível 4','4'],['Nível 3','3'],['Nível 2','2'],['Chão','1']];
+const PP_TOTAL=112;
+let ppEstado={};       // id -> {cod,qtd,val}
+let ppPosAtual=null;
+let ppFiltroAtivo='TODOS';
+let ppMontado=false;
+
+function ppGrupo(cod){ const it=PP_ITENS.find(x=>x.cod==cod); return it?it.grupo:''; }
+function ppDiasVenc(val){ if(!val) return null; const h=new Date(); h.setHours(0,0,0,0); const d=new Date(val+'T00:00'); return Math.round((d-h)/86400000); }
+function ppMontarSelect(){
+  const sel=document.getElementById('pp-m-item'); if(!sel) return;
+  let html='<option value="">— selecione —</option>';
+  PP_ITENS.forEach(it=>{ html+='<option value="'+it.cod+'">'+it.cod+' · '+it.nome+'</option>'; });
+  sel.innerHTML=html;
+}
+function ppMontarMapa(){
+  const mapa=document.getElementById('pp-mapa'); if(!mapa) return;
+  let html='';
+  PP_RUAS.forEach(([letra,porNivel])=>{
+    html+='<div class="pp-rua"><div class="pp-rua-nome">Rua '+letra+' · '+porNivel+'/nível<span class="pp-rua-ocup" id="pp-oc-'+letra+'"></span></div><div class="pp-niveis">';
+    PP_NIVEIS.forEach(([nome,n])=>{
+      html+='<div class="pp-nivel"><span class="pp-nivel-lbl">'+nome+'</span><div class="pp-posicoes" style="grid-template-columns:repeat('+porNivel+',minmax(52px,1fr))">';
+      for(let i=1;i<=porNivel;i++){ const id=letra+n+'-'+i; html+='<div class="pp-pos vazio" id="pp-p-'+id+'" onclick="ppAbrir(\''+id+'\')">'+id+'</div>'; }
+      html+='</div></div>';
+    });
+    html+='</div></div>';
+  });
+  mapa.innerHTML=html;
+  Object.keys(ppEstado).forEach(id=>ppPintar(id));
+  ppAplicarFiltroTodas();
+}
+function ppPintar(id){
+  const el=document.getElementById('pp-p-'+id); if(!el) return;
+  const at=ppEstado[id];
+  if(!at){ el.className='pp-pos vazio'; el.innerHTML=id; ppFiltroPos(id); return; }
+  const cor=PP_CORES[ppGrupo(at.cod)]||'pp-b-fecula';
+  let cls='pp-pos '+cor;
+  const dias=ppDiasVenc(at.val); let badge='';
+  if(dias!==null){ if(dias<0){ cls+=' venc-vencido'; badge='<span class="pp-venc-badge">⚠</span>'; } else if(dias<=30){ cls+=' venc-alerta'; badge='<span class="pp-venc-badge">•</span>'; } }
+  el.className=cls;
+  let txt=id+badge+'<span class="pp-det">'+at.cod+'</span>';
+  if(at.qtd) txt+='<span class="pp-det">'+at.qtd+' un</span>';
+  el.innerHTML=txt;
+  ppFiltroPos(id);
+}
+function ppFiltroPos(id){
+  const el=document.getElementById('pp-p-'+id); if(!el) return;
+  if(ppFiltroAtivo==='TODOS'){ el.classList.remove('apagado'); return; }
+  const at=ppEstado[id]; const g=at?ppGrupo(at.cod):null;
+  el.classList.toggle('apagado', g!==ppFiltroAtivo);
+}
+function ppAplicarFiltroTodas(){ document.querySelectorAll('#pp-mapa .pp-pos').forEach(el=>ppFiltroPos(el.id.slice(5))); }
+function ppFiltrar(f){
+  ppFiltroAtivo=f;
+  document.querySelectorAll('.pp-fbtn').forEach(b=>b.classList.toggle('on', b.dataset.f===f));
+  ppAplicarFiltroTodas();
+}
+function ppAbrir(id){
+  ppPosAtual=id;
+  document.getElementById('pp-m-posid').textContent='Posição '+id;
+  const at=ppEstado[id];
+  document.getElementById('pp-m-item').value=at?at.cod:'';
+  document.getElementById('pp-m-qtd').value=at?at.qtd:'';
+  document.getElementById('pp-m-val').value=at?at.val:'';
+  document.getElementById('pp-btn-liberar').style.display=at?'':'none';
+  document.getElementById('pp-m-titulo').textContent=at?'Editar posição':'Ocupar posição';
+  document.getElementById('pp-modal-bg').classList.add('open');
+}
+function ppFechar(){ document.getElementById('pp-modal-bg').classList.remove('open'); ppPosAtual=null; }
+function ppSalvar(){
+  const cod=document.getElementById('pp-m-item').value;
+  if(!cod){ toast('Escolha um item'); return; }
+  ppEstado[ppPosAtual]={cod,qtd:document.getElementById('pp-m-qtd').value,val:document.getElementById('pp-m-val').value};
+  ppPintar(ppPosAtual); ppFechar(); ppResumo();
+}
+function ppLiberar(){ delete ppEstado[ppPosAtual]; ppPintar(ppPosAtual); ppFechar(); ppResumo(); }
+function ppResumo(){
+  const ocup=Object.keys(ppEstado).length;
+  let vencendo=0,vencido=0;
+  Object.values(ppEstado).forEach(at=>{ const d=ppDiasVenc(at.val); if(d!==null){ if(d<0)vencido++; else if(d<=30)vencendo++; } });
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  set('pp-ocup',ocup); set('pp-livre',PP_TOTAL-ocup); set('pp-vencendo',vencendo); set('pp-vencido',vencido);
+  PP_RUAS.forEach(([letra,porNivel])=>{ const tot=porNivel*4; let oc=0; Object.keys(ppEstado).forEach(id=>{ if(id[0]===letra)oc++; }); const e=document.getElementById('pp-oc-'+letra); if(e) e.textContent=' ('+oc+'/'+tot+' cheias)'; });
+}
+function ppInit(){
+  if(!ppMontado){ ppMontarSelect(); ppMontarMapa(); ppMontado=true; }
+  ppResumo();
+}
+
 if(API_URL) pull(true, true);   // primeira sincronização forçada (destrava o envio de usuários/base)
 // garante que a primeira sincronização conclua — mas SEM martelar o servidor.
 // tenta poucas vezes, com espaçamento crescente; se falhar, o loop normal assume.
@@ -4741,7 +4916,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v107';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v108';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
