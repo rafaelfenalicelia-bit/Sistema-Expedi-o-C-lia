@@ -1113,7 +1113,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #E8A200;background:#ddd"></span>Vencendo (≤30 dias)</span>
     <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #D32F2F;background:#ddd"></span>Vencido</span>
   </div>
-  <div class="pp-nota">Versão visual — o preenchimento funciona na tela mas ainda não é salvo. Toque numa posição para preencher item, quantidade e validade.</div>
+  <div class="pp-nota">O preenchimento é salvo <b>neste aparelho</b> (ainda não sincroniza entre aparelhos). Toque numa posição para preencher item, quantidade e validade.</div>
 </div>
 </div>
 
@@ -4782,6 +4782,10 @@ const PP_RUAS=[['A',7],['B',4],['C',9],['D',8]];
 const PP_NIVEIS=[['Nível 4','4'],['Nível 3','3'],['Nível 2','2'],['Chão','1']];
 const PP_TOTAL=112;
 let ppEstado={};       // id -> {cod,qtd,val}
+// Persistência LOCAL (só neste aparelho — ainda não sincroniza).
+const PP_KEY='controle_porta_palete_v1';
+function ppSalvarLocal(){ try{ localStorage.setItem(PP_KEY, JSON.stringify(ppEstado)); }catch(e){} }
+function ppCarregarLocal(){ try{ const d=JSON.parse(localStorage.getItem(PP_KEY)||'null'); if(d&&typeof d==='object') ppEstado=d; }catch(e){} }
 let ppPosAtual=null;
 let ppFiltroAtivo='TODOS';
 let ppMontado=false;
@@ -4852,9 +4856,10 @@ function ppSalvar(){
   const cod=document.getElementById('pp-m-item').value;
   if(!cod){ toast('Escolha um item'); return; }
   ppEstado[ppPosAtual]={cod,qtd:document.getElementById('pp-m-qtd').value,val:document.getElementById('pp-m-val').value};
+  ppSalvarLocal();
   ppPintar(ppPosAtual); ppFechar(); ppResumo();
 }
-function ppLiberar(){ delete ppEstado[ppPosAtual]; ppPintar(ppPosAtual); ppFechar(); ppResumo(); }
+function ppLiberar(){ delete ppEstado[ppPosAtual]; ppSalvarLocal(); ppPintar(ppPosAtual); ppFechar(); ppResumo(); }
 function ppResumo(){
   const ocup=Object.keys(ppEstado).length;
   let vencendo=0,vencido=0;
@@ -4864,7 +4869,7 @@ function ppResumo(){
   PP_RUAS.forEach(([letra,porNivel])=>{ const tot=porNivel*4; let oc=0; Object.keys(ppEstado).forEach(id=>{ if(id[0]===letra)oc++; }); const e=document.getElementById('pp-oc-'+letra); if(e) e.textContent=' ('+oc+'/'+tot+' cheias)'; });
 }
 function ppInit(){
-  if(!ppMontado){ ppMontarSelect(); ppMontarMapa(); ppMontado=true; }
+  if(!ppMontado){ ppCarregarLocal(); ppMontarSelect(); ppMontarMapa(); ppMontado=true; }
   ppResumo();
 }
 
@@ -4916,7 +4921,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v109';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v110';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
