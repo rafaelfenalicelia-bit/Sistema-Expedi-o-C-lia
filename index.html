@@ -1115,7 +1115,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #E8A200;background:#ddd"></span>Vencendo (≤30 dias)</span>
     <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #D32F2F;background:#ddd"></span>Vencido</span>
   </div>
-  <div class="pp-nota">O preenchimento é salvo <b>neste aparelho</b> (ainda não sincroniza entre aparelhos). Toque numa posição para preencher item, quantidade e validade.</div>
+  <div class="pp-nota">O preenchimento é salvo e <b>sincronizado entre os aparelhos</b>. Toque numa posição para preencher item, quantidade e validade.</div>
 </div>
 </div>
 
@@ -1450,6 +1450,9 @@ function pushMeta(forcar){
     insObs: {t:insObsTexto, ts:insObsTs},
     capMaq: capMaq,
     audit: auditLog,
+    auditVistas: auditVistas,
+    portaPalete: ppEstado,
+    portaPaleteDel: ppDel,
     justif: justificativas,
     snapTerc: snapTerc,
     cargasDel: cargasDel,
@@ -1510,6 +1513,8 @@ function pull(silencioso, forcar){
         if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
         if(d.meta.insObs) adotarInsObs(d.meta.insObs);
         if(d.meta.capMaq) adotarCapMaq(d.meta.capMaq);
+        if(d.meta.auditVistas) mergeAuditVistas(d.meta.auditVistas);
+        if(d.meta.portaPalete||d.meta.portaPaleteDel) ppMergeNuvem(d.meta.portaPalete, d.meta.portaPaleteDel);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1586,6 +1591,8 @@ function sincronizarInicial(){
         if(d.meta.baixaCargas) adotarBaixa(d.meta.baixaCargas);
         if(d.meta.insObs) adotarInsObs(d.meta.insObs);
         if(d.meta.capMaq) adotarCapMaq(d.meta.capMaq);
+        if(d.meta.auditVistas) mergeAuditVistas(d.meta.auditVistas);
+        if(d.meta.portaPalete||d.meta.portaPaleteDel) ppMergeNuvem(d.meta.portaPalete, d.meta.portaPaleteDel);
         if(d.meta.audit) mergeAuditDaNuvem(d.meta.audit);
         if(d.meta.justif) mergeJustifDaNuvem(d.meta.justif);
         if(d.meta.snapTerc) mergeSnapTerc(d.meta.snapTerc);
@@ -1602,7 +1609,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,insObs:{t:insObsTexto,ts:insObsTs},capMaq:capMaq,audit:auditLog,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,insObs:{t:insObsTexto,ts:insObsTs},capMaq:capMaq,audit:auditLog,auditVistas:auditVistas,portaPalete:ppEstado,portaPaleteDel:ppDel,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -4427,6 +4434,14 @@ function registrarAcao(acao){
     if(API_URL) pushMeta();
   }, 6000);
 }
+// junta as notificações já vistas vindas de outro aparelho (união): lida num vale em todos
+function mergeAuditVistas(remoto){
+  if(!Array.isArray(remoto)) return;
+  const set = new Set(auditVistas);
+  remoto.forEach(id=>{ if(id) set.add(id); });
+  auditVistas = Array.from(set).slice(-300);   // mantém no máximo 300 ids
+  saveAudit();
+}
 // recebe o log da nuvem: o ADMIN vira notificação para ações de OUTROS usuários
 function mergeAuditDaNuvem(remoto){
   if(!Array.isArray(remoto)) return;
@@ -4783,11 +4798,42 @@ const PP_CORES={BATATA:'pp-b-batata',FARINHA:'pp-b-farinha',TAPIOCA:'pp-b-tapioc
 const PP_RUAS=[['A',7],['B',4],['C',9],['D',8]];
 const PP_NIVEIS=[['Nível 4','4'],['Nível 3','3'],['Nível 2','2'],['Chão','1']];
 const PP_TOTAL=112;
-let ppEstado={};       // id -> {cod,qtd,val}
-// Persistência LOCAL (só neste aparelho — ainda não sincroniza).
+let ppEstado={};       // id -> {cod,qtd,val,ts}
+let ppDel={};          // id -> ts (posições liberadas, para não "reviver" via sync antigo)
+// Persistência LOCAL
 const PP_KEY='controle_porta_palete_v1';
-function ppSalvarLocal(){ try{ localStorage.setItem(PP_KEY, JSON.stringify(ppEstado)); }catch(e){} }
-function ppCarregarLocal(){ try{ const d=JSON.parse(localStorage.getItem(PP_KEY)||'null'); if(d&&typeof d==='object') ppEstado=d; }catch(e){} }
+const PP_DEL_KEY='controle_porta_palete_del_v1';
+function ppSalvarLocal(){
+  try{ localStorage.setItem(PP_KEY, JSON.stringify(ppEstado)); }catch(e){}
+  try{ localStorage.setItem(PP_DEL_KEY, JSON.stringify(ppDel)); }catch(e){}
+}
+function ppCarregarLocal(){
+  try{ const d=JSON.parse(localStorage.getItem(PP_KEY)||'null'); if(d&&typeof d==='object') ppEstado=d; }catch(e){}
+  try{ const d=JSON.parse(localStorage.getItem(PP_DEL_KEY)||'null'); if(d&&typeof d==='object') ppDel=d; }catch(e){}
+}
+// junta o porta-palete vindo da nuvem: cada posição decidida por "mais recente vence" (ts)
+function ppMergeNuvem(remoto, remotoDel){
+  remotoDel = remotoDel||{};
+  remoto = remoto||{};
+  // 1) aplica exclusões remotas mais recentes
+  Object.keys(remotoDel).forEach(id=>{
+    const tsDel=+remotoDel[id]||0;
+    if(tsDel > (ppDel[id]||0)) ppDel[id]=tsDel;
+    // se a exclusão remota é mais nova que o meu preenchimento local, removo
+    if(ppEstado[id] && tsDel >= (ppEstado[id].ts||0)) delete ppEstado[id];
+  });
+  // 2) aplica preenchimentos remotos mais recentes
+  Object.keys(remoto).forEach(id=>{
+    const r=remoto[id]; if(!r) return;
+    const rts=+r.ts||0;
+    // ignora se há exclusão local mais nova
+    if((ppDel[id]||0) > rts) return;
+    // adota se remoto é mais novo que o local
+    if(!ppEstado[id] || rts > (ppEstado[id].ts||0)){ ppEstado[id]={...r, ts:rts}; }
+  });
+  ppSalvarLocal();
+  if(ppMontado){ ppMontarMapa(); ppResumo(); }
+}
 let ppPosAtual=null;
 let ppFiltroAtivo='TODOS';
 let ppMontado=false;
@@ -4857,11 +4903,13 @@ function ppFechar(){ document.getElementById('pp-modal-bg').classList.remove('op
 function ppSalvar(){
   const cod=document.getElementById('pp-m-item').value;
   if(!cod){ toast('Escolha um item'); return; }
-  ppEstado[ppPosAtual]={cod,qtd:document.getElementById('pp-m-qtd').value,val:document.getElementById('pp-m-val').value};
+  ppEstado[ppPosAtual]={cod,qtd:document.getElementById('pp-m-qtd').value,val:document.getElementById('pp-m-val').value, ts:Date.now()};
+  if(ppDel[ppPosAtual]) delete ppDel[ppPosAtual];   // ocupou de novo: cancela marca de exclusão
   ppSalvarLocal();
+  if(API_URL) pushMeta();                            // sincroniza (é minúsculo, ~5KB no máximo)
   ppPintar(ppPosAtual); ppFechar(); ppResumo();
 }
-function ppLiberar(){ delete ppEstado[ppPosAtual]; ppSalvarLocal(); ppPintar(ppPosAtual); ppFechar(); ppResumo(); }
+function ppLiberar(){ delete ppEstado[ppPosAtual]; ppDel[ppPosAtual]=Date.now(); ppSalvarLocal(); if(API_URL) pushMeta(); ppPintar(ppPosAtual); ppFechar(); ppResumo(); }
 function ppResumo(){
   const ocup=Object.keys(ppEstado).length;
   let vencendo=0,vencido=0;
@@ -4923,7 +4971,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v111';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v113';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
