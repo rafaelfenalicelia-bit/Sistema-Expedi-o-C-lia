@@ -2728,6 +2728,19 @@ function maqDoProduto(p){
   if(/30X1/i.test(p.nome)) return '30X1';
   return null;
 }
+// kg por fardo de cada máquina (para converter itens lançados em KG)
+const KG_POR_FARDO = {'6X5':30, '30X1':30, '10X1':10};
+// converte a quantidade lançada em FARDOS.
+// Itens com "KG" no nome são lançados em quilos → divide pelo peso do fardo da máquina.
+// Os demais já são lançados em fardos → usa a quantidade direto.
+function qtdEmFardos(p, qtd, maq){
+  if(!p) return qtd;
+  const ehKg = /\bKG\b/i.test(p.nome||'');
+  if(ehKg && maq && KG_POR_FARDO[maq]){
+    return qtd / KG_POR_FARDO[maq];
+  }
+  return qtd;
+}
 function renderMaquinas(){
   if(!maqVisivel) return;
   const ini=val('d-ini'), fim=val('d-fim');
@@ -2741,9 +2754,11 @@ function renderMaquinas(){
   Object.keys(prog).forEach(cod=>{
     const p=PMAP[cod]; if(!p) return;
     const m=maqDoProduto(p); if(!m) return;
-    progM[m]+=prog[cod];
+    const progFardos = qtdEmFardos(p, prog[cod], m);         // converte kg→fardos se for item KG
+    progM[m]+=progFardos;
     const est=estoqueQtd[cod]||0;
-    const f=Math.max(0, prog[cod]-est);
+    const estFardos = qtdEmFardos(p, est, m);                 // estoque também na mesma unidade
+    const f=Math.max(0, progFardos-estFardos);
     if(f>0) falta[m]+=f;
   });
   document.getElementById('maq-6x5').innerHTML=gaugeHTML('Empacotadeira 6X5', falta['6X5'], capMaq['6X5'], '1 conjunto', '6X5');
@@ -4975,7 +4990,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v114';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v115';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
