@@ -4402,15 +4402,19 @@ let notificacoes = [];
 let auditLog = [];                 // [{id,user,acao,ts}]
 const AUDIT_KEY='controle_audit_v1';
 const AUDIT_VISTAS_KEY='controle_audit_vistas_v1';
-let auditVistas = [];              // ids já notificados neste aparelho
+const AUDIT_PROPRIAS_KEY='controle_audit_proprias_v1';
+let auditVistas = [];              // ids de notificações já vistas/lidas (sincroniza entre aparelhos do admin)
+let auditProprias = [];            // ids de ações que EU mesmo fiz (local, não sincroniza)
 let _auditTimers = {};
 function loadAudit(){
   try{ auditLog=JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]')||[]; }catch(e){ auditLog=[]; }
   try{ auditVistas=JSON.parse(localStorage.getItem(AUDIT_VISTAS_KEY)||'[]')||[]; }catch(e){ auditVistas=[]; }
+  try{ auditProprias=JSON.parse(localStorage.getItem(AUDIT_PROPRIAS_KEY)||'[]')||[]; }catch(e){ auditProprias=[]; }
 }
 function saveAudit(){
   try{ localStorage.setItem(AUDIT_KEY,JSON.stringify(auditLog.slice(0,60))); }catch(e){}
   try{ localStorage.setItem(AUDIT_VISTAS_KEY,JSON.stringify(auditVistas.slice(0,300))); }catch(e){}
+  try{ localStorage.setItem(AUDIT_PROPRIAS_KEY,JSON.stringify(auditProprias.slice(-300))); }catch(e){}
 }
 const AUDIT_JANELA = 30*60*1000;   // agrupa alterações da mesma área por 30 min
 // registra uma ação; alterações seguidas na mesma área viram UM único registro (janela de 30 min)
@@ -4428,7 +4432,7 @@ function registrarAcao(acao){
       const ent={ id: agora+'_'+Math.random().toString(36).slice(2), user: usuarioAtual.nome, acao, ts: agora };
       auditLog.unshift(ent);
       auditLog=auditLog.slice(0,60);
-      if(!auditVistas.includes(ent.id)) auditVistas.push(ent.id);  // não notifica a si mesmo
+      if(!auditProprias.includes(ent.id)) auditProprias.push(ent.id);  // minhas próprias ações (local, não sincroniza)
     }
     saveAudit();
     if(API_URL) pushMeta();
@@ -4450,9 +4454,9 @@ function mergeAuditDaNuvem(remoto){
   const souAdmin = !!(usuarioAtual && usuarioAtual.role==='admin');
   if(souAdmin){
     auditLog.slice().reverse().forEach(e=>{
-      if(auditVistas.includes(e.id)) return;
+      if(e.user===usuarioAtual.nome){ if(!auditVistas.includes(e.id)) auditVistas.push(e.id); return; }  // minha própria ação: não notifico
+      if(auditVistas.includes(e.id)) return;         // já vista/lida (inclusive em outro aparelho meu)
       auditVistas.push(e.id);
-      if(e.user===usuarioAtual.nome) return;         // não notifica as próprias ações
       const titulo='Usuário '+e.user+' '+e.acao;
       // não repete a mesma notificação (mesmo usuário/área) dentro da janela
       const jaTem = notificacoes.find(n=> n.tipo==='alteracao' && n.titulo===titulo && (Date.now()-n.ts)<AUDIT_JANELA );
@@ -4971,7 +4975,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v113';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v114';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
