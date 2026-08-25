@@ -452,6 +452,45 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .urb-user{background:#E8F5E9;color:#2E7D32}
 .btn-pin-reset{font-size:12px;padding:5px 10px;min-height:32px}
 /* ===== Porta-Paletes ===== */
+/* seletor Matriz/CD */
+.pp-local-sw{display:flex;gap:0;margin:10px 0 14px;border:2px solid var(--red);border-radius:10px;overflow:hidden}
+.pp-local-sw button{flex:1;padding:11px;border:none;background:var(--surface);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--red)}
+.pp-local-sw button.on{background:var(--red);color:#fff}
+/* mapa usa a largura toda da tela no PC (escapa do limite do wrap) */
+@media(min-width:720px){
+  #screen-palete.active{max-width:100vw}
+  #screen-palete .pp-mapa-scroll{width:96vw;position:relative;left:50%;transform:translateX(-50%)}
+}
+/* painel-resumo do produto filtrado */
+.pp-resumo-prod{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:none;text-align:left}
+.pp-resumo-prod.show{display:block}
+.pp-rp-titulo{font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.pp-rp-dot{width:13px;height:13px;border-radius:3px}
+.pp-rp-item{border-bottom:1px solid var(--border)}
+.pp-rp-item:last-of-type{border-bottom:none}
+.pp-rp-linha{display:flex;align-items:center;justify-content:space-between;padding:9px 0;font-size:13px;cursor:pointer}
+.pp-rp-nome{color:var(--text);font-weight:600;flex:1;display:flex;align-items:center;gap:7px}
+.pp-rp-cod{color:var(--text3);font-weight:500;font-size:11px}
+.pp-rp-seta{color:var(--text3);font-size:10px;transition:transform .15s;display:inline-block;width:12px}
+.pp-rp-item.aberto .pp-rp-seta{transform:rotate(180deg)}
+.pp-rp-vals{display:flex;gap:16px;text-align:right;flex-shrink:0}
+.pp-rp-val{min-width:64px}
+.pp-rp-val .n{font-size:15px;font-weight:800}
+.pp-rp-val .l{font-size:9.5px;color:var(--text3);text-transform:uppercase}
+.pp-rp-sub{display:none;padding:2px 0 10px 10px;margin-left:5px;border-left:2px solid var(--border)}
+.pp-rp-item.aberto .pp-rp-sub{display:block}
+.pp-sub-linha{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;font-size:12px}
+.pp-sub-tag{display:flex;align-items:center;gap:7px;color:var(--text2)}
+.pp-sub-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pp-sub-vals{display:flex;gap:16px;text-align:right}
+.pp-sub-vals .v{min-width:58px}
+.pp-sub-vals .n{font-weight:700;font-size:13px}
+.pp-sub-vals .l{font-size:9px;color:var(--text3);text-transform:uppercase}
+.pp-tag-venc{color:#D32F2F;font-weight:700}
+.pp-tag-alerta{color:#E8A200;font-weight:700}
+.pp-rp-total{display:flex;align-items:center;justify-content:space-between;padding-top:10px;margin-top:4px;border-top:2px solid var(--text);font-size:13px;font-weight:800}
+.pp-rp-total .pp-rp-val .n{color:var(--red)}
+.pp-rp-vazio{color:var(--text3);font-size:12.5px;text-align:center;padding:8px 0}
 .pp-modal-bg{display:none}
 .pp-modal-bg.open{display:flex}
 .pp-resumo{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px}
@@ -465,10 +504,11 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .pp-fbtn .pp-dot{width:12px;height:12px;border-radius:3px}
 .pp-fbtn.on{border-color:var(--text);background:var(--surface2)}
 .pp-mapa-scroll{overflow-x:auto;padding-bottom:6px;margin-top:4px}
-.pp-rua{margin-bottom:16px;min-width:min-content}
+.pp-rua{margin-bottom:16px;display:flex;flex-direction:column;align-items:center}
+.pp-niveis-wrap{display:inline-block}
 .pp-rua-nome{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
 .pp-rua-ocup{font-size:10px;color:var(--text3);font-weight:500;margin-left:6px}
-.pp-niveis{display:flex;flex-direction:column;gap:5px}
+.pp-niveis{display:inline-block}
 .pp-nivel{display:flex;align-items:center;gap:6px}
 .pp-nivel-lbl{width:48px;font-size:10px;color:var(--text3);flex-shrink:0}
 .pp-posicoes{display:grid;gap:5px}
@@ -1091,7 +1131,12 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 
 <div class="screen" id="screen-palete">
   <div class="ptitle" style="text-align:center">Porta-Paletes</div>
-  <div class="psub" style="text-align:center">Terceirizados — ocupação, filtro e validade</div>
+  <div class="psub" style="text-align:center" id="pp-psub">Terceirizados · Matriz — ocupação, filtro e validade</div>
+
+  <div class="pp-local-sw">
+    <button id="pp-loc-matriz" class="on" onclick="ppTrocarLocal('matriz')">🏭 Matriz</button>
+    <button id="pp-loc-cd" onclick="ppTrocarLocal('cd')">🏢 CD</button>
+  </div>
 
   <div class="pp-resumo">
     <div class="pp-box"><div class="pp-num" id="pp-ocup">0</div><div class="pp-lbl">Ocupadas</div></div>
@@ -1109,12 +1154,10 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <button class="pp-fbtn" data-f="FECULA" onclick="ppFiltrar('FECULA')"><span class="pp-dot" style="background:#455A64"></span>Fécula</button>
   </div>
 
+  <div class="pp-resumo-prod" id="pp-resumo-prod"></div>
+
   <div class="pp-mapa-scroll" id="pp-mapa"></div>
 
-  <div class="pp-legenda">
-    <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #E8A200;background:#ddd"></span>Vencendo (≤30 dias)</span>
-    <span><span class="pp-mini" style="box-shadow:inset 0 0 0 3px #D32F2F;background:#ddd"></span>Vencido</span>
-  </div>
   <div class="pp-nota">O preenchimento é salvo e <b>sincronizado entre os aparelhos</b>. Toque numa posição para preencher item, quantidade e validade.</div>
 </div>
 </div>
@@ -1451,7 +1494,7 @@ function pushMeta(forcar){
     capMaq: capMaq,
     audit: auditLog,
     auditVistas: auditVistas,
-    portaPalete: ppEstado,
+    portaPalete: ppDados,
     portaPaleteDel: ppDel,
     justif: justificativas,
     snapTerc: snapTerc,
@@ -1609,7 +1652,7 @@ function sincronizarInicial(){
         status('online'); toast('Dados carregados da nuvem ✓');
       } else if(localTemDados){
         // nuvem vazia: este aparelho semeia os dados
-        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,insObs:{t:insObsTexto,ts:insObsTs},capMaq:capMaq,audit:auditLog,auditVistas:auditVistas,portaPalete:ppEstado,portaPaleteDel:ppDel,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
+        enviar({action:'all',cargas,estoqueQtd,meta:{contador:val('e-contador'),dataContagem:val('e-data'),baseItens:baseItens,baseItensTs:getBaseItensTs(),users:loadUsers(),usersTs:getUsersTs(),usersDel:getUsersDel(),terc:terc,tercTs:getTercTs(),estoqueCeara:estoqueCeara,estoqueOsorio:estoqueOsorio,estEmpTs:getEstEmpTs(),dataEmp:dataEmp,atualizadoEmp:atualizadoEmp,concluidoEmp:concluidoEmp,pendPubEmp:pendPubEmp,lotesEst:lotesEst,baixaCargas:baixaCargas,insObs:{t:insObsTexto,ts:insObsTs},capMaq:capMaq,audit:auditLog,auditVistas:auditVistas,portaPalete:ppDados,portaPaleteDel:ppDel,justif:justificativas,snapTerc:snapTerc,cargasDel:cargasDel,produtos:{custom:customProdutos,overrides:prodOverrides,deleted:prodDeleted}}});
         cargasSnapshot = cargas.map(c=>({...c,itens:normalizarItens(c.itens)}));
         toast('Dados enviados para a nuvem ✓');
       } else {
@@ -3646,6 +3689,10 @@ function hoje(){ return new Date().toISOString().slice(0,10); }
 const TERC_KEY='controle_terc_v1';
 let terc={ matriz:{data:'',itens:[]}, ceara:{data:'',itens:[]} };
 let tercTela='matriz';
+// ordenação da tabela (preferência local, não sincroniza)
+const TERC_SORT_KEY='controle_terc_sort_v1';
+let TERC_SORT={campo:null, dir:1};
+try{ const s=JSON.parse(localStorage.getItem(TERC_SORT_KEY)||'null'); if(s&&typeof s==='object') TERC_SORT=s; }catch(e){}
 let ultimaEdicaoTerc=0;
 let tercPushTimer;
 function getTercTs(){ return parseInt(localStorage.getItem(TERC_KEY+'_ts')||'0'); }
@@ -3703,18 +3750,39 @@ function renderTerc(){
   const ceara = tercTela==='ceara';
   document.getElementById('terc-data').value = terc[tercTela].data||'';
   const rt=document.getElementById('terc-rod-transf'); if(rt) rt.style.display = ceara?'inline':'none';
+  // setinha de ordenação nas colunas Cód e Produto
+  const setaCod = TERC_SORT.campo==='cod' ? (TERC_SORT.dir>0?' ▲':' ▼') : '';
+  const setaProd = TERC_SORT.campo==='nome' ? (TERC_SORT.dir>0?' ▲':' ▼') : '';
   const th = ceara
     ? ['Cód','Produto','Est. atual','Carteira','Saldo','Comprado','Transf.','Est. final','Est. mínimo','Status','']
     : ['Cód','Produto','Est. atual','Carteira','Saldo','Comprado','Est. final','Est. mínimo','Status',''];
-  document.getElementById('terc-head').innerHTML='<tr>'+th.map((h,i)=>`<th class="${i===0?'tcod':i===1?'tprod':''}">${h}</th>`).join('')+'</tr>';
+  document.getElementById('terc-head').innerHTML='<tr>'+th.map((h,i)=>{
+    if(i===0) return `<th class="tcod terc-sortable" onclick="tercOrdenar('cod')" style="cursor:pointer" title="Ordenar por código">${h}${setaCod}</th>`;
+    if(i===1) return `<th class="tprod terc-sortable" onclick="tercOrdenar('nome')" style="cursor:pointer" title="Ordenar por produto">${h}${setaProd}</th>`;
+    return `<th>${h}</th>`;
+  }).join('')+'</tr>';
   const lista=terc[tercTela].itens;
   if(!lista.length){
     const cols=ceara?11:10;
     document.getElementById('terc-body').innerHTML=`<tr><td colspan="${cols}"><div class="empty" style="padding:16px">Nenhum item. Toque em "＋ Item" para adicionar.</div></td></tr>`;
     return;
   }
+  // ordena por ÍNDICES (preserva o índice real do array para tercUpd/tercDel/tercEditar)
+  let ordem = lista.map((_,i)=>i);
+  if(TERC_SORT.campo){
+    ordem.sort((a,b)=>{
+      let va, vb;
+      if(TERC_SORT.campo==='cod'){ va=parseFloat(lista[a].cod); vb=parseFloat(lista[b].cod);
+        if(isNaN(va)||isNaN(vb)){ va=String(lista[a].cod); vb=String(lista[b].cod); return TERC_SORT.dir*String(va).localeCompare(String(vb)); }
+        return TERC_SORT.dir*(va-vb);
+      } else {
+        return TERC_SORT.dir*String(lista[a].nome||'').localeCompare(String(lista[b].nome||''));
+      }
+    });
+  }
   let rows='';
-  lista.forEach((it,i)=>{
+  ordem.forEach(i=>{
+    const it=lista[i];
     const saldo=(+it.atual||0)-(+it.carteira||0);
     const final=saldo+(+it.comprado||0)+(ceara?(+it.transf||0):0);
     const [cls,txt]=tercStatus(final,+it.min||0);
@@ -3729,10 +3797,31 @@ function renderTerc(){
       <td class="terc-calc${final<0?' neg':''}" id="terc-final-${i}">${final}</td>
       <td><input class="terc-cel" data-r="${i}" data-c="${ceara?4:3}" onkeydown="tercNav(event)" type="number" inputmode="numeric" value="${it.min!=null?it.min:''}" oninput="tercUpd(${i},'min',this.value)"></td>
       <td id="terc-st-${i}"><span class="terc-st ${cls}">${txt}</span></td>
-      <td><button class="terc-del" onclick="tercDel(${i})" title="Remover">🗑</button></td>
+      <td style="white-space:nowrap"><button class="terc-del" onclick="tercEditar(${i})" title="Editar" style="margin-right:2px">✏️</button><button class="terc-del" onclick="tercDel(${i})" title="Remover">🗑</button></td>
     </tr>`;
   });
   document.getElementById('terc-body').innerHTML=rows;
+}
+// ordenação: 1º clique crescente, 2º decrescente; lembra a escolha (local)
+function tercOrdenar(campo){
+  if(TERC_SORT.campo===campo){ TERC_SORT.dir = -TERC_SORT.dir; }
+  else { TERC_SORT.campo=campo; TERC_SORT.dir=1; }
+  try{ localStorage.setItem(TERC_SORT_KEY, JSON.stringify(TERC_SORT)); }catch(e){}
+  renderTerc();
+}
+// editar código e nome de um item
+function tercEditar(i){
+  const it=terc[tercTela].itens[i]; if(!it) return;
+  const novoCod=prompt('Código do item:', it.cod); if(novoCod===null) return;
+  const novoNome=prompt('Nome do produto:', it.nome); if(novoNome===null||!novoNome.trim()) return;
+  const codMudou = String(novoCod).trim()!==String(it.cod);
+  if(codMudou){
+    if(!confirm('Você alterou o CÓDIGO do item.\n\nO código identifica o produto no sistema. Mudá-lo pode desvincular este item de outras referências.\n\nConfirma a alteração?')) return;
+  }
+  it.cod = parseInt(novoCod)||novoCod||it.cod;
+  it.nome = novoNome.trim().toUpperCase();
+  salvarTerc();
+  renderTerc();
 }
 function tercRecalcLinha(i){
   const ceara=tercTela==='ceara';
@@ -4814,51 +4903,86 @@ status(API_URL?'online':'');
 // ===== Porta-Paletes (versão visual — ainda não persiste) =====
 const PP_ITENS=[{"cod":1419,"nome":"FARINHA BRANCA","grupo":"FARINHA"},{"cod":1421,"nome":"FARINHA AMARELA","grupo":"FARINHA"},{"cod":1425,"nome":"TAPIOCA 20X500 (CX)","grupo":"TAPIOCA"},{"cod":1426,"nome":"TAPIOCA 10X1 (CX)","grupo":"TAPIOCA"},{"cod":1461,"nome":"FARINHA TORRADA","grupo":"FARINHA"},{"cod":1649,"nome":"TAPIOCA 20X500 (FD)","grupo":"TAPIOCA"},{"cod":1650,"nome":"TAPIOCA 10X1 (FD)","grupo":"TAPIOCA"},{"cod":1657,"nome":"FECULA 10X1","grupo":"FECULA"},{"cod":1811,"nome":"BATATA TRADI CX 100G","grupo":"BATATA"},{"cod":1813,"nome":"BATATA EXTRA FINA CX 100G","grupo":"BATATA"},{"cod":1859,"nome":"FECULA 20X1","grupo":"FECULA"},{"cod":1930,"nome":"BATATA TRADI FD 400G","grupo":"BATATA"},{"cod":1931,"nome":"BATATA TRADI FD 800G","grupo":"BATATA"},{"cod":2081,"nome":"BATATA TRADI CX 400G","grupo":"BATATA"},{"cod":2082,"nome":"BATATA TRADI CX 800G","grupo":"BATATA"},{"cod":2137,"nome":"BATATA CHIPS ORIGINAL","grupo":"BATATA"},{"cod":2138,"nome":"BATATA CHIPS CEBOLA E SALSA","grupo":"BATATA"},{"cod":2139,"nome":"BATATA CHIPS CHURRASCO","grupo":"BATATA"}];
 const PP_CORES={BATATA:'pp-b-batata',FARINHA:'pp-b-farinha',TAPIOCA:'pp-b-tapioca',FECULA:'pp-b-fecula'};
-const PP_RUAS=[['A',7],['B',4],['C',9],['D',8]];
-const PP_NIVEIS=[['Nível 4','4'],['Nível 3','3'],['Nível 2','2'],['Chão','1']];
-const PP_TOTAL=112;
-let ppEstado={};       // id -> {cod,qtd,val,ts}
-let ppDel={};          // id -> ts (posições liberadas, para não "reviver" via sync antigo)
-// Persistência LOCAL
-const PP_KEY='controle_porta_palete_v1';
-const PP_DEL_KEY='controle_porta_palete_del_v1';
+const PP_NOMES_GRUPO={BATATA:'Batata',FARINHA:'Farinha',TAPIOCA:'Tapioca',FECULA:'Fécula'};
+// estruturas dos dois locais: [nome do módulo, posições por nível, nº de níveis]
+const PP_ESTRUTURAS={
+  matriz:{ nome:'Matriz', total:112, modulos:[['A',7,4],['B',4,4],['C',9,4],['D',8,4]] },
+  cd:{ nome:'CD', total:54, modulos:[['1',16,3],['2',2,3]] }
+};
+// dados por local: { matriz:{id->{cod,qtd,val,ts}}, cd:{...} } e exclusões idem
+let ppDados={matriz:{}, cd:{}};
+let ppDel={matriz:{}, cd:{}};
+let ppLocal='matriz';           // local selecionado
+let ppPosAtual=null;
+let ppFiltroAtivo='TODOS';
+let ppItensAbertos={};          // cod -> true (itens do resumo expandidos)
+let ppMontado=false;
+
+// chaves de armazenamento
+const PP_KEY='controle_porta_palete_v2';        // novo formato (dois locais)
+const PP_DEL_KEY='controle_porta_palete_del_v2';
+const PP_KEY_ANTIGO='controle_porta_palete_v1';     // formato antigo (só matriz)
+const PP_DEL_KEY_ANTIGO='controle_porta_palete_del_v1';
+
+function ppEstadoLocal(){ return ppDados[ppLocal]; }
+function ppDelLocal(){ return ppDel[ppLocal]; }
+function ppEstrutura(){ return PP_ESTRUTURAS[ppLocal]; }
+
 function ppSalvarLocal(){
-  try{ localStorage.setItem(PP_KEY, JSON.stringify(ppEstado)); }catch(e){}
+  try{ localStorage.setItem(PP_KEY, JSON.stringify(ppDados)); }catch(e){}
   try{ localStorage.setItem(PP_DEL_KEY, JSON.stringify(ppDel)); }catch(e){}
 }
 function ppCarregarLocal(){
-  try{ const d=JSON.parse(localStorage.getItem(PP_KEY)||'null'); if(d&&typeof d==='object') ppEstado=d; }catch(e){}
-  try{ const d=JSON.parse(localStorage.getItem(PP_DEL_KEY)||'null'); if(d&&typeof d==='object') ppDel=d; }catch(e){}
+  // 1) tenta o formato novo
+  let temNovo=false;
+  try{ const d=JSON.parse(localStorage.getItem(PP_KEY)||'null'); if(d&&typeof d==='object'&&d.matriz!==undefined){ ppDados={matriz:d.matriz||{}, cd:d.cd||{}}; temNovo=true; } }catch(e){}
+  try{ const d=JSON.parse(localStorage.getItem(PP_DEL_KEY)||'null'); if(d&&typeof d==='object'&&d.matriz!==undefined){ ppDel={matriz:d.matriz||{}, cd:d.cd||{}}; } }catch(e){}
+  // 2) MIGRAÇÃO: se não há formato novo, puxa o antigo (que era só a matriz) e preserva
+  if(!temNovo){
+    try{ const d=JSON.parse(localStorage.getItem(PP_KEY_ANTIGO)||'null'); if(d&&typeof d==='object') ppDados.matriz=d; }catch(e){}
+    try{ const d=JSON.parse(localStorage.getItem(PP_DEL_KEY_ANTIGO)||'null'); if(d&&typeof d==='object') ppDel.matriz=d; }catch(e){}
+    ppSalvarLocal();   // grava já no formato novo (não apaga o antigo, por segurança)
+  }
 }
-// junta o porta-palete vindo da nuvem: cada posição decidida por "mais recente vence" (ts)
+// junta o porta-palete vindo da nuvem (dois locais), cada posição por "mais recente vence"
 function ppMergeNuvem(remoto, remotoDel){
-  remotoDel = remotoDel||{};
-  remoto = remoto||{};
-  // 1) aplica exclusões remotas mais recentes
-  Object.keys(remotoDel).forEach(id=>{
-    const tsDel=+remotoDel[id]||0;
-    if(tsDel > (ppDel[id]||0)) ppDel[id]=tsDel;
-    // se a exclusão remota é mais nova que o meu preenchimento local, removo
-    if(ppEstado[id] && tsDel >= (ppEstado[id].ts||0)) delete ppEstado[id];
-  });
-  // 2) aplica preenchimentos remotos mais recentes
-  Object.keys(remoto).forEach(id=>{
-    const r=remoto[id]; if(!r) return;
-    const rts=+r.ts||0;
-    // ignora se há exclusão local mais nova
-    if((ppDel[id]||0) > rts) return;
-    // adota se remoto é mais novo que o local
-    if(!ppEstado[id] || rts > (ppEstado[id].ts||0)){ ppEstado[id]={...r, ts:rts}; }
+  remoto = remoto||{}; remotoDel = remotoDel||{};
+  // COMPATIBILIDADE: se a nuvem ainda está no formato antigo (posições direto, sem matriz/cd),
+  // trata como se fosse a matriz.
+  if(remoto && remoto.matriz===undefined && Object.keys(remoto).length){
+    remoto = {matriz: remoto, cd:{}};
+  }
+  if(remotoDel && remotoDel.matriz===undefined && Object.keys(remotoDel).length){
+    remotoDel = {matriz: remotoDel, cd:{}};
+  }
+  ['matriz','cd'].forEach(loc=>{
+    const rem = remoto[loc]||{};
+    const remDel = remotoDel[loc]||{};
+    const est = ppDados[loc]||(ppDados[loc]={});
+    const del = ppDel[loc]||(ppDel[loc]={});
+    // exclusões remotas
+    Object.keys(remDel).forEach(id=>{
+      const tsDel=+remDel[id]||0;
+      if(tsDel > (del[id]||0)) del[id]=tsDel;
+      if(est[id] && tsDel >= (est[id].ts||0)) delete est[id];
+    });
+    // preenchimentos remotos
+    Object.keys(rem).forEach(id=>{
+      const r=rem[id]; if(!r) return;
+      const rts=+r.ts||0;
+      if((del[id]||0) > rts) return;
+      if(!est[id] || rts > (est[id].ts||0)){ est[id]={...r, ts:rts}; }
+    });
   });
   ppSalvarLocal();
-  if(ppMontado){ ppMontarMapa(); ppResumo(); }
+  if(ppMontado){ ppMontarMapa(); ppResumo(); ppMontarResumoProduto(); }
 }
-let ppPosAtual=null;
-let ppFiltroAtivo='TODOS';
-let ppMontado=false;
 
 function ppGrupo(cod){ const it=PP_ITENS.find(x=>x.cod==cod); return it?it.grupo:''; }
+function ppNome(cod){ const it=PP_ITENS.find(x=>x.cod==cod); return it?it.nome:''; }
 function ppDiasVenc(val){ if(!val) return null; const h=new Date(); h.setHours(0,0,0,0); const d=new Date(val+'T00:00'); return Math.round((d-h)/86400000); }
+function ppFmtData(val){ if(!val) return 'sem validade'; const p=val.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+
 function ppMontarSelect(){
   const sel=document.getElementById('pp-m-item'); if(!sel) return;
   let html='<option value="">— selecione —</option>';
@@ -4867,50 +4991,93 @@ function ppMontarSelect(){
 }
 function ppMontarMapa(){
   const mapa=document.getElementById('pp-mapa'); if(!mapa) return;
-  let html='';
-  PP_RUAS.forEach(([letra,porNivel])=>{
-    html+='<div class="pp-rua"><div class="pp-rua-nome">Rua '+letra+' · '+porNivel+'/nível<span class="pp-rua-ocup" id="pp-oc-'+letra+'"></span></div><div class="pp-niveis">';
-    PP_NIVEIS.forEach(([nome,n])=>{
-      html+='<div class="pp-nivel"><span class="pp-nivel-lbl">'+nome+'</span><div class="pp-posicoes" style="grid-template-columns:repeat('+porNivel+',minmax(52px,1fr))">';
-      for(let i=1;i<=porNivel;i++){ const id=letra+n+'-'+i; html+='<div class="pp-pos vazio" id="pp-p-'+id+'" onclick="ppAbrir(\''+id+'\')">'+id+'</div>'; }
+  const est=ppEstrutura(); let html='';
+  est.modulos.forEach(([nome,porNivel,niveis])=>{
+    html+='<div class="pp-rua"><div class="pp-rua-nome">Módulo '+nome+' · '+porNivel+'/nível<span class="pp-rua-ocup" id="pp-oc-'+nome+'"></span></div><div class="pp-niveis">';
+    for(let n=niveis;n>=1;n--){
+      const lbl=n===1?'Chão':'Nível '+n;
+      html+='<div class="pp-nivel"><span class="pp-nivel-lbl">'+lbl+'</span><div class="pp-posicoes" style="grid-template-columns:repeat('+porNivel+',minmax(52px,1fr))">';
+      for(let i=1;i<=porNivel;i++){ const id=nome+n+'-'+i; html+='<div class="pp-pos vazio" id="pp-p-'+id+'" onclick="ppAbrir(\''+id+'\')">'+id+'</div>'; }
       html+='</div></div>';
-    });
+    }
     html+='</div></div>';
   });
   mapa.innerHTML=html;
-  Object.keys(ppEstado).forEach(id=>ppPintar(id));
+  Object.keys(ppEstadoLocal()).forEach(id=>ppPintar(id));
   ppAplicarFiltroTodas();
 }
 function ppPintar(id){
   const el=document.getElementById('pp-p-'+id); if(!el) return;
-  const at=ppEstado[id];
+  const at=ppEstadoLocal()[id];
   if(!at){ el.className='pp-pos vazio'; el.innerHTML=id; ppFiltroPos(id); return; }
   const cor=PP_CORES[ppGrupo(at.cod)]||'pp-b-fecula';
-  let cls='pp-pos '+cor;
-  const dias=ppDiasVenc(at.val); let badge='';
-  if(dias!==null){ if(dias<0){ cls+=' venc-vencido'; badge='<span class="pp-venc-badge">⚠</span>'; } else if(dias<=30){ cls+=' venc-alerta'; badge='<span class="pp-venc-badge">•</span>'; } }
+  let cls='pp-pos '+cor; const dias=ppDiasVenc(at.val); let badge='';
+  if(dias!==null){ if(dias<0){cls+=' venc-vencido';badge='<span class="pp-venc-badge">⚠</span>';} else if(dias<=30){cls+=' venc-alerta';badge='<span class="pp-venc-badge">•</span>';} }
   el.className=cls;
-  let txt=id+badge+'<span class="pp-det">'+at.cod+'</span>';
-  if(at.qtd) txt+='<span class="pp-det">'+at.qtd+' un</span>';
-  el.innerHTML=txt;
-  ppFiltroPos(id);
+  let txt=id+badge+'<span class="pp-det">'+at.cod+'</span>'; if(at.qtd) txt+='<span class="pp-det">'+at.qtd+' un</span>';
+  el.innerHTML=txt; ppFiltroPos(id);
 }
 function ppFiltroPos(id){
   const el=document.getElementById('pp-p-'+id); if(!el) return;
   if(ppFiltroAtivo==='TODOS'){ el.classList.remove('apagado'); return; }
-  const at=ppEstado[id]; const g=at?ppGrupo(at.cod):null;
-  el.classList.toggle('apagado', g!==ppFiltroAtivo);
+  const at=ppEstadoLocal()[id]; el.classList.toggle('apagado',(at?ppGrupo(at.cod):null)!==ppFiltroAtivo);
 }
 function ppAplicarFiltroTodas(){ document.querySelectorAll('#pp-mapa .pp-pos').forEach(el=>ppFiltroPos(el.id.slice(5))); }
 function ppFiltrar(f){
   ppFiltroAtivo=f;
-  document.querySelectorAll('.pp-fbtn').forEach(b=>b.classList.toggle('on', b.dataset.f===f));
-  ppAplicarFiltroTodas();
+  document.querySelectorAll('.pp-fbtn').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  ppAplicarFiltroTodas(); ppItensAbertos={}; ppMontarResumoProduto();
+}
+function ppToggleItem(cod){ ppItensAbertos[cod]=!ppItensAbertos[cod]; ppMontarResumoProduto(); }
+function ppMontarResumoProduto(){
+  const box=document.getElementById('pp-resumo-prod'); if(!box) return;
+  if(ppFiltroAtivo==='TODOS'){ box.classList.remove('show'); box.innerHTML=''; return; }
+  const e=ppEstadoLocal();
+  const porItem={};
+  Object.values(e).forEach(at=>{
+    if(ppGrupo(at.cod)!==ppFiltroAtivo) return;
+    if(!porItem[at.cod]) porItem[at.cod]={paletes:0,qtd:0,validades:{}};
+    const r=porItem[at.cod]; r.paletes++; r.qtd+=(parseFloat(at.qtd)||0);
+    const v=at.val||'sem'; if(!r.validades[v]) r.validades[v]={paletes:0,qtd:0};
+    r.validades[v].paletes++; r.validades[v].qtd+=(parseFloat(at.qtd)||0);
+  });
+  const cods=Object.keys(porItem);
+  let html='<div class="pp-rp-titulo"><span class="pp-rp-dot '+PP_CORES[ppFiltroAtivo]+'"></span>Resumo · '+PP_NOMES_GRUPO[ppFiltroAtivo]+'</div>';
+  if(cods.length===0){ html+='<div class="pp-rp-vazio">Nenhum palete de '+PP_NOMES_GRUPO[ppFiltroAtivo]+' armazenado no momento.</div>'; box.innerHTML=html; box.classList.add('show'); return; }
+  let totPal=0,totQtd=0;
+  cods.sort((a,b)=>ppNome(a).localeCompare(ppNome(b)));
+  cods.forEach(cod=>{
+    const r=porItem[cod]; totPal+=r.paletes; totQtd+=r.qtd;
+    const aberto=ppItensAbertos[cod]?' aberto':'';
+    html+='<div class="pp-rp-item'+aberto+'">';
+    html+='<div class="pp-rp-linha" onclick="ppToggleItem('+cod+')"><div class="pp-rp-nome"><span class="pp-rp-seta">▼</span><span class="pp-rp-cod">'+cod+'</span> '+ppNome(cod)+'</div>'
+      +'<div class="pp-rp-vals"><div class="pp-rp-val"><div class="n">'+r.paletes+'</div><div class="l">paletes</div></div><div class="pp-rp-val"><div class="n">'+r.qtd+'</div><div class="l">itens</div></div></div></div>';
+    const vals=Object.keys(r.validades).sort((a,b)=>{ if(a==='sem')return 1; if(b==='sem')return -1; return a.localeCompare(b); });
+    html+='<div class="pp-rp-sub">';
+    vals.forEach(v=>{
+      const sv=r.validades[v]; const dias=v==='sem'?null:ppDiasVenc(v);
+      let cor='#bbb', cls='', txt=v==='sem'?'Sem validade':'Vence '+ppFmtData(v);
+      if(dias!==null){ if(dias<0){cor='var(--vencido,#D32F2F)';cls='pp-tag-venc';} else if(dias<=30){cor='var(--alerta,#E8A200)';cls='pp-tag-alerta';} }
+      html+='<div class="pp-sub-linha"><div class="pp-sub-tag"><span class="pp-sub-dot" style="background:'+cor+'"></span><span class="'+cls+'">'+txt+'</span></div>'
+        +'<div class="pp-sub-vals"><div class="v"><div class="n">'+sv.paletes+'</div><div class="l">paletes</div></div><div class="v"><div class="n">'+sv.qtd+'</div><div class="l">itens</div></div></div></div>';
+    });
+    html+='</div></div>';
+  });
+  html+='<div class="pp-rp-total"><div>Total '+PP_NOMES_GRUPO[ppFiltroAtivo]+'</div><div class="pp-rp-vals"><div class="pp-rp-val"><div class="n">'+totPal+'</div><div class="l">paletes</div></div><div class="pp-rp-val"><div class="n">'+totQtd+'</div><div class="l">itens</div></div></div></div>';
+  box.innerHTML=html; box.classList.add('show');
+}
+function ppTrocarLocal(loc){
+  ppLocal=loc;
+  const bM=document.getElementById('pp-loc-matriz'), bC=document.getElementById('pp-loc-cd');
+  if(bM) bM.classList.toggle('on',loc==='matriz');
+  if(bC) bC.classList.toggle('on',loc==='cd');
+  ppFiltroAtivo='TODOS'; document.querySelectorAll('.pp-fbtn').forEach(b=>b.classList.toggle('on',b.dataset.f==='TODOS'));
+  ppItensAbertos={}; ppMontarMapa(); ppResumo(); ppMontarResumoProduto();
 }
 function ppAbrir(id){
   ppPosAtual=id;
-  document.getElementById('pp-m-posid').textContent='Posição '+id;
-  const at=ppEstado[id];
+  document.getElementById('pp-m-posid').textContent='Posição '+id+' · '+ppEstrutura().nome;
+  const at=ppEstadoLocal()[id];
   document.getElementById('pp-m-item').value=at?at.cod:'';
   document.getElementById('pp-m-qtd').value=at?at.qtd:'';
   document.getElementById('pp-m-val').value=at?at.val:'';
@@ -4922,24 +5089,27 @@ function ppFechar(){ document.getElementById('pp-modal-bg').classList.remove('op
 function ppSalvar(){
   const cod=document.getElementById('pp-m-item').value;
   if(!cod){ toast('Escolha um item'); return; }
-  ppEstado[ppPosAtual]={cod,qtd:document.getElementById('pp-m-qtd').value,val:document.getElementById('pp-m-val').value, ts:Date.now()};
-  if(ppDel[ppPosAtual]) delete ppDel[ppPosAtual];   // ocupou de novo: cancela marca de exclusão
-  ppSalvarLocal();
-  if(API_URL) pushMeta();                            // sincroniza (é minúsculo, ~5KB no máximo)
-  ppPintar(ppPosAtual); ppFechar(); ppResumo();
+  ppEstadoLocal()[ppPosAtual]={cod,qtd:document.getElementById('pp-m-qtd').value,val:document.getElementById('pp-m-val').value, ts:Date.now()};
+  if(ppDelLocal()[ppPosAtual]) delete ppDelLocal()[ppPosAtual];
+  ppSalvarLocal(); if(API_URL) pushMeta();
+  ppPintar(ppPosAtual); ppFechar(); ppResumo(); ppMontarResumoProduto();
 }
-function ppLiberar(){ delete ppEstado[ppPosAtual]; ppDel[ppPosAtual]=Date.now(); ppSalvarLocal(); if(API_URL) pushMeta(); ppPintar(ppPosAtual); ppFechar(); ppResumo(); }
+function ppLiberar(){
+  delete ppEstadoLocal()[ppPosAtual]; ppDelLocal()[ppPosAtual]=Date.now();
+  ppSalvarLocal(); if(API_URL) pushMeta();
+  ppPintar(ppPosAtual); ppFechar(); ppResumo(); ppMontarResumoProduto();
+}
 function ppResumo(){
-  const ocup=Object.keys(ppEstado).length;
+  const est=ppEstrutura(); const e=ppEstadoLocal(); const ocup=Object.keys(e).length;
   let vencendo=0,vencido=0;
-  Object.values(ppEstado).forEach(at=>{ const d=ppDiasVenc(at.val); if(d!==null){ if(d<0)vencido++; else if(d<=30)vencendo++; } });
-  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
-  set('pp-ocup',ocup); set('pp-livre',PP_TOTAL-ocup); set('pp-vencendo',vencendo); set('pp-vencido',vencido);
-  PP_RUAS.forEach(([letra,porNivel])=>{ const tot=porNivel*4; let oc=0; Object.keys(ppEstado).forEach(id=>{ if(id[0]===letra)oc++; }); const e=document.getElementById('pp-oc-'+letra); if(e) e.textContent=' ('+oc+'/'+tot+' cheias)'; });
+  Object.values(e).forEach(at=>{ const d=ppDiasVenc(at.val); if(d!==null){ if(d<0)vencido++; else if(d<=30)vencendo++; } });
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('pp-ocup',ocup); set('pp-livre',est.total-ocup); set('pp-vencendo',vencendo); set('pp-vencido',vencido);
+  est.modulos.forEach(([nome,porNivel,niveis])=>{ const tot=porNivel*niveis; let oc=0; Object.keys(e).forEach(id=>{ if(id.startsWith(nome))oc++; }); const el=document.getElementById('pp-oc-'+nome); if(el) el.textContent=' ('+oc+'/'+tot+' cheias)'; });
 }
 function ppInit(){
   if(!ppMontado){ ppCarregarLocal(); ppMontarSelect(); ppMontarMapa(); ppMontado=true; }
-  ppResumo();
+  ppResumo(); ppMontarResumoProduto();
 }
 
 if(API_URL) pull(true, true);   // primeira sincronização forçada (destrava o envio de usuários/base)
@@ -4990,7 +5160,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v115';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v116';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
