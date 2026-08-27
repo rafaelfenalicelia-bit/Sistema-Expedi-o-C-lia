@@ -3892,10 +3892,24 @@ function mergeUsersDaNuvem(cloudUsers, cloudTs, cloudDel){
   const localUsers=loadUsers();
   const localTs=getUsersTs();
   const del=Array.from(new Set([...(getUsersDel()||[]), ...(cloudDel||[])]));
-  const cloudNewer=(cloudTs||0)>=localTs;
   const map={};
+  // começa com os locais
   localUsers.forEach(u=>{ map[u.nome]=u; });
-  cloudUsers.forEach(u=>{ if(!map[u.nome]||cloudNewer) map[u.nome]=u; });
+  // para cada usuário da nuvem, decide POR USUÁRIO: vence o de timestamp mais recente.
+  // (antes era um único ts para a lista toda, o que fazia a senha nova de um usuário
+  //  ser revertida pela versão antiga vinda de outro aparelho.)
+  cloudUsers.forEach(cu=>{
+    const lu=map[cu.nome];
+    if(!lu){ map[cu.nome]=cu; return; }                 // usuário novo da nuvem
+    const luTs = +lu.ts || 0;
+    const cuTs = +cu.ts || 0;
+    if(cuTs > luTs){ map[cu.nome]=cu; }                  // nuvem mais recente para ESTE usuário
+    else if(cuTs===luTs && cuTs===0){
+      // nenhum tem ts (dados antigos): mantém o local, mas se a lista da nuvem for globalmente mais nova, adota
+      if((cloudTs||0) > localTs) map[cu.nome]=cu;
+    }
+    // senão mantém o local (local é mais recente para este usuário)
+  });
   let merged=Object.values(map).filter(u=> u.nome===ADMIN_NAME || del.indexOf(u.nome)<0 );
   if(!merged.find(u=>u.nome===ADMIN_NAME)) merged.unshift({nome:ADMIN_NAME,pin:ADMIN_PIN,role:'admin'});
   const mudou = JSON.stringify(merged)!==JSON.stringify(localUsers) || JSON.stringify(del)!==JSON.stringify(getUsersDel()||[]);
@@ -3955,7 +3969,7 @@ function fazerCadastro(){
   if(nome===ADMIN_NAME){err.textContent='Este nome é reservado';return;}
   const users=loadUsers();
   if(users.find(u=>u.nome===nome)){err.textContent='Usuário já existe. Faça login.';return;}
-  users.push({nome,pin,role:'user',tabs:['est','con']}); 
+  users.push({nome,pin,role:'user',tabs:['est','con'],ts:Date.now()}); 
   const del=getUsersDel().filter(n=>n!==nome); setUsersDel(del);
   salvarUsersSync(users);
   saveSession({nome,role:'user',tabs:['est','con']});
@@ -4046,7 +4060,7 @@ function confirmarAlterarSenha(){
   const users=loadUsers();
   const idx=users.findIndex(u=>u.nome===usuarioAtual.nome);
   if(idx<0||users[idx].pin!==pinAtual){err.textContent='Senha atual incorreta ❌';clearPin('pin-atual');return;}
-  users[idx].pin=pinNova; salvarUsersSync(users);
+  users[idx].pin=pinNova; users[idx].ts=Date.now(); salvarUsersSync(users);
   fecharDrawer('senha');
   toast('Senha alterada com sucesso ✓');
 }
@@ -4097,6 +4111,7 @@ function setUserEdita(nome, ativo){
   const users=loadUsers();
   const u=users.find(x=>x.nome===nome); if(!u) return;
   u.editaEstoque = !!ativo;
+  u.ts=Date.now();
   salvarUsersSync(users);
   toast((ativo?'Liberado':'Bloqueado')+' editar estoque: '+nome);
 }
@@ -4107,6 +4122,7 @@ function setUserTab(nome, tab, ativo){
   if(ativo){ if(!tabs.includes(tab)) tabs.push(tab); }
   else { tabs=tabs.filter(t=>t!==tab); }
   u.tabs=tabs;
+  u.ts=Date.now();
   salvarUsersSync(users);
   toast('Telas de '+nome+' atualizadas ✓');
 }
@@ -4141,7 +4157,7 @@ function confirmarResetSenha(){
   const users=loadUsers();
   const idx=users.findIndex(u=>u.nome===_resetTarget);
   if(idx<0){err.textContent='Usuário não encontrado';return;}
-  users[idx].pin=pin; salvarUsersSync(users);
+  users[idx].pin=pin; users[idx].ts=Date.now(); salvarUsersSync(users);
   fecharDrawer('reset');
   toast('Senha de '+_resetTarget+' redefinida ✓');
   _resetTarget=null;
@@ -5160,7 +5176,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v117';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v118';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
