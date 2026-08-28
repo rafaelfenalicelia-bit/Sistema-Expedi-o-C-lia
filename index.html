@@ -452,6 +452,14 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .urb-user{background:#E8F5E9;color:#2E7D32}
 .btn-pin-reset{font-size:12px;padding:5px 10px;min-height:32px}
 /* ===== Porta-Paletes ===== */
+/* tooltip (PC) modelo card claro com barra colorida */
+.pp-tooltip{position:fixed;z-index:9999;background:#fff;color:var(--text,#1A1010);border-radius:10px;width:210px;box-shadow:0 8px 24px rgba(0,0,0,.22);border:1px solid rgba(0,0,0,.10);overflow:hidden;pointer-events:none;opacity:0;transition:opacity .12s;display:none}
+.pp-tooltip.show{display:block;opacity:1}
+.pp-tt-barra{color:#fff;padding:8px 12px;font-size:12.5px;font-weight:700;line-height:1.2}
+.pp-tt-corpo{padding:9px 12px}
+.pp-tt-lin{font-size:12px;display:flex;justify-content:space-between;padding:2px 0;color:var(--text2,#5E4040)}
+.pp-tt-lin b{color:var(--text,#1A1010);font-weight:700}
+.pp-tt-venc{margin-top:4px;font-size:11px;font-weight:700}
 /* seletor Matriz/CD */
 .pp-local-sw{display:flex;gap:0;margin:10px 0 14px;border:2px solid var(--red);border-radius:10px;overflow:hidden}
 .pp-local-sw button{flex:1;padding:11px;border:none;background:var(--surface);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--red)}
@@ -1180,6 +1188,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 
 <div class="app-footer">Controle de Expedição <span class="ver-tag" id="ver-tag"></span></div>
 
+<div class="pp-tooltip" id="pp-tooltip"></div>
 <div class="pp-modal-bg" id="pp-modal-bg" style="position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:16px;z-index:200">
   <div style="background:var(--surface);border-radius:14px;padding:18px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(0,0,0,.3)">
     <h3 id="pp-m-titulo" style="font-size:15px;margin-bottom:2px">Posição</h3>
@@ -5021,18 +5030,65 @@ function ppMontarMapa(){
   mapa.innerHTML=html;
   Object.keys(ppEstadoLocal()).forEach(id=>ppPintar(id));
   ppAplicarFiltroTodas();
+  // eventos do tooltip (só uma vez): delegação no container do mapa
+  if(mapa && !mapa.dataset.ttLigado){
+    mapa.dataset.ttLigado='1';
+    mapa.addEventListener('mouseover', e=>{ const pos=e.target.closest('.pp-pos'); if(pos && pos.dataset.ttCod) ppTooltipMostrar(pos, e); });
+    mapa.addEventListener('mousemove', e=>{ const pos=e.target.closest('.pp-pos'); if(pos && pos.dataset.ttCod) ppTooltipPos(e); else ppTooltipEsconder(); });
+    mapa.addEventListener('mouseout', e=>{ const pos=e.target.closest('.pp-pos'); const to=e.relatedTarget&&e.relatedTarget.closest?e.relatedTarget.closest('.pp-pos'):null; if(pos&&pos!==to) ppTooltipEsconder(); });
+    mapa.addEventListener('mouseleave', ppTooltipEsconder);
+  }
 }
 function ppPintar(id){
   const el=document.getElementById('pp-p-'+id); if(!el) return;
   const at=ppEstadoLocal()[id];
-  if(!at){ el.className='pp-pos vazio'; el.innerHTML=id; ppFiltroPos(id); return; }
+  if(!at){ el.className='pp-pos vazio'; el.innerHTML=id; el.removeAttribute('title'); ppFiltroPos(id); return; }
   const cor=PP_CORES[ppGrupo(at.cod)]||'pp-b-fecula';
   let cls='pp-pos '+cor; const dias=ppDiasVenc(at.val); let badge='';
   if(dias!==null){ if(dias<0){cls+=' venc-vencido';badge='<span class="pp-venc-badge">⚠</span>';} else if(dias<=30){cls+=' venc-alerta';badge='<span class="pp-venc-badge">•</span>';} }
   el.className=cls;
   let txt=id+badge+'<span class="pp-det">'+at.cod+'</span>'; if(at.qtd) txt+='<span class="pp-det">'+at.qtd+' un</span>';
-  el.innerHTML=txt; ppFiltroPos(id);
+  el.innerHTML=txt;
+  // dados para o tooltip customizado (PC). No celular, o toque abre a ficha como sempre.
+  el.dataset.ttNome = ppNome(at.cod);
+  el.dataset.ttCod = at.cod;
+  el.dataset.ttQtd = at.qtd||'';
+  el.dataset.ttVal = at.val||'';
+  el.dataset.ttGrupo = ppGrupo(at.cod);
+  el.removeAttribute('title');
+  ppFiltroPos(id);
 }
+// cor da barra do tooltip conforme o grupo
+const PP_COR_HEX={BATATA:'#2E7D32',FARINHA:'#5D4037',TAPIOCA:'#00695C',FECULA:'#455A64'};
+function ppTooltipMostrar(el, ev){
+  const tt=document.getElementById('pp-tooltip'); if(!tt) return;
+  if(!el.dataset.ttCod) return;   // posição vazia: sem tooltip
+  const cor=PP_COR_HEX[el.dataset.ttGrupo]||'#455A64';
+  const val=el.dataset.ttVal;
+  const dias=val?ppDiasVenc(val):null;
+  let vencHtml='';
+  if(dias!==null){
+    if(dias<0) vencHtml='<div class="pp-tt-venc" style="color:#D32F2F">⚠ VENCIDO</div>';
+    else if(dias<=30) vencHtml='<div class="pp-tt-venc" style="color:#E8A200">• vence em '+dias+' dia'+(dias===1?'':'s')+'</div>';
+  }
+  tt.innerHTML='<div class="pp-tt-barra" style="background:'+cor+'">'+el.dataset.ttNome+'</div>'
+    +'<div class="pp-tt-corpo">'
+    +'<div class="pp-tt-lin">Código <b>'+el.dataset.ttCod+'</b></div>'
+    +'<div class="pp-tt-lin">Quantidade <b>'+(el.dataset.ttQtd||'—')+'</b></div>'
+    +'<div class="pp-tt-lin">Validade <b>'+(val?ppFmtData(val):'sem validade')+'</b></div>'
+    +vencHtml+'</div>';
+  tt.classList.add('show');
+  ppTooltipPos(ev);
+}
+function ppTooltipPos(ev){
+  const tt=document.getElementById('pp-tooltip'); if(!tt||!tt.classList.contains('show')) return;
+  const larg=tt.offsetWidth||210, alt=tt.offsetHeight||90;
+  let x=ev.clientX+14, y=ev.clientY-alt-8;
+  if(x+larg>window.innerWidth-8) x=ev.clientX-larg-14;   // não sai pela direita
+  if(y<8) y=ev.clientY+16;                               // se não cabe em cima, vai embaixo
+  tt.style.left=x+'px'; tt.style.top=y+'px';
+}
+function ppTooltipEsconder(){ const tt=document.getElementById('pp-tooltip'); if(tt) tt.classList.remove('show'); }
 function ppFiltroPos(id){
   const el=document.getElementById('pp-p-'+id); if(!el) return;
   if(ppFiltroAtivo==='TODOS'){ el.classList.remove('apagado'); return; }
@@ -5176,7 +5232,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v118';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v120';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
