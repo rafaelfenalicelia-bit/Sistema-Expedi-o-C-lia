@@ -1102,6 +1102,7 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
       <div class="fg" style="margin:0;flex:1"><label>📅 Data fim</label><input type="date" id="d-fim" onchange="renderDash()"></div>
     </div>
     <button class="btn btn-sm" onclick="limparDash()">Limpar período (ver tudo)</button>
+    <button class="btn btn-sm" onclick="exportarResumoProg()" style="background:var(--red);color:#fff;border-color:var(--red);margin-top:6px">📄 Exportar resumo da programação</button>
   </div>
   <div class="metrics">
     <div class="metric"><div class="metric-label">A carregar (período)</div><div class="metric-val" id="d-car">0 kg</div></div>
@@ -2825,6 +2826,135 @@ function renderMaquinas(){
       <div class="maq-rz"><span class="mz-l">30X1</span><span class="mz-v">${fmtFardos(progM['30X1'])}</span></div>
       <div class="maq-rz"><span class="mz-l">10X1</span><span class="mz-v">${fmtFardos(progM['10X1'])}</span></div>
     </div>`;
+}
+
+// ===== Exportar resumo da programação (página imprimível) =====
+function exportarResumoProg(){
+  const ini=val('d-ini'), fim=val('d-fim');
+  const cf=cargas.filter(c=>{ const d=c.data||''; if(!d) return false; if(ini&&d<ini)return false; if(fim&&d>fim)return false; return true; });
+  if(!cf.length){ toast('Nenhuma carga no período selecionado.'); return; }
+
+  const DIAS=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+  const fmtCol=iso=>{ const [a,m,dd]=iso.split('-').map(Number); const dt=new Date(a,m-1,dd); return DIAS[dt.getDay()]+' '+String(dd).padStart(2,'0')+'/'+String(m).padStart(2,'0'); };
+  const nf=v=> v? Math.round(v).toLocaleString('pt-BR') : '—';
+  const ff=v=> v? fmtFardos(v) : '—';
+
+  // dias presentes (ordenados)
+  const dias=[...new Set(cf.map(c=>c.data))].sort();
+
+  // ---- 1. CARGAS ----
+  const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||'')||String(a.num).localeCompare(String(b.num)));
+  let totFardos=0, cargasRows='';
+  ord.forEach(c=>{
+    const pesoC=c.itens.reduce((s,x)=>s+(x.peso||0),0), fardos=pesoC/30; totFardos+=fardos;
+    const esp = c.especial?'<span class="tag-esp">ESPECIAL</span>':'';
+    cargasRows+=`<tr><td>${esc(String(c.num))}</td><td>${esc(c.nome)}${esp}</td><td>${fmtCol(c.data)}</td><td class="fardos">${ff(fardos)}</td></tr>`;
+  });
+  cargasRows+=`<tr><td colspan="3">TOTAL — ${ord.length} carga(s)</td><td class="fardos">${ff(totFardos)} fardos</td></tr>`;
+
+  // ---- 2. INSUMOS (por dia, parbo/polido/integral × normal/especial) ----
+  const zero=()=>({parbo:{normal:0,especial:0},polido:{normal:0,especial:0},integral:{normal:0,especial:0}});
+  const porDiaIns={};
+  cf.forEach(c=>{
+    const cat=c.especial?'especial':'normal'; const d=c.data;
+    if(!porDiaIns[d]) porDiaIns[d]=zero();
+    c.itens.forEach(it=>{
+      const t=tipoInsumo(it.nome,it.tp); if(!t) return;
+      const p=PMAP[it.cod]; const pu=p?(p.peso||0):0; const granel=p?p.granel:it.granel;
+      const kg=(granel||pu<=0)?(it.qtd||0):(it.qtd||0)*pu;
+      if(t==='mix'){ porDiaIns[d].parbo[cat]+=kg/2; porDiaIns[d].polido[cat]+=kg/2; }
+      else porDiaIns[d][t][cat]+=kg;
+    });
+  });
+  const insTipos=[['parbo','Parbo','ins-parbo'],['polido','Polido','ins-polido'],['integral','Integral','ins-integral']];
+  let insHead='<tr><th colspan="2">INSUMO</th>'+dias.map(d=>`<th class="dia">${fmtCol(d)}</th>`).join('')+'<th class="num">TOTAL</th></tr>';
+  let insBody='';
+  insTipos.forEach(([key,label,cls])=>{
+    [['normal','Normal',false],['especial','Especial',true]].forEach(([cat,catLabel,isEsp],idx)=>{
+      let tl=0; const cels=dias.map(d=>{ const v=porDiaIns[d][key][cat]; tl+=v; return `<td class="cel">${nf(v)}</td>`; }).join('');
+      insBody+=`<tr class="${cls} ${isEsp?'esp sep':''}">`;
+      if(idx===0) insBody+=`<td class="tipo" rowspan="2">${label}</td>`;
+      insBody+=`<td class="cat">${catLabel}</td>${cels}<td class="tot">${nf(tl)}</td></tr>`;
+    });
+  });
+
+  // ---- 3. FARDOS POR MÁQUINA EM CADA DIA (cálculo novo) ----
+  const maqs=['6X5','30X1','10X1'];
+  const porDiaMaq={};  // data -> {6X5,30X1,10X1}
+  dias.forEach(d=>porDiaMaq[d]={'6X5':0,'30X1':0,'10X1':0});
+  cf.forEach(c=>{
+    const d=c.data;
+    c.itens.forEach(it=>{
+      const p=PMAP[it.cod]; if(!p) return;
+      const m=maqDoProduto(p); if(!m) return;
+      porDiaMaq[d][m]+= qtdEmFardos(p, it.qtd, m);
+    });
+  });
+  const totMaq={'6X5':0,'30X1':0,'10X1':0};
+  let maqBody='';
+  maqs.forEach(m=>{
+    let lin=0; const cels=dias.map(d=>{ const v=porDiaMaq[d][m]; lin+=v; totMaq[m]+=v; return `<td class="cel">${ff(v)}</td>`; }).join('');
+    maqBody+=`<tr><td class="maq">${m}</td>${cels}<td class="tot">${ff(lin)}</td></tr>`;
+  });
+  // linha total por dia
+  let totGeral=0;
+  const celsTot=dias.map(d=>{ const v=maqs.reduce((s,m)=>s+porDiaMaq[d][m],0); totGeral+=v; return `<td class="cel">${ff(v)}</td>`; }).join('');
+  maqBody+=`<tr><td class="maq">TOTAL/DIA</td>${celsTot}<td class="tot">${ff(totGeral)}</td></tr>`;
+  let maqHead='<tr><th>Máquina</th>'+dias.map(d=>`<th class="dia">${fmtCol(d)}</th>`).join('')+'<th class="num">TOTAL</th></tr>';
+
+  // ---- observações ----
+  const obs = (insObsTexto||'').trim();
+  const obsHtml = obs ? `<div class="obs"><b>Observações:</b> ${esc(obs)}</div>` : '';
+
+  const periodoTxt = (ini||fim) ? ((ini?fmtData(ini):'início')+' a '+(fim?fmtData(fim):'fim')) : 'todo o período';
+
+  // ---- monta a página ----
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Resumo da Programação</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1A1010;padding:20px;font-size:13px;background:#E9E5E4}
+.btn-print{max-width:820px;margin:0 auto 12px;text-align:right}
+.btn-print button{background:#C8102E;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.folha{max-width:820px;margin:0 auto;background:#fff;border:1px solid #E0D6D6;border-radius:8px;padding:26px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.cab{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #C8102E;padding-bottom:14px;margin-bottom:18px}
+.cab h1{font-size:20px;color:#C8102E;margin-bottom:2px}.cab .sub{font-size:12px;color:#5E4040}
+.cab .periodo{text-align:right;font-size:12px;color:#5E4040}.cab .periodo b{color:#1A1010;font-size:14px}
+.secao{margin-bottom:24px}
+.secao-tit{font-size:14px;font-weight:800;color:#C8102E;text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #E0D6D6}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:6px 9px;text-align:left;border:1px solid #E0D6D6}
+th{background:#F5EFEF;font-weight:700;font-size:11px;text-transform:uppercase;color:#5E4040}
+th.num,th.dia{text-align:center}
+.cargas-tab td.fardos{text-align:right;font-weight:700;color:#C8102E}
+.cargas-tab tr:last-child td{border-top:2px solid #1A1010;font-weight:800;background:#FAFAFA}
+.tag-esp{display:inline-block;background:#FBE9E7;color:#C8102E;font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:middle}
+.ins-tab td.tipo{font-weight:800;text-transform:uppercase;background:#FAFAFA;text-align:center;vertical-align:middle}
+.ins-tab td.cat{font-size:11px;color:#5E4040}.ins-tab td.cel{text-align:right}
+.ins-tab td.tot{text-align:right;font-weight:800;background:#FAFAFA}
+.ins-tab tr.esp td{color:#5E4040}.ins-tab tr.sep td{border-bottom:2px solid #D0C4C4}
+.ins-parbo{border-left:3px solid #C8102E!important}.ins-polido{border-left:3px solid #00695C!important}.ins-integral{border-left:3px solid #8D6E63!important}
+.obs{margin-top:10px;background:#FFFDF5;border:1px solid #F0E4B8;border-radius:8px;padding:10px 12px;font-size:12px;color:#6B5410;line-height:1.5}.obs b{color:#3D2F08}
+.maq-tab td.maq{font-weight:700;background:#FAFAFA}.maq-tab td.cel{text-align:right}.maq-tab td.tot{text-align:right;font-weight:800;background:#FAFAFA}
+.maq-tab tr:last-child td{border-top:2px solid #1A1010;font-weight:800;background:#F5EFEF}
+.rodape{margin-top:20px;padding-top:12px;border-top:1px solid #E0D6D6;font-size:10px;color:#9A7878;text-align:center}
+@media print{ body{background:#fff;padding:0} .btn-print{display:none} .folha{box-shadow:none;border:none;max-width:100%} }
+</style></head><body>
+<div class="btn-print"><button onclick="window.print()">🖨️ Imprimir / Salvar PDF</button></div>
+<div class="folha">
+  <div class="cab"><div><h1>Resumo da Programação</h1><div class="sub">Célia Alimentos · Matriz</div></div>
+    <div class="periodo">Período<br><b>${periodoTxt}</b><br><span style="font-size:11px;color:#9A7878">emitido em ${fmtDataHora(Date.now())}</span></div></div>
+  <div class="secao"><div class="secao-tit">🚚 Cargas do período</div>
+    <table class="cargas-tab"><thead><tr><th>Carga</th><th>Cliente / Destino</th><th>Data prog.</th><th class="num">Fardos</th></tr></thead><tbody>${cargasRows}</tbody></table></div>
+  <div class="secao"><div class="secao-tit">🌾 Resumo de insumos (kg de arroz a granel)</div>
+    <table class="ins-tab"><thead>${insHead}</thead><tbody>${insBody}</tbody></table>${obsHtml}</div>
+  <div class="secao"><div class="secao-tit">⚙️ Fardos programados por máquina em cada dia</div>
+    <table class="maq-tab"><thead>${maqHead}</thead><tbody>${maqBody}</tbody></table></div>
+  <div class="rodape">Controle de Expedição · Célia Alimentos — resumo gerado pelo Painel</div>
+</div></body></html>`;
+
+  const w=window.open('','_blank');
+  if(!w){ toast('Permita pop-ups para abrir o resumo.'); return; }
+  w.document.write(html); w.document.close();
 }
 
 // ===== CONTROLE DE LOTES DE ARROZ (MATRIZ e CEARÁ) =====
@@ -5232,7 +5362,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v120';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v121';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
