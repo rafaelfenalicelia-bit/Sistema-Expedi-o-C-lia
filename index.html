@@ -2529,12 +2529,23 @@ function renderCon(){
     });
   });
   document.getElementById('con-body').innerHTML=rows||'<tr><td colspan="6"><div class="empty">Nenhuma carga no período selecionado</div></td></tr>';
-  let pesoTot=0;
-  cf.forEach(c=>c.itens.forEach(it=>{ pesoTot+=(it.peso||0); }));
-  document.getElementById('con-fardos-tot').textContent=fmtFardos(pesoTot/30)+' fardos';
+  let totFardosCon=0;
+  cf.forEach(c=>{ totFardosCon+=fardosDaCarga(c); });
+  document.getElementById('con-fardos-tot').textContent=fmtFardos(totFardosCon)+' fardos';
 }
 function fmtKg(n){ return Math.round(n).toLocaleString('pt-BR')+' kg'; }
 function fmtFardos(n){ const r=Math.round(n*10)/10; return (Number.isInteger(r)?r:r.toFixed(1)).toString().replace('.',','); }
+// Fardos de uma carga: converte ITEM A ITEM pela máquina de cada um.
+// 10X1 usa fardo de 10 kg; todo o resto (30X1, 6X5, granel, etc.) usa 30 kg.
+function fardosDaCarga(c){
+  return (c.itens||[]).reduce((s,it)=>{
+    const peso=it.peso||0; if(!peso) return s;
+    const p=PMAP[it.cod];
+    const nome=(p&&p.nome)||it.nome||'';
+    const kgFardo = /10X1/i.test(nome) ? 10 : 30;
+    return s + peso/kgFardo;
+  },0);
+}
 function limparDash(){ document.getElementById('d-ini').value=''; document.getElementById('d-fim').value=''; renderDash(); }
 let dashView='graf';
 function setDashView(v){ dashView=v; aplicarDashView(); }
@@ -2734,7 +2745,7 @@ function renderDash(){
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   let resumo='', totFardos=0;
   ord.forEach(c=>{
-    const pesoC=c.itens.reduce((s,x)=>s+(x.peso||0),0), fardos=pesoC/30; totFardos+=fardos;
+    const fardos=fardosDaCarga(c); totFardos+=fardos;
     resumo+=`<div class="resumo-row"><span class="resumo-nome">${esc(c.num)} · ${esc(c.nome)} <span class="resumo-data">(${fmtData(c.data)})</span></span><span class="fardos-badge">${fmtFardos(fardos)} fardos</span></div>`;
   });
   document.getElementById('dash-resumo').innerHTML=resumo||'<div class="empty">Nenhuma carga no período</div>';
@@ -2846,7 +2857,7 @@ function exportarResumoProg(){
   const ord=cf.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||'')||String(a.num).localeCompare(String(b.num)));
   let totFardos=0, cargasRows='';
   ord.forEach(c=>{
-    const pesoC=c.itens.reduce((s,x)=>s+(x.peso||0),0), fardos=pesoC/30; totFardos+=fardos;
+    const fardos=fardosDaCarga(c); totFardos+=fardos;
     const esp = c.especial?'<span class="tag-esp">ESPECIAL</span>':'';
     cargasRows+=`<tr><td>${esc(String(c.num))}</td><td>${esc(c.nome)}${esp}</td><td>${fmtCol(c.data)}</td><td class="fardos">${ff(fardos)}</td></tr>`;
   });
@@ -5362,7 +5373,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v121';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v122';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
