@@ -247,6 +247,34 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
 .resumo-data{color:var(--text3);font-size:11px}
 .fardos-badge{background:var(--redXL);color:var(--red);font-weight:700;padding:4px 12px;border-radius:999px;font-size:13px;white-space:nowrap;border:1px solid var(--redL)}
 .resumo-tot{display:flex;justify-content:space-between;align-items:center;padding:12px 0 2px;font-weight:700;font-size:15px;border-top:2px solid var(--border2);margin-top:6px}
+/* calculadora de produção */
+.calc-linha{display:flex;gap:10px;margin-bottom:14px}
+.calc-dias-tit{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+.calc-dia-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.calc-dia-row:last-child{border-bottom:none}
+.calc-dia-nome{flex:1}
+.calc-dia-nome input{width:100%;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--text);padding:3px 0}
+.calc-dia-horas{width:76px}
+.calc-dia-horas input{width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:14px;text-align:center;background:#fafafa}
+.calc-dia-sub{width:96px;text-align:right;font-size:11px;color:var(--text3)}
+.calc-dia-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;padding:4px;flex-shrink:0}
+.calc-add{width:100%;margin-top:10px;padding:9px;border:1px dashed var(--red);border-radius:8px;background:#FFF5F6;color:var(--red);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.calc-result{background:linear-gradient(135deg,#7A1020,#C8102E);color:#fff;border-radius:12px;padding:16px;text-align:center;margin-top:14px}
+.calc-r-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.85;margin-bottom:3px}
+.calc-r-kg{font-size:32px;font-weight:800;line-height:1}
+.calc-r-kg small{font-size:15px;font-weight:600;opacity:.9}
+.calc-r-div{height:1px;background:rgba(255,255,255,.25);margin:13px 0}
+.calc-rb{display:flex;justify-content:space-around}
+.calc-rb .n{font-size:19px;font-weight:800}
+.calc-rb .l{font-size:10px;opacity:.8;text-transform:uppercase}
+.calc-r-det{font-size:12px;opacity:.85;margin-top:10px;line-height:1.5}
+/* modal da calculadora */
+.calc-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:16px;z-index:200}
+.calc-modal-bg.open{display:flex}
+.calc-modal{background:var(--card,#fff);border-radius:14px;width:100%;max-width:480px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.calc-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--border);font-size:15px;font-weight:800;color:var(--red)}
+.calc-modal-x{background:none;border:none;font-size:18px;color:var(--text3);cursor:pointer;padding:2px 6px;line-height:1}
+.calc-modal-body{padding:18px;overflow-y:auto}
 .maq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .maq-grid-3{grid-template-columns:1fr 1fr 1fr}
 @media(max-width:640px){.maq-grid-3{grid-template-columns:1fr}}
@@ -1108,7 +1136,10 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="metric"><div class="metric-label">A carregar (período)</div><div class="metric-val" id="d-car">0 kg</div></div>
     <div class="metric"><div class="metric-label">Em estoque (atual)</div><div class="metric-val" id="d-est">0 kg</div></div>
   </div>
-  <button class="btn btn-full" id="btn-maq" onclick="toggleMaq()" style="margin-bottom:12px">🏭 Ocupação de máquinas</button>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="btn" id="btn-maq" onclick="toggleMaq()" style="flex:1;margin:0">🏭 Ocupação de máquinas</button>
+    <button class="btn" onclick="calcAbrir()" style="flex:1;margin:0;background:var(--red);color:#fff;border-color:var(--red);font-weight:700">🧮 Calculadora</button>
+  </div>
   <div class="card" id="maq-card" style="display:none">
     <div class="ctitle">🏭 Ocupação das máquinas (falta produzir)</div>
     <div class="psub" style="margin-bottom:12px">Quanto ainda falta empacotar hoje (programado − pronto no estoque) frente à capacidade de cada conjunto.</div>
@@ -1135,6 +1166,40 @@ textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 2px rgba(20
     <div class="ctitle">🚚 Cargas do período · fardos</div>
     <div id="dash-resumo"></div>
     <div class="resumo-tot"><span>Total de fardos no período</span><span class="fardos-badge" style="font-size:16px" id="dash-tot-fardos">0</span></div>
+  </div>
+</div>
+
+<div class="calc-modal-bg" id="calc-modal-bg" onclick="if(event.target===this)calcFechar()">
+  <div class="calc-modal">
+    <div class="calc-modal-head">
+      <span>🧮 Calculadora de produção</span>
+      <button class="calc-modal-x" onclick="calcFechar()">✕</button>
+    </div>
+    <div class="calc-modal-body">
+      <div class="calc-linha">
+        <div class="fg" style="margin:0;flex:1"><label>Produção por hora (kg)</label><input type="number" id="calc-kgh" inputmode="numeric" placeholder="ex: 4500" oninput="calcProd()"></div>
+        <div class="fg" style="margin:0;flex:1"><label>Peso do fardo</label>
+          <select id="calc-fardo" onchange="calcProd()">
+            <option value="30">30 kg (6X5/30X1)</option>
+            <option value="10">10 kg (10X1)</option>
+          </select>
+        </div>
+      </div>
+      <div class="calc-dias-tit">Dias e horas de produção</div>
+      <div id="calc-dias"></div>
+      <button class="calc-add" onclick="calcAddDia()">＋ Adicionar dia</button>
+      <div class="calc-result">
+        <div class="calc-r-lbl">Produção total estimada</div>
+        <div class="calc-r-kg" id="calc-r-kg">0 <small>kg</small></div>
+        <div class="calc-r-div"></div>
+        <div class="calc-rb">
+          <div><div class="n" id="calc-r-fardos">0</div><div class="l">fardos</div></div>
+          <div><div class="n" id="calc-r-horas">0</div><div class="l">horas</div></div>
+          <div><div class="n" id="calc-r-dias">0</div><div class="l">dias</div></div>
+        </div>
+        <div class="calc-r-det" id="calc-r-det"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2547,6 +2612,67 @@ function fardosDaCarga(c){
   },0);
 }
 function limparDash(){ document.getElementById('d-ini').value=''; document.getElementById('d-fim').value=''; renderDash(); }
+
+// ===== Calculadora de produção =====
+let calcDias=[{nome:'Dia 1', horas:8}];
+let _calcInit=false;
+function calcAbrir(){
+  if(!_calcInit){ _calcInit=true; calcCarregar(); calcRenderDias(); }
+  document.getElementById('calc-modal-bg').classList.add('open');
+}
+function calcFechar(){ document.getElementById('calc-modal-bg').classList.remove('open'); }
+const CALC_KEY='controle_calc_prod_v1';
+function calcCarregar(){
+  try{ const s=JSON.parse(localStorage.getItem(CALC_KEY)||'null');
+    if(s){ if(Array.isArray(s.dias)&&s.dias.length) calcDias=s.dias;
+      const k=document.getElementById('calc-kgh'); if(k&&s.kgh!=null) k.value=s.kgh;
+      const f=document.getElementById('calc-fardo'); if(f&&s.fardo) f.value=s.fardo; }
+  }catch(e){}
+}
+function calcSalvar(){
+  try{ localStorage.setItem(CALC_KEY, JSON.stringify({
+    dias:calcDias,
+    kgh:(document.getElementById('calc-kgh')||{}).value||'',
+    fardo:(document.getElementById('calc-fardo')||{}).value||'30'
+  })); }catch(e){}
+}
+function calcRenderDias(){
+  const box=document.getElementById('calc-dias'); if(!box) return;
+  let html='';
+  calcDias.forEach((d,i)=>{
+    html+=`<div class="calc-dia-row">
+      <div class="calc-dia-nome"><input value="${(d.nome||'').replace(/"/g,'&quot;')}" oninput="calcSetNome(${i},this.value)" placeholder="Dia ${i+1}"></div>
+      <div class="calc-dia-horas"><input type="number" inputmode="decimal" value="${d.horas!=null?d.horas:''}" oninput="calcSetHoras(${i},this.value)" placeholder="h"></div>
+      <div class="calc-dia-sub" id="calc-sub-${i}"></div>
+      <button class="calc-dia-del" onclick="calcDelDia(${i})" title="Remover">🗑</button>
+    </div>`;
+  });
+  box.innerHTML=html;
+  calcProd();
+}
+function calcSetNome(i,v){ calcDias[i].nome=v; calcSalvar(); }
+function calcSetHoras(i,v){ calcDias[i].horas=parseFloat(v)||0; calcProd(); calcSalvar(); }
+function calcDelDia(i){ if(calcDias.length<=1){ calcDias=[{nome:'Dia 1',horas:0}]; } else { calcDias.splice(i,1); } calcRenderDias(); calcSalvar(); }
+function calcAddDia(){ calcDias.push({nome:'Dia '+(calcDias.length+1), horas:8}); calcRenderDias(); calcSalvar(); }
+function calcProd(){
+  const kgh=parseFloat((document.getElementById('calc-kgh')||{}).value)||0;
+  const pf=parseFloat((document.getElementById('calc-fardo')||{}).value)||30;
+  let totHoras=0;
+  calcDias.forEach((d,i)=>{
+    totHoras+=(d.horas||0);
+    const sub=document.getElementById('calc-sub-'+i);
+    if(sub) sub.textContent=(kgh*(d.horas||0)).toLocaleString('pt-BR')+' kg';
+  });
+  const totKg=kgh*totHoras;
+  const fardos=pf>0?Math.floor(totKg/pf):0;
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.innerHTML=v; };
+  set('calc-r-kg', totKg.toLocaleString('pt-BR')+' <small>kg</small>');
+  set('calc-r-fardos', fardos.toLocaleString('pt-BR'));
+  set('calc-r-horas', (Math.round(totHoras*10)/10).toLocaleString('pt-BR'));
+  set('calc-r-dias', calcDias.length);
+  set('calc-r-det', kgh?`${kgh.toLocaleString('pt-BR')} kg/h × ${(Math.round(totHoras*10)/10).toLocaleString('pt-BR')} h · fardo de ${pf} kg`:'Informe a produção por hora');
+  calcSalvar();
+}
 let dashView='graf';
 function setDashView(v){ dashView=v; aplicarDashView(); }
 function aplicarDashView(){
@@ -5373,7 +5499,7 @@ setInterval(()=>{
 initAuth();
 
 // ===== Versão do app + atualização automática =====
-const APP_VERSAO = 'v122';   // <- número trocado a cada atualização
+const APP_VERSAO = 'v125';   // <- número trocado a cada atualização
 (function(){
   const tag=document.getElementById('ver-tag'); if(tag) tag.textContent=APP_VERSAO;
   const lv=document.getElementById('login-ver');
